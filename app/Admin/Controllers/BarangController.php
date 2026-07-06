@@ -7,6 +7,7 @@ use Dcat\Admin\Admin;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Show;
+use App\Services\InventoryService;
 use Dcat\Admin\Http\Controllers\AdminController;
 
 class BarangController extends AdminController
@@ -23,48 +24,27 @@ class BarangController extends AdminController
             $grid->column('id', 'ID')->sortable();
             $grid->column('nama_barang');
             $grid->column('Kategori')->display(function ($value) {
-
-                return "<span style='
-                    background:#e5e7eb;
-                    color:#1e3a8a;
-                    padding:4px 10px;
-                    border-radius:5px;
-                    font-weight:600;
-                    font-size:12px;
-                '>
-                    " . ucfirst($value) . "
-                </span>";
+                return "<span class='badge-kategori'>" . ucfirst($value) . "</span>";
             });
             $grid->column('satuan');
             $grid->column('jumlah_total');
-            $grid->column('stok_tersedia');
+            $grid->column('stok', 'Stok Hari Ini')
+                ->display(function () {
+
+                    return $this->getStokHariIniAttribute();
+                });
+            $grid->column('dipakai_hari_ini', 'Dipakai Hari Ini')
+                ->display(function () {
+
+                    return $this->getDipakaiHariIniAttribute();
+                });
             $grid->column('status')->display(function ($value) {
 
                 if ($value == 'aktif') {
-                    return "
-                <span style='
-                    background:#e5e7eb;
-                    color:#1e3a8a;
-                    padding:4px 10px;
-                    border-radius:5px;
-                    font-weight:600;
-                    font-size:12px;
-                '>
-                    Aktif
-                </span>";
+                    return "<span class='status-aktif'>Aktif</span>";
                 }
 
-                return "
-                <span style='
-                    background:#fee2e2;
-                    color:#991b1b;
-                    padding:4px 10px;
-                    border-radius:5px;
-                    font-weight:600;
-                    font-size:12px;
-                '>
-                    Nonaktif
-                </span>";
+                return "<span class='status-nonaktif'>Nonaktif</span>";
             });
             $grid->column('keterangan');
             // $grid->column('created_at');
@@ -91,7 +71,8 @@ class BarangController extends AdminController
             $show->field('Kategori');
             $show->field('satuan');
             $show->field('jumlah_total');
-            $show->field('stok_tersedia');
+            $show->field('stok_hari_ini');
+            $show->field('dipakai_hari_ini');
             $show->field('status');
             $show->field('keterangan');
             // $show->field('created_at');
@@ -178,11 +159,6 @@ class BarangController extends AdminController
                         'roll' => 'Roll',
                     ])
                     ->required();
-
-                $row->width(6)->number('stok_tersedia', 'Stok Tersedia')
-                    ->default(0)
-                    ->disable()
-                    ->help('Stok tersedia otomatis mengikuti sistem penyewaan');
             });
 
             $form->row(function ($row) {
@@ -200,22 +176,6 @@ class BarangController extends AdminController
 
             $form->display('created_at');
             $form->display('updated_at');
-
-            $form->saving(function (Form $form) {
-
-                // Saat tambah data baru
-                if (! $form->model()->exists) {
-
-                    $form->stok_tersedia = $form->jumlah_total;
-                } else {
-
-                    // Saat edit data
-                    if ($form->stok_tersedia > $form->jumlah_total) {
-
-                        $form->stok_tersedia = $form->jumlah_total;
-                    }
-                }
-            });
         });
     }
 }

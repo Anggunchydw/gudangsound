@@ -6,17 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('detail_penyewaan', function (Blueprint $table) {
+        Schema::create('detail_penyewaan_barang', function (Blueprint $table) {
+
             $table->id();
+
             $table->unsignedBigInteger('penyewaan_id');
-            $table->unsignedBigInteger('paket_id')->nullable();
-            $table->unsignedBigInteger('barang_id')->nullable();
+
+            $table->unsignedBigInteger('barang_id');
+
             $table->integer('jumlah_barang');
+
             $table->timestamps();
 
             $table->foreign('penyewaan_id')
@@ -24,23 +25,15 @@ return new class extends Migration
                 ->on('penyewaan')
                 ->onDelete('cascade');
 
-            $table->foreign('paket_id')
-                ->references('id')
-                ->on('paket')
-                ->nullOnDelete();
-
             $table->foreign('barang_id')
                 ->references('id')
                 ->on('barang')
-                ->nullOnDelete();
+                ->onDelete('cascade');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('detail_penyewaan');
+        Schema::dropIfExists('detail_penyewaan_barang');
     }
 };

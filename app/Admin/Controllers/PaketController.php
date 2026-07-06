@@ -102,47 +102,6 @@ class PaketController extends AdminController
      */
     protected function form()
     {
-        \Dcat\Admin\Admin::style('
-        /* Container utama */
-        .content {
-            max-width: 1300px;
-        }
-
-        /* Box/Card form */
-        .box,
-        .card {
-            max-width: 1050px;
-            margin-left: 10px;
-            border-radius: 10px;
-        }
-
-        /* Isi form */
-        .box-body,
-        .card-body {
-            padding: 30px !important;
-        }
-
-
-        /* Jarak antar field */
-        .form-group {
-            margin-bottom: 22px;
-        }
-
-        /* Input */
-        .form-control {
-            border-radius: 6px;
-        }
-
-        /* Table hasMany */
-        .table {
-            margin-bottom: 0;
-        }
-
-        /* Tombol */
-        .btn {
-            border-radius: 6px;
-        }
-    ');
         return Form::make(
             Paket::with(['detail']),
             function (Form $form) {
