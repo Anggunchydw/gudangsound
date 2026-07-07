@@ -28,4 +28,9 @@ Route::group([
         'penyewaan/{id}/cancel',
         [PenyewaanController::class, 'cancel']
     );
+
+    Route::get(
+        'penyewaan/{id}/cetak',
+        [PenyewaanController::class, 'cetak']
+    )->name('admin.penyewaan.cetak');
 });

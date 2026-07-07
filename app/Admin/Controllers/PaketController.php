@@ -2,11 +2,12 @@
 
 namespace App\Admin\Controllers;
 
-use App\Admin\Repositories\Paket;
+use App\Admin\Repositories\Paket as PaketRepository;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Show;
 use Dcat\Admin\Http\Controllers\AdminController;
+use App\Models\Paket;
 use App\Models\Barang;
 use Dcat\Admin\Widgets\Table;
 
@@ -103,7 +104,7 @@ class PaketController extends AdminController
     protected function form()
     {
         return Form::make(
-            Paket::with(['detail']),
+            PaketRepository::with(['detail']),
             function (Form $form) {
                 $form->display('id');
                 $form->text('nama_paket')->required();
@@ -113,7 +114,8 @@ class PaketController extends AdminController
                 $form->hasMany('detail', 'Isi Barang (Detail Paket)', function (Form\NestedForm $form) {
                     $form->select('barang_id', 'Barang')
                         ->options(
-                            Barang::pluck('nama_barang', 'id')->toArray()
+                            Barang::where('status', 'aktif')
+                                ->pluck('nama_barang', 'id')
                         )
                         ->required();
 

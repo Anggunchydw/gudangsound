@@ -2,7 +2,9 @@
 
 namespace App\Admin\Controllers;
 
-use App\Admin\Repositories\Penyewaan;
+use Dcat\Admin\Admin;
+use App\Admin\Repositories\Penyewaan as PenyewaanRepository;
+use App\Models\Penyewaan;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Show;
@@ -11,6 +13,7 @@ use App\Models\Paket;
 use Carbon\Carbon;
 use App\Services\InventoryService;
 use Dcat\Admin\Http\Controllers\AdminController;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PenyewaanController extends AdminController
 {
@@ -21,7 +24,7 @@ class PenyewaanController extends AdminController
      */
     protected function grid()
     {
-        return Grid::make(new Penyewaan(), function (Grid $grid) {
+        return Grid::make(new PenyewaanRepository(), function (Grid $grid) {
             $grid->column('id')->sortable();
             $grid->column('nama_penyewa');
             $grid->column('no_tlp');
@@ -78,21 +81,15 @@ class PenyewaanController extends AdminController
      */
     protected function detail($id)
     {
-        return Show::make($id, Penyewaan::with([
-            'detailPaket',
-            'detailBarang'
-        ]), function (Show $show) {
-            $show->field('id');
-            $show->field('nama_penyewa');
-            $show->field('no_tlp');
-            $show->field('tanggal_mulai');
-            $show->field('tanggal_selesai');
-            $show->field('lokasi');
-            $show->field('total_harga');
-            $show->field('status_pembayaran');
-            $show->field('status_penyewaan');
+        $penyewaan = Penyewaan::with([
+            'detailBarang.barang',
+            'detailPaket.paket',
+        ])->findOrFail($id);
 
-        });
+        return view(
+            'admin.penyewaan.detail',
+            compact('penyewaan')
+        );
     }
 
     /**
@@ -102,7 +99,55 @@ class PenyewaanController extends AdminController
      */
     protected function form()
     {
-        return Form::make(Penyewaan::with([
+        Admin::script(<<<JS
+
+        function formatRupiah(angka){
+
+            if (angka < 0) {
+                return '-' + new Intl.NumberFormat('id-ID').format(Math.abs(angka));
+            }
+
+            return new Intl.NumberFormat('id-ID').format(angka);
+        }
+
+        function getCurrency(value){
+
+            value = String(value);
+
+            value = value.replace(/,/g,'');
+
+            return parseFloat(value) || 0;
+        }
+
+        function hitungPelunasan(){
+
+            let total = getCurrency(
+                $('input[name="total_harga"]').val()
+            );
+
+            let dp = getCurrency(
+                $('input[name="uang_muka"]').val()
+            );
+
+            let sisa = total - dp;
+
+            $('#sisa-pelunasan').text(
+                'Rp ' + formatRupiah(sisa)
+            );
+        }
+
+
+        $(document).on(
+            'keyup change',
+            'input[name="total_harga"], input[name="uang_muka"]',
+            hitungPelunasan
+        );
+
+        hitungPelunasan();
+
+
+        JS);
+        return Form::make(PenyewaanRepository::with([
             'detailPaket',
             'detailBarang'
         ]), function (Form $form) {
@@ -129,7 +174,7 @@ class PenyewaanController extends AdminController
 
                 $form->select('paket_id', 'Pilih Paket')
                     ->options(
-                        Paket::pluck('nama_paket', 'id')
+                        Paket::getPaketAktif()
                     )
                     ->required();
 
@@ -145,7 +190,8 @@ class PenyewaanController extends AdminController
 
                 $form->select('barang_id', 'Barang')
                     ->options(
-                        Barang::pluck('nama_barang', 'id')
+                        Barang::where('status', 'aktif')
+                            ->pluck('nama_barang', 'id')
                     )
                     ->required();
 
@@ -153,11 +199,24 @@ class PenyewaanController extends AdminController
                     ->default(1)
                     ->min(1);
             })->useTable();
-
-            $form->currency('total_harga')
+            $form->divider('Pembayaran');
+            $form->currency('total_harga', 'Total Harga')
                 ->symbol('Rp')
                 ->required();
-
+            $form->currency('uang_muka', 'Uang Muka (DP)')
+                ->symbol('Rp')
+                ->default(0)
+                ->required();
+            $form->html('
+            <div class="form-group">
+                <label class="control-label">Sisa Pelunasan</label>
+                <div>
+                    <strong id="sisa-pelunasan" style="color:#dc3545;">
+                        Rp 0
+                    </strong>
+                </div>
+            </div>
+            ');
             $form->radio('status_pembayaran', 'Status Pembayaran')
                 ->options([
                     'DP'    => '<span class="status-dp">DP</span>',
@@ -171,13 +230,28 @@ class PenyewaanController extends AdminController
 
 
             $form->saving(function (Form $form) {
+                $totalHarga = (float) str_replace(',', '', $form->total_harga);
+                $uangMuka   = (float) str_replace(',', '', request('uang_muka'));
 
+                $form->uang_muka = $uangMuka;
+
+                if ($uangMuka > $totalHarga) {
+
+                    return $form->response()->error(
+                        'Uang muka (DP) tidak boleh melebihi total harga.'
+                    );
+                }
+                $form->status_pembayaran =
+                    $uangMuka >= $totalHarga
+                    ? 'Lunas'
+                    : 'DP';
                 try {
 
                     InventoryService::checkAvailability(
 
                         $form->tanggal_mulai,
                         $form->tanggal_selesai,
+
 
                         request()->input('detailBarang', []),
 
@@ -192,6 +266,24 @@ class PenyewaanController extends AdminController
                 }
             });
         });
+    }
+    public function cetak($id)
+    {
+        $penyewaan = \App\Models\Penyewaan::with([
+            'detailBarang.barang',
+            'detailPaket.paket.detail.barang',
+        ])->findOrFail($id);
+
+        $pdf = Pdf::loadView(
+            'admin.penyewaan.invoice',
+            compact('penyewaan')
+        );
+
+        $pdf->setPaper('A4', 'portrait');
+
+        return $pdf->stream(
+            'Bukti-Penyewaan-' . $penyewaan->id . '.pdf'
+        );
     }
     public function cancel($id)
     {

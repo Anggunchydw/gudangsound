@@ -22,6 +22,7 @@ class Penyewaan extends Model
         'tanggal_selesai',
         'lokasi',
         'total_harga',
+        'uang_muka',
         'status_pembayaran',
         'status_penyewaan'
     ];

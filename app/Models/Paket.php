@@ -20,4 +20,28 @@ class Paket extends Model
     {
         return $this->hasMany(DetailPaket::class, 'paket_id');
     }
+    public static function getPaketAktif()
+    {
+        return self::with('detail.barang')
+            ->get()
+            ->filter(function ($paket) {
+                return $paket->is_active;
+            })
+            ->pluck('nama_paket', 'id');
+    }
+    public function getIsActiveAttribute()
+    {
+        foreach ($this->detail as $detail) {
+
+            if (!$detail->barang) {
+                return false;
+            }
+
+            if ($detail->barang->status != 'aktif') {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

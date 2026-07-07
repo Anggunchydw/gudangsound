@@ -17,7 +17,6 @@ return new class extends Migration
             $table->enum('Kategori', ['inti', 'pendukung']);
             $table->string('satuan', 20);
             $table->integer('jumlah_total');
-            $table->integer('stok_tersedia');
             $table->enum('status', ['aktif', 'nonaktif']);
             $table->string('keterangan', 100)->nullable();
             $table->timestamps();

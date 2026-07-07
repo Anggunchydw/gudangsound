@@ -57,6 +57,11 @@ class InventoryService
             foreach ($detail as $barangPaket) {
 
                 $barang = Barang::find($barangPaket->barang_id);
+                if ($barang->status != 'aktif') {
+                    throw new \Exception(
+                        "Barang {$barang->nama_barang} sudah tidak aktif sehingga paket tidak dapat disewakan."
+                    );
+                }
 
                 $dibutuhkan =
                     $barangPaket->jumlah *
