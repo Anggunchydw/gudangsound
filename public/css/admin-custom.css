@@ -103,22 +103,7 @@
     font-weight: 600;
     font-size: 12px;
 }
-.payment-box {
-    margin-top: 15px;
-    padding: 15px;
-    background: #f8fafc;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-}
 
-.payment-row {
-    display: flex;
-    gap: 15px;
-}
-
-.payment-row > div {
-    flex: 1;
-}
 
 .sisa-pelunasan-wrapper {
     margin-top: 10px;
@@ -137,33 +122,26 @@
     font-weight: 600;
     color: #dc2626;
 }
-/* paket */
-.paket-form-wrapper {
-    max-width: 1050px;
+/* ===========================
+   Pemasukan
+=========================== */
+
+.total-pemasukan {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 15px;
 }
 
-.paket-form-wrapper .card,
-.paket-form-wrapper .box {
-    border-radius: 10px;
+.total-pemasukan-label {
+    font-size: 16px;
+    font-weight: 600;
+    color: #27426e;
 }
 
-.paket-form-wrapper .box-body,
-.paket-form-wrapper .card-body {
-    padding: 30px !important;
-}
-
-.paket-form-wrapper .form-group {
-    margin-bottom: 22px;
-}
-
-.paket-form-wrapper .form-control {
-    border-radius: 6px;
-}
-
-.paket-form-wrapper .btn {
-    border-radius: 6px;
-}
-
-.paket-form-wrapper .table {
-    margin-bottom: 0;
+.total-pemasukan-nominal {
+    font-size: 18px;
+    font-weight: 700;
+    color: #27426e;
 }

@@ -38,4 +38,5 @@ Route::group([
         'penyewaan/{id}/pembayaran',
         [PenyewaanController::class, 'simpanPembayaran']
     );
+    
 });

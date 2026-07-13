@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use APP\Models\Pemasukan as PemasukanModel;
 use App\Admin\Repositories\Pemasukan;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
@@ -18,7 +19,22 @@ class PemasukanController extends AdminController
     protected function grid()
     {
         return Grid::make(new Pemasukan(), function (Grid $grid) {
-            $grid->model()->with('penyewaan');
+            $grid->model()
+                ->with('penyewaan')
+                ->orderByDesc('id');
+            $totalPemasukan = PemasukanModel::sum('jumlah');
+
+            $grid->header("
+                <div class='total-pemasukan'>
+                    <span class='total-pemasukan-label'>
+                        Total Pemasukan :
+                    </span>
+
+                    <span class='total-pemasukan-nominal'>
+                        Rp " . number_format($totalPemasukan, 0, ',', '.') . "
+                    </span>
+                </div>
+            ");
             $grid->column('id')->sortable();
 
             $grid->column('tanggal_masuk');
@@ -31,17 +47,18 @@ class PemasukanController extends AdminController
                     }
                     return "<span class='status-lunas'>Lunas</span>";
                 });
-            $grid->column('jumlah');
+            $grid->column('jumlah')
+                ->display(function ($value) {
+                    return 'Rp ' . number_format($value, 0, ',', '.');
+                });;
             $grid->column('keterangan');
-            // $grid->column('created_at');
-            // $grid->column('updated_at')->sortable();
 
             $grid->filter(function (Grid\Filter $filter) {
                 $filter->equal('id');
             });
             $grid->disableCreateButton();
             $grid->disableActions();
-            $grid->disableBatchDelete();
+            // $grid->disableBatchDelete();
         });
     }
 
@@ -56,13 +73,6 @@ class PemasukanController extends AdminController
     {
         return Show::make($id, new Pemasukan(), function (Show $show) {
             $show->field('id');
-            $show->field('penyewaan_id');
-            $show->field('tanggal_masuk');
-            $show->field('jumlah');
-            $show->field('jenis_pembayaran');
-            $show->field('keterangan');
-            $show->field('created_at');
-            $show->field('updated_at');
         });
     }
 
@@ -75,14 +85,6 @@ class PemasukanController extends AdminController
     {
         return Form::make(new Pemasukan(), function (Form $form) {
             $form->display('id');
-            $form->text('penyewaan_id');
-            $form->text('tanggal_masuk');
-            $form->text('jumlah');
-            $form->text('jenis_pembayaran');
-            $form->text('keterangan');
-
-            $form->display('created_at');
-            $form->display('updated_at');
         });
     }
 }
