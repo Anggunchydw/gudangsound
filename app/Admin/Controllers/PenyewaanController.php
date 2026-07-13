@@ -2,6 +2,8 @@
 
 namespace App\Admin\Controllers;
 
+use App\Services\PemasukanService;
+use Illuminate\Http\Request;
 use Dcat\Admin\Admin;
 use App\Admin\Repositories\Penyewaan as PenyewaanRepository;
 use App\Models\Penyewaan;
@@ -235,6 +237,12 @@ class PenyewaanController extends AdminController
 
                 $form->uang_muka = $uangMuka;
 
+                if ($uangMuka < 0) {
+
+                    return $form->response()->error(
+                        'Uang muka (DP) tidak boleh bernilai negatif.'
+                    );
+                }
                 if ($uangMuka > $totalHarga) {
 
                     return $form->response()->error(
@@ -265,7 +273,81 @@ class PenyewaanController extends AdminController
                     return $form->response()->error($e->getMessage());
                 }
             });
+            $form->saved(function (Form $form) {
+
+                $penyewaan = Penyewaan::find($form->getKey());
+
+                if ($penyewaan->uang_muka > 0) {
+
+                    PemasukanService::simpan(
+                        $penyewaan,
+                        $penyewaan->uang_muka,
+                        $penyewaan->status_pembayaran == 'Lunas'
+                            ? 'Lunas'
+                            : 'DP',
+                        'Pembayaran awal'
+                    );
+                }
+
+                return $form->response()
+                    ->success('Penyewaan berhasil disimpan.')
+                    ->redirect(admin_url('penyewaan/' . $form->getKey()));
+            });
         });
+    }
+
+    public function simpanPembayaran(Request $request, $id)
+    {
+        $request->validate([
+            'nominal' => 'required|numeric|min:1'
+        ]);
+
+        $penyewaan = Penyewaan::findOrFail($id);
+
+        $sisa =
+            $penyewaan->total_harga
+            -
+            $penyewaan->uang_muka;
+
+        if ($request->nominal > $sisa) {
+
+            return back()
+                ->withErrors([
+                    'nominal' => 'Nominal melebihi sisa tagihan.'
+                ]);
+        }
+
+        $penyewaan->uang_muka += $request->nominal;
+
+        if (
+            $penyewaan->uang_muka >=
+            $penyewaan->total_harga
+        ) {
+
+            $penyewaan->status_pembayaran = 'Lunas';
+        } else {
+
+            $penyewaan->status_pembayaran = 'DP';
+        }
+
+        $penyewaan->save();
+        PemasukanService::simpan(
+            $penyewaan,
+            $request->nominal,
+            $penyewaan->status_pembayaran == 'Lunas'
+                ? 'Lunas'
+                : 'DP',
+            'Pembayaran lanjutan'
+        );
+
+        admin_success(
+            'Berhasil',
+            'Pembayaran berhasil ditambahkan.'
+        );
+
+        return redirect(
+            admin_url("penyewaan/{$penyewaan->id}")
+        );
     }
     public function cetak($id)
     {

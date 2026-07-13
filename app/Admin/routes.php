@@ -33,4 +33,9 @@ Route::group([
         'penyewaan/{id}/cetak',
         [PenyewaanController::class, 'cetak']
     )->name('admin.penyewaan.cetak');
+
+    Route::post(
+        'penyewaan/{id}/pembayaran',
+        [PenyewaanController::class, 'simpanPembayaran']
+    );
 });

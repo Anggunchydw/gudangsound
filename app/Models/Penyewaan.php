@@ -71,4 +71,8 @@ class Penyewaan extends Model
 
         return "<span class='{$class}'>{$status}</span>";
     }
+    public function pemasukan()
+    {
+        return $this->hasMany(Pemasukan::class);
+    }
 }

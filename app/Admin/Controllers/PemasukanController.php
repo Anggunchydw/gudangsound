@@ -18,19 +18,30 @@ class PemasukanController extends AdminController
     protected function grid()
     {
         return Grid::make(new Pemasukan(), function (Grid $grid) {
+            $grid->model()->with('penyewaan');
             $grid->column('id')->sortable();
-            $grid->column('penyewaan_id');
+
             $grid->column('tanggal_masuk');
+            $grid->column('penyewaan.nama_penyewa', 'Nama Penyewa');
+            $grid->column('jenis_pembayaran')
+                ->display(function ($status) {
+
+                    if ($status == 'DP') {
+                        return "<span class='status-dp'>DP</span>";
+                    }
+                    return "<span class='status-lunas'>Lunas</span>";
+                });
             $grid->column('jumlah');
-            $grid->column('jenis_pembayaran');
             $grid->column('keterangan');
-            $grid->column('created_at');
-            $grid->column('updated_at')->sortable();
-        
+            // $grid->column('created_at');
+            // $grid->column('updated_at')->sortable();
+
             $grid->filter(function (Grid\Filter $filter) {
                 $filter->equal('id');
-        
             });
+            $grid->disableCreateButton();
+            $grid->disableActions();
+            $grid->disableBatchDelete();
         });
     }
 
@@ -69,7 +80,7 @@ class PemasukanController extends AdminController
             $form->text('jumlah');
             $form->text('jenis_pembayaran');
             $form->text('keterangan');
-        
+
             $form->display('created_at');
             $form->display('updated_at');
         });
