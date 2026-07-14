@@ -8,7 +8,7 @@ use App\Admin\Controllers\PaketController;
 use App\Admin\Controllers\PenyewaanController;
 use App\Admin\Controllers\PemasukanController;
 use App\Admin\Controllers\PengeluaranController;
-
+use App\Admin\Controllers\RekapKeuanganController;
 
 Admin::routes();
 
@@ -38,5 +38,9 @@ Route::group([
         'penyewaan/{id}/pembayaran',
         [PenyewaanController::class, 'simpanPembayaran']
     );
-    
+
+    Route::get(
+        'rekap-keuangan',
+        [RekapKeuanganController::class, 'index']
+    );
 });
