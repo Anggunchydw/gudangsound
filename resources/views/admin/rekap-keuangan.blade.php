@@ -10,7 +10,7 @@
 
         <form method="GET">
 
-            <div class="row" style="margin-bottom:20px">
+            <div class="row rekap-filter">
 
                 <div class="col-md-3">
                     <input type="date" name="mulai" value="{{ $mulai }}" class="form-control">
@@ -29,14 +29,29 @@
 
                 </div>
 
+                <div class="col-md-4 text-right">
+
+                    <a href="{{ url('admin/rekap-keuangan/cetak?mulai=' . $mulai . '&sampai=' . $sampai) }}" target="_blank"
+                        class="btn btn-primary">
+
+                        <i class="feather icon-printer"></i>
+
+                        Cetak Laporan
+
+                    </a>
+
+                </div>
+
             </div>
 
         </form>
 
+
         <div class="table-responsive">
 
-             <table class="table table-hover" style="border:none;">
-                <thead style="background:#f5f5f5">
+            <table class="table table-hover rekap-table">
+
+                <thead>
 
                     <tr>
 
@@ -62,45 +77,35 @@
                             <td>
 
                                 @if ($item['tipe'] == 'Pemasukan')
-                                    <span
-                                        style="
-                display:inline-block;
-                padding:4px 10px;
-                background:#d4edda;
-                color:#155724;
-                border-radius:15px;
-                font-weight:600;
-                font-size:12px;
-            ">
+                                    <span class="badge-pemasukan">
+
                                         Pemasukan
+
                                     </span>
                                 @else
-                                    <span
-                                        style="
-                display:inline-block;
-                padding:4px 10px;
-                background:#f8d7da;
-                color:#721c24;
-                border-radius:15px;
-                font-weight:600;
-                font-size:12px;
-            ">
+                                    <span class="badge-pengeluaran">
+
                                         Pengeluaran
+
                                     </span>
                                 @endif
 
                             </td>
 
                             <td>
+
                                 {{ $item['keterangan'] }}
+
                             </td>
 
                             <td>
 
                                 @if ($item['masuk'] > 0)
-                                    <strong style="color:#28a745">
+                                    <span class="text-masuk">
+
                                         Rp {{ number_format($item['masuk'], 0, ',', '.') }}
-                                    </strong>
+
+                                    </span>
                                 @else
                                     -
                                 @endif
@@ -110,9 +115,11 @@
                             <td>
 
                                 @if ($item['keluar'] > 0)
-                                    <strong style="color:#dc3545">
+                                    <span class="text-keluar">
+
                                         Rp {{ number_format($item['keluar'], 0, ',', '.') }}
-                                    </strong>
+
+                                    </span>
                                 @else
                                     -
                                 @endif
@@ -126,7 +133,9 @@
                         <tr>
 
                             <td colspan="5" class="text-center">
+
                                 Tidak ada data
+
                             </td>
 
                         </tr>
@@ -142,21 +151,23 @@
 
     <div class="box-footer">
 
-        <table class="table">
+        <table class="table rekap-footer">
 
             <tr>
 
                 <td width="250">
+
                     Total Pemasukan
+
                 </td>
 
                 <td>
 
-                    <strong style="color:green">
+                    <span class="text-masuk">
 
                         Rp {{ number_format($totalMasuk, 0, ',', '.') }}
 
-                    </strong>
+                    </span>
 
                 </td>
 
@@ -172,11 +183,11 @@
 
                 <td>
 
-                    <strong style="color:red">
+                    <span class="text-keluar">
 
                         Rp {{ number_format($totalKeluar, 0, ',', '.') }}
 
-                    </strong>
+                    </span>
 
                 </td>
 
@@ -192,11 +203,11 @@
 
                 <td>
 
-                    <strong style="font-size:18px;color:#0b5394">
+                    <span class="text-saldo">
 
                         Rp {{ number_format($totalMasuk - $totalKeluar, 0, ',', '.') }}
 
-                    </strong>
+                    </span>
 
                 </td>
 

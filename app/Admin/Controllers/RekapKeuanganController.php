@@ -2,6 +2,7 @@
 
 namespace App\Admin\Controllers;
 
+use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
 use Dcat\Admin\Layout\Content;
@@ -19,8 +20,8 @@ class RekapKeuanganController extends Controller
         // DATA PEMASUKAN
         // ==========================
         $pemasukan = Pemasukan::when($mulai, function ($q) use ($mulai) {
-                $q->whereDate('tanggal_masuk', '>=', $mulai);
-            })
+            $q->whereDate('tanggal_masuk', '>=', $mulai);
+        })
             ->when($sampai, function ($q) use ($sampai) {
                 $q->whereDate('tanggal_masuk', '<=', $sampai);
             })
@@ -30,8 +31,8 @@ class RekapKeuanganController extends Controller
         // DATA PENGELUARAN
         // ==========================
         $pengeluaran = Pengeluaran::when($mulai, function ($q) use ($mulai) {
-                $q->whereDate('tanggal_pengeluaran', '>=', $mulai);
-            })
+            $q->whereDate('tanggal_pengeluaran', '>=', $mulai);
+        })
             ->when($sampai, function ($q) use ($sampai) {
                 $q->whereDate('tanggal_pengeluaran', '<=', $sampai);
             })
@@ -83,5 +84,80 @@ class RekapKeuanganController extends Controller
                     'sampai'
                 )
             ));
+    }
+    public function cetak(Request $request)
+    {
+        $mulai  = $request->mulai;
+        $sampai = $request->sampai;
+
+        // ==========================
+        // DATA PEMASUKAN
+        // ==========================
+
+        $pemasukan = Pemasukan::when($mulai, function ($q) use ($mulai) {
+            $q->whereDate('tanggal_masuk', '>=', $mulai);
+        })
+            ->when($sampai, function ($q) use ($sampai) {
+                $q->whereDate('tanggal_masuk', '<=', $sampai);
+            })
+            ->get();
+
+        // ==========================
+        // DATA PENGELUARAN
+        // ==========================
+
+        $pengeluaran = Pengeluaran::when($mulai, function ($q) use ($mulai) {
+            $q->whereDate('tanggal_pengeluaran', '>=', $mulai);
+        })
+            ->when($sampai, function ($q) use ($sampai) {
+                $q->whereDate('tanggal_pengeluaran', '<=', $sampai);
+            })
+            ->get();
+
+        $data = [];
+
+        foreach ($pemasukan as $item) {
+
+            $data[] = [
+                'tanggal' => $item->tanggal_masuk,
+                'tipe' => 'Pemasukan',
+                'keterangan' => $item->keterangan,
+                'masuk' => $item->jumlah,
+                'keluar' => 0,
+            ];
+        }
+
+        foreach ($pengeluaran as $item) {
+
+            $data[] = [
+                'tanggal' => $item->tanggal_pengeluaran,
+                'tipe' => 'Pengeluaran',
+                'keterangan' => $item->keterangan,
+                'masuk' => 0,
+                'keluar' => $item->jumlah_pengeluaran,
+            ];
+        }
+
+        usort($data, function ($a, $b) {
+            return strtotime($a['tanggal']) - strtotime($b['tanggal']);
+        });
+
+        $totalMasuk = $pemasukan->sum('jumlah');
+        $totalKeluar = $pengeluaran->sum('jumlah_pengeluaran');
+
+        $pdf = Pdf::loadView(
+            'admin.cetak-rekap-keuangan',
+            compact(
+                'data',
+                'totalMasuk',
+                'totalKeluar',
+                'mulai',
+                'sampai'
+            )
+        );
+
+        $pdf->setPaper('A4', 'portrait');
+
+        return $pdf->stream('Laporan Rekap Keuangan.pdf');
     }
 }

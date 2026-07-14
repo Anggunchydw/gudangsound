@@ -43,4 +43,8 @@ Route::group([
         'rekap-keuangan',
         [RekapKeuanganController::class, 'index']
     );
+    Route::get(
+    'rekap-keuangan/cetak',
+    [RekapKeuanganController::class, 'cetak']
+);
 });

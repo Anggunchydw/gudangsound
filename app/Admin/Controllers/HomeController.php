@@ -2,9 +2,11 @@
 
 namespace App\Admin\Controllers;
 
-use App\Admin\Metrics\Examples;
+
 use App\Http\Controllers\Controller;
-use Dcat\Admin\Http\Controllers\Dashboard;
+use App\Models\Barang;
+use App\Models\Pemasukan;
+use App\Models\Penyewaan;
 use Dcat\Admin\Layout\Column;
 use Dcat\Admin\Layout\Content;
 use Dcat\Admin\Layout\Row;
@@ -13,24 +15,35 @@ class HomeController extends Controller
 {
     public function index(Content $content)
     {
+        $totalPenyewaan = Penyewaan::count();
+
+        $stokBarang = Barang::all()->sum(function ($barang) {
+            return $barang->getStokHariIniAttribute();
+        });
+
+        $pendapatan = Pemasukan::whereMonth('tanggal_masuk', now()->month)
+            ->whereYear('tanggal_masuk', now()->year)
+            ->sum('jumlah');
+
+        $transaksiTerbaru = Penyewaan::with([
+            'detailPaket.paket',
+            'detailBarang.barang'
+        ])
+            ->latest()
+            ->take(5)
+            ->get();
+
         return $content
             ->header('Dashboard')
-            ->description('Description...')
-            ->body(function (Row $row) {
-                $row->column(6, function (Column $column) {
-                    $column->row(Dashboard::title());
-                    $column->row(new Examples\Tickets());
-                });
-
-                $row->column(6, function (Column $column) {
-                    $column->row(function (Row $row) {
-                        $row->column(6, new Examples\NewUsers());
-                        $row->column(6, new Examples\NewDevices());
-                    });
-
-                    $column->row(new Examples\Sessions());
-                    $column->row(new Examples\ProductOrders());
-                });
-            });
+            ->description('')
+            ->body(view(
+                'admin.dashboard',
+                compact(
+                    'totalPenyewaan',
+                    'stokBarang',
+                    'pendapatan',
+                    'transaksiTerbaru'
+                )
+            ));
     }
 }
