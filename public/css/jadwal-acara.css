@@ -1,0 +1,301 @@
+
+    #calendar {
+        max-width: 100%;
+        margin: 20px auto;
+    }
+
+    .fc {
+        background: #fff;
+        border-radius: 10px;
+        border: 1px solid #dfe3e8;
+        padding: 15px;
+    }
+
+    .fc-scrollgrid {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    /* Toolbar */
+    .fc-toolbar {
+        margin-bottom: 18px !important;
+    }
+
+    .fc-toolbar-title {
+        font-size: 24px !important;
+        font-weight: 600;
+        color: #303133;
+    }
+
+    /* Semua tombol */
+    .fc .fc-button {
+        background: #f5f7fa !important;
+        border: 1px solid #dcdfe6 !important;
+        color: #606266 !important;
+        box-shadow: none !important;
+        padding: .45rem .8rem !important;
+    }
+
+    /* Hover */
+    .fc .fc-button:hover {
+        background: #e7edf7 !important;
+        border-color: #27426e !important;
+        color: #27426e !important;
+    }
+
+    /* Tombol yang sedang aktif */
+    .fc .fc-button-primary:not(:disabled).fc-button-active,
+    .fc .fc-button-primary:not(:disabled):active,
+    .fc .fc-button-primary:focus,
+    .fc .fc-button-primary.fc-button-active {
+
+        background: #27426e !important;
+        border-color: #27426e !important;
+        color: #fff !important;
+        box-shadow: none !important;
+
+    }
+
+    /* Hari ini */
+    .fc-today-button {
+        margin-left: 12px !important;
+        margin-right: 12px !important;
+    }
+
+    /* Header nama hari */
+    .fc-col-header-cell {
+        background: #f5f7fa;
+    }
+
+    .fc-col-header-cell-cushion {
+        color: #606266 !important;
+        font-weight: 600;
+        text-decoration: none !important;
+        padding: 12px 0 !important;
+    }
+
+    .fc-theme-standard td,
+    .fc-theme-standard th {
+        border: 1px solid #ebeef5;
+    }
+
+    .fc-daygrid-day {
+        background: white;
+    }
+
+    .fc-day-today {
+
+        background: #cfdef5 !important;
+    }
+
+    .fc-event {
+        border: none !important;
+        border-left: 4px solid rgba(0, 0, 0, .25) !important;
+        border-radius: 6px !important;
+        padding: 2px 6px !important;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .fc-event-title {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .detail-item {
+        margin-top: 22px;
+    }
+
+    .detail-item small {
+        display: block;
+        color: #909399;
+        font-weight: 600;
+        margin-bottom: 6px;
+        letter-spacing: .5px;
+        text-transform: uppercase;
+    }
+
+    .modal-content {
+        border: none;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .modal-body {
+        padding: 22px;
+    }
+
+    .event-header {
+
+        display: flex;
+
+        justify-content: space-between;
+
+        align-items: flex-start;
+
+    }
+
+    .event-title {
+
+        flex: 1;
+
+    }
+
+    .event-title h3 {
+
+        margin: 0;
+
+        font-size: 32px;
+
+        font-weight: 700;
+
+        color: #222;
+
+        line-height: 1.2;
+
+    }
+
+    .event-title p {
+
+        margin: 8px 0 0;
+
+        color: #8b95a7;
+
+        font-size: 15px;
+
+    }
+
+    .event-close {
+
+        width: 36px;
+
+        height: 36px;
+
+        display: flex;
+
+        align-items: center;
+
+        justify-content: center;
+
+        background: none;
+
+        border: none;
+
+        color: #98a2b3;
+
+        font-size: 24px;
+
+        cursor: pointer;
+
+        transition: .2s;
+
+    }
+
+    .event-close:hover {
+
+        color: #27426e;
+
+    }
+
+    .modal-body hr {
+
+        margin: 18px -22px 24px;
+
+        border-color: #edf2f7;
+
+    }
+
+    .detail-item {
+
+        display: flex;
+
+        gap: 16px;
+
+        align-items: flex-start;
+
+        margin-bottom: 25px;
+
+    }
+
+    .detail-item:last-child {
+
+        margin-bottom: 0;
+
+    }
+
+    .detail-icon {
+
+        width: 26px;
+
+        text-align: center;
+
+        color: #8b95a7;
+
+        font-size: 20px;
+
+        margin-top: 4px;
+
+    }
+
+    .detail-content {
+
+        flex: 1;
+
+    }
+
+    .detail-content small {
+
+        display: block;
+
+        color: #98a2b3;
+
+        font-size: 13px;
+
+        font-weight: 700;
+
+        letter-spacing: .7px;
+
+        margin-bottom: 6px;
+
+    }
+
+    .detail-content div {
+
+        color: #222;
+
+        font-size: 16px;
+
+    }
+
+    .status-badge {
+
+        display: inline-block;
+
+        padding: 5px 14px;
+
+        border-radius: 18px;
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+    }
+
+    .status-lunas {
+
+        background: #dcfce7;
+
+        color: #15803d;
+
+    }
+
+    .status-dp {
+
+        background: #ffedd5;
+
+        color: #c2410c;
+
+    }
+

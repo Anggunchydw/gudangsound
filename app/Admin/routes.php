@@ -44,7 +44,13 @@ Route::group([
         [RekapKeuanganController::class, 'index']
     );
     Route::get(
-    'rekap-keuangan/cetak',
-    [RekapKeuanganController::class, 'cetak']
-);
+        'rekap-keuangan/cetak',
+        [RekapKeuanganController::class, 'cetak']
+    );
+    $router->get('Jadwal-Acara', 'JadwalAcaraController@index');
+
+    $router->get(
+        'Jadwal-Acara/events',
+        'JadwalAcaraController@events'
+    );
 });
