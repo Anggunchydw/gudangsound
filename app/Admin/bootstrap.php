@@ -27,3 +27,4 @@ use Dcat\Admin\Show;
 Admin::css('/css/admin-custom.css');
 Admin::css('/css/jadwal-acara.css');
 Admin::css('/css/dashboard.css');
+Admin::css('/css/rekap-keuangan.css');

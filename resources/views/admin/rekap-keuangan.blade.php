@@ -47,7 +47,7 @@
         </form>
 
 
-        <div class="table-responsive">
+        <div class="rekap-table-wrapper">
 
             <table class="table table-hover rekap-table">
 

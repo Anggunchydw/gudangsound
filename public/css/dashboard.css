@@ -6,26 +6,45 @@
     display:flex;
     justify-content:space-between;
     align-items:center;
+    gap:15px;
     margin-bottom:25px;
+}
+
+.dashboard-toolbar > div:first-child{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
 }
 
 .dashboard-update{
     color:#8b909a;
     font-size:13px;
+    white-space:nowrap;
 }
+
+/* ==========================
+   CARD
+========================== */
 
 .dashboard-card{
     background:#fff;
     border:1px solid #ebeef5;
     border-radius:10px;
     padding:20px;
+
     display:flex;
-    justify-content:space-between;
     align-items:center;
+    gap:18px;
+
     min-height:120px;
     margin-bottom:20px;
-}
 
+    overflow:hidden;
+}
+.dashboard-card > div:first-child{
+    flex:1;
+    min-width:0;
+}
 .dashboard-label{
     font-size:13px;
     color:#909399;
@@ -36,13 +55,19 @@
     font-weight:700;
     color:#303133;
     margin-top:8px;
+    line-height:1.2;
 }
 
 .dashboard-money{
-    font-size:30px;
+     font-size:clamp(22px,2vw,30px);
     font-weight:700;
     color:#303133;
     margin-top:8px;
+    line-height:1.25;
+
+    white-space:normal;
+    word-break:normal;
+    overflow-wrap:break-word;
 }
 
 .dashboard-desc{
@@ -59,6 +84,8 @@
     justify-content:center;
     align-items:center;
     font-size:28px;
+    flex-shrink:0;
+     flex:0 0 60px;
 }
 
 .dashboard-icon.purple{
@@ -76,44 +103,78 @@
     color:#16a34a;
 }
 
-/* tabel dashboard */
+/* ==========================
+   TABLE
+========================== */
+
+.dashboard-table-wrapper{
+    width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+}
+
+.dashboard-table{
+    width:100%;
+    min-width:850px;
+    margin-bottom:0;
+}
 
 .dashboard-table thead th{
     background:#f5f7fa !important;
     color:#606266;
     font-weight:600;
     border-bottom:1px solid #ebeef5;
+    white-space:nowrap;
 }
 
 .dashboard-table tbody td{
     vertical-align:middle;
+    white-space:nowrap;
+}
+
+.dashboard-table tbody td:nth-child(3){
+    white-space:normal;
+    min-width:220px;
 }
 
 .dashboard-table tr:hover{
     background:#fafafa;
 }
+
+.status-dp,
+.status-lunas{
+    white-space:nowrap;
+}
+
 /* ==========================
-   RESPONSIVE DASHBOARD
+   RESPONSIVE
 ========================== */
 
-@media (max-width: 992px){
+/* Laptop */
+@media (max-width:992px){
 
     .dashboard-toolbar{
         flex-direction:column;
         align-items:flex-start;
-        gap:15px;
     }
 
-    .dashboard-toolbar .btn{
-        margin-bottom:8px;
+    .dashboard-toolbar > div:first-child{
+        width:100%;
     }
 
     .dashboard-update{
         width:100%;
+        white-space:normal;
+    }
+
+    .dashboard-card{
+        min-height:110px;
     }
 
 }
 
+/* Tablet */
 @media (max-width:768px){
 
     .dashboard-card{
@@ -127,7 +188,6 @@
 
     .dashboard-money{
         font-size:22px;
-        word-break:break-word;
     }
 
     .dashboard-icon{
@@ -136,24 +196,76 @@
         font-size:22px;
     }
 
+    .dashboard-table{
+        min-width:760px;
+    }
+
+    .dashboard-table th,
+    .dashboard-table td{
+        padding:10px 12px;
+        font-size:13px;
+    }
+
 }
 
+/* Mobile */
 @media (max-width:576px){
 
-    .dashboard-toolbar .btn{
-        display:block;
+    .dashboard-toolbar{
+        gap:12px;
+    }
+
+    .dashboard-toolbar > div:first-child{
+        display:grid;
+        grid-template-columns:1fr;
         width:100%;
-        margin-bottom:10px;
+        gap:10px;
+    }
+
+    .dashboard-toolbar .btn{
+        width:100%;
+        margin:0;
+    }
+
+    .dashboard-update{
+        font-size:12px;
     }
 
     .dashboard-card{
         flex-direction:column;
         align-items:flex-start;
         gap:15px;
+        padding:16px;
     }
 
     .dashboard-icon{
         align-self:flex-end;
+        width:46px;
+        height:46px;
+        font-size:20px;
+    }
+
+    .dashboard-number{
+        font-size:26px;
+    }
+
+    .dashboard-money{
+        font-size:20px;
+    }
+
+    .dashboard-table-wrapper{
+        margin:0 -15px;
+        padding:0 15px;
+    }
+
+    .dashboard-table{
+        min-width:720px;
+    }
+
+    .dashboard-table th,
+    .dashboard-table td{
+        padding:9px 10px;
+        font-size:12px;
     }
 
 }

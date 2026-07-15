@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Admin\Controllers;
-
+use Dcat\Admin\Admin;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
@@ -13,6 +13,8 @@ class RekapKeuanganController extends Controller
 {
     public function index(Content $content, Request $request)
     {
+         Admin::css(asset('css/rekap-keuangan.css'));
+
         $mulai  = $request->get('mulai');
         $sampai = $request->get('sampai');
 

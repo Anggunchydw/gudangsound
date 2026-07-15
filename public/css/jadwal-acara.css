@@ -1,301 +1,491 @@
+/* ==========================================
+   LAYOUT
+========================================== */
 
-    #calendar {
-        max-width: 100%;
-        margin: 20px auto;
+.jadwal-header{
+    display:flex;
+    justify-content:flex-end;
+    align-items:center;
+    margin-bottom:18px;
+}
+
+.jadwal-wrapper{
+    display:flex;
+    gap:20px;
+    align-items:flex-start;
+}
+
+.calendar-section{
+    flex:1;
+    min-width:0;
+}
+
+.sidebar-section{
+    width:280px;
+    flex-shrink:0;
+}
+
+/* ==========================================
+   SIDEBAR
+========================================== */
+
+.sidebar-card{
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:14px;
+    margin-bottom:12px;
+}
+
+.sidebar-card:last-child{
+    margin-bottom:0;
+}
+
+.sidebar-card h5{
+    margin:0 0 10px;
+    font-size:15px;
+    font-weight:600;
+    color:#1f2937;
+}
+
+/* ==========================================
+   RINGKASAN
+========================================== */
+
+.summary-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
+
+.summary-grid>div{
+    background:#f8fafc;
+    border-radius:8px;
+    text-align:center;
+    padding:10px;
+}
+
+.summary-grid h2{
+    margin:0;
+    font-size:24px;
+    font-weight:700;
+    color:#27426e;
+}
+
+.summary-grid span{
+    display:block;
+    margin-top:3px;
+    font-size:12px;
+    color:#94a3b8;
+}
+
+/* ==========================================
+   AGENDA
+========================================== */
+
+.agenda-list{
+    max-height:200px;
+    overflow-y:auto;
+    padding-right:4px;
+}
+
+.agenda-list::-webkit-scrollbar{
+    width:5px;
+}
+
+.agenda-list::-webkit-scrollbar-thumb{
+    background:#cbd5e1;
+    border-radius:10px;
+}
+
+.agenda-card{
+    display:flex;
+    gap:10px;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+    padding:10px;
+    margin-bottom:10px;
+    background:#fff;
+}
+
+.agenda-card:last-child{
+    margin-bottom:0;
+}
+
+.agenda-date-box{
+    width:48px;
+    height:48px;
+    flex-shrink:0;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    border-radius:8px;
+    background:#f3f6fb;
+}
+
+.agenda-date-box .day{
+    font-size:19px;
+    font-weight:700;
+    line-height:1;
+    color:#1f2937;
+}
+
+.agenda-date-box .month{
+    margin-top:3px;
+    font-size:10px;
+    font-weight:600;
+    color:#94a3b8;
+}
+
+.agenda-info{
+    flex:1;
+    min-width:0;
+}
+
+.agenda-title{
+    font-size:14px;
+    font-weight:600;
+    color:#1f2937;
+    margin-bottom:5px;
+}
+
+.agenda-detail{
+    display:flex;
+    align-items:flex-start;
+    gap:6px;
+    margin-bottom:3px;
+
+    font-size:12px;
+    color:#6b7280;
+
+    line-height:1.35;
+}
+
+.agenda-detail i{
+    width:14px;
+    margin-top:2px;
+    color:#94a3b8;
+}
+
+.agenda-info .badge{
+    margin-top:6px;
+    font-size:11px;
+    padding:4px 10px;
+}
+
+/* ==========================================
+   FULLCALENDAR
+========================================== */
+
+#calendar{
+    width:100%;
+}
+
+.fc{
+    background:#fff;
+    border:1px solid #dfe3e8;
+    border-radius:10px;
+    padding:15px;
+}
+
+.fc-scrollgrid{
+    border-radius:8px;
+    overflow:hidden;
+}
+
+.fc-toolbar{
+    margin-bottom:18px!important;
+}
+
+.fc-toolbar-title{
+    font-size:24px!important;
+    font-weight:600;
+    color:#303133;
+}
+
+.fc .fc-button{
+    background:#f5f7fa!important;
+    border:1px solid #dcdfe6!important;
+    color:#606266!important;
+    box-shadow:none!important;
+    padding:.45rem .8rem!important;
+}
+
+.fc .fc-button:hover{
+    background:#e7edf7!important;
+    border-color:#27426e!important;
+    color:#27426e!important;
+}
+
+.fc .fc-button-primary.fc-button-active,
+.fc .fc-button-primary:focus,
+.fc .fc-button-primary:not(:disabled):active{
+    background:#27426e!important;
+    border-color:#27426e!important;
+    color:#fff!important;
+}
+
+.fc-col-header-cell{
+    background:#f5f7fa;
+}
+
+.fc-col-header-cell-cushion{
+    text-decoration:none!important;
+    color:#606266!important;
+    font-weight:600;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th{
+    border:1px solid #ebeef5;
+}
+
+.fc-day-today{
+    background:#cfdef5!important;
+}
+
+.fc-event{
+    border:none!important;
+    border-radius:6px!important;
+    padding:2px 6px!important;
+    font-size:12px;
+    font-weight:600;
+}
+
+.fc-event-title{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+
+/* ==========================================
+   MODAL
+========================================== */
+
+.modal-content{
+    border:none;
+    border-radius:14px;
+}
+
+.modal-body{
+    padding:22px;
+}
+
+.event-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+}
+
+.event-title{
+    flex:1;
+}
+
+.event-title h4{
+    margin:0;
+    font-size:28px;
+    font-weight:700;
+}
+
+.event-title p{
+    margin-top:6px;
+    color:#94a3b8;
+}
+
+.event-close{
+    width:36px;
+    height:36px;
+    border:none;
+    background:none;
+    color:#94a3b8;
+    font-size:22px;
+}
+
+.event-close:hover{
+    color:#27426e;
+}
+
+.modal-body hr{
+    margin:18px -22px;
+}
+
+.detail-item{
+    display:flex;
+    gap:14px;
+    margin-bottom:22px;
+}
+
+.detail-item:last-child{
+    margin-bottom:0;
+}
+
+.detail-icon{
+    width:24px;
+    color:#94a3b8;
+}
+
+.detail-content{
+    flex:1;
+}
+
+.detail-content small{
+    display:block;
+    font-size:12px;
+    color:#94a3b8;
+    margin-bottom:4px;
+    font-weight:700;
+}
+
+.detail-content div{
+    font-size:15px;
+}
+
+.status-badge{
+    display:inline-block;
+    padding:5px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+}
+
+.status-lunas{
+    background:#dcfce7;
+    color:#15803d;
+}
+
+.status-dp{
+    background:#ffedd5;
+    color:#c2410c;
+}
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+/* Laptop */
+
+@media (max-width:1200px){
+
+    .sidebar-section{
+        width:250px;
     }
 
-    .fc {
-        background: #fff;
-        border-radius: 10px;
-        border: 1px solid #dfe3e8;
-        padding: 15px;
+}
+
+/* Tablet */
+
+@media (max-width:992px){
+
+    .jadwal-wrapper{
+        flex-direction:column;
     }
 
-    .fc-scrollgrid {
-        border-radius: 8px;
-        overflow: hidden;
+    .calendar-section,
+    .sidebar-section{
+        width:100%;
     }
 
-    /* Toolbar */
-    .fc-toolbar {
-        margin-bottom: 18px !important;
+    .sidebar-section{
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+        gap:14px;
     }
 
-    .fc-toolbar-title {
-        font-size: 24px !important;
-        font-weight: 600;
-        color: #303133;
+    .sidebar-card{
+        margin-bottom:0;
     }
 
-    /* Semua tombol */
-    .fc .fc-button {
-        background: #f5f7fa !important;
-        border: 1px solid #dcdfe6 !important;
-        color: #606266 !important;
-        box-shadow: none !important;
-        padding: .45rem .8rem !important;
+    .agenda-list{
+        max-height:180px;
     }
 
-    /* Hover */
-    .fc .fc-button:hover {
-        background: #e7edf7 !important;
-        border-color: #27426e !important;
-        color: #27426e !important;
+    .fc-toolbar{
+        flex-wrap:wrap;
+        gap:10px;
     }
 
-    /* Tombol yang sedang aktif */
-    .fc .fc-button-primary:not(:disabled).fc-button-active,
-    .fc .fc-button-primary:not(:disabled):active,
-    .fc .fc-button-primary:focus,
-    .fc .fc-button-primary.fc-button-active {
+}
 
-        background: #27426e !important;
-        border-color: #27426e !important;
-        color: #fff !important;
-        box-shadow: none !important;
+/* Tablet Portrait */
 
+@media (max-width:768px){
+
+    .sidebar-section{
+        grid-template-columns:1fr;
     }
 
-    /* Hari ini */
-    .fc-today-button {
-        margin-left: 12px !important;
-        margin-right: 12px !important;
+    .jadwal-header{
+        justify-content:stretch;
     }
 
-    /* Header nama hari */
-    .fc-col-header-cell {
-        background: #f5f7fa;
+    .jadwal-header .btn{
+        width:100%;
     }
 
-    .fc-col-header-cell-cushion {
-        color: #606266 !important;
-        font-weight: 600;
-        text-decoration: none !important;
-        padding: 12px 0 !important;
+    .summary-grid{
+        grid-template-columns:repeat(2,1fr);
     }
 
-    .fc-theme-standard td,
-    .fc-theme-standard th {
-        border: 1px solid #ebeef5;
+    .fc-toolbar{
+        flex-direction:column;
+        align-items:flex-start;
     }
 
-    .fc-daygrid-day {
-        background: white;
+    .fc-toolbar-chunk{
+        display:flex;
+        flex-wrap:wrap;
+        gap:8px;
     }
 
-    .fc-day-today {
+}
 
-        background: #cfdef5 !important;
+/* Mobile */
+
+@media (max-width:576px){
+
+    .summary-grid{
+        grid-template-columns:1fr;
     }
 
-    .fc-event {
-        border: none !important;
-        border-left: 4px solid rgba(0, 0, 0, .25) !important;
-        border-radius: 6px !important;
-        padding: 2px 6px !important;
-        font-size: 12px;
-        font-weight: 500;
-        cursor: pointer;
+    .agenda-card{
+        padding:8px;
     }
 
-    .fc-event-title {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+    .agenda-date-box{
+        width:44px;
+        height:44px;
     }
 
-    .detail-item {
-        margin-top: 22px;
+    .agenda-date-box .day{
+        font-size:17px;
     }
 
-    .detail-item small {
-        display: block;
-        color: #909399;
-        font-weight: 600;
-        margin-bottom: 6px;
-        letter-spacing: .5px;
-        text-transform: uppercase;
+    .agenda-title{
+        font-size:13px;
     }
 
-    .modal-content {
-        border: none;
-        border-radius: 14px;
-        overflow: hidden;
+    .agenda-detail{
+        font-size:11px;
     }
 
-    .modal-body {
-        padding: 22px;
+    .fc-toolbar-title{
+        font-size:18px!important;
     }
 
-    .event-header {
-
-        display: flex;
-
-        justify-content: space-between;
-
-        align-items: flex-start;
-
+    .fc .fc-button{
+        font-size:11px!important;
+        padding:.35rem .5rem!important;
     }
 
-    .event-title {
-
-        flex: 1;
-
+    .event-title h4{
+        font-size:22px;
     }
 
-    .event-title h3 {
-
-        margin: 0;
-
-        font-size: 32px;
-
-        font-weight: 700;
-
-        color: #222;
-
-        line-height: 1.2;
-
+    .modal-dialog{
+        margin:12px;
     }
 
-    .event-title p {
-
-        margin: 8px 0 0;
-
-        color: #8b95a7;
-
-        font-size: 15px;
-
-    }
-
-    .event-close {
-
-        width: 36px;
-
-        height: 36px;
-
-        display: flex;
-
-        align-items: center;
-
-        justify-content: center;
-
-        background: none;
-
-        border: none;
-
-        color: #98a2b3;
-
-        font-size: 24px;
-
-        cursor: pointer;
-
-        transition: .2s;
-
-    }
-
-    .event-close:hover {
-
-        color: #27426e;
-
-    }
-
-    .modal-body hr {
-
-        margin: 18px -22px 24px;
-
-        border-color: #edf2f7;
-
-    }
-
-    .detail-item {
-
-        display: flex;
-
-        gap: 16px;
-
-        align-items: flex-start;
-
-        margin-bottom: 25px;
-
-    }
-
-    .detail-item:last-child {
-
-        margin-bottom: 0;
-
-    }
-
-    .detail-icon {
-
-        width: 26px;
-
-        text-align: center;
-
-        color: #8b95a7;
-
-        font-size: 20px;
-
-        margin-top: 4px;
-
-    }
-
-    .detail-content {
-
-        flex: 1;
-
-    }
-
-    .detail-content small {
-
-        display: block;
-
-        color: #98a2b3;
-
-        font-size: 13px;
-
-        font-weight: 700;
-
-        letter-spacing: .7px;
-
-        margin-bottom: 6px;
-
-    }
-
-    .detail-content div {
-
-        color: #222;
-
-        font-size: 16px;
-
-    }
-
-    .status-badge {
-
-        display: inline-block;
-
-        padding: 5px 14px;
-
-        border-radius: 18px;
-
-        font-size: 13px;
-
-        font-weight: 600;
-
-    }
-
-    .status-lunas {
-
-        background: #dcfce7;
-
-        color: #15803d;
-
-    }
-
-    .status-dp {
-
-        background: #ffedd5;
-
-        color: #c2410c;
-
-    }
-
+}

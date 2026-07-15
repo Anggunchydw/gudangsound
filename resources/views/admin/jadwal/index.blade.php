@@ -1,4 +1,200 @@
-<div id="calendar"></div>
+<div class="jadwal-header">
+
+    <a href="{{ admin_url('penyewaan/create') }}" class="btn btn-primary">
+
+        <i class="feather icon-plus"></i>
+
+        Tambah Penyewaan
+
+    </a>
+
+</div>
+
+<div class="jadwal-wrapper">
+
+    {{-- =======================
+        KALENDER
+    ======================== --}}
+    <div class="calendar-section">
+
+        <div id="calendar"></div>
+
+    </div>
+
+    {{-- =======================
+        SIDEBAR
+    ======================== --}}
+    <div class="sidebar-section">
+
+        {{-- Ringkasan --}}
+        <div class="sidebar-card">
+
+            <h5>Ringkasan Bulan Ini</h5>
+
+            <div class="summary-grid">
+
+                <div>
+
+                    <h2>{{ $totalAcara }}</h2>
+
+                    <span>Total Acara</span>
+
+                </div>
+
+                <div>
+
+                    <h2>{{ $belumLunas }}</h2>
+
+                    <span>Belum Lunas</span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {{-- Agenda Hari Ini --}}
+        <div class="sidebar-card">
+
+            <h5>Agenda Hari Ini</h5>
+
+            <div class="agenda-list">
+
+                @forelse($agendaHariIni as $item)
+                    <div class="agenda-card">
+
+                        <div class="agenda-date-box">
+
+                            <div class="day">
+                                {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d') }}
+                            </div>
+
+                            <div class="month">
+                                {{ strtoupper(\Carbon\Carbon::parse($item->tanggal_mulai)->translatedFormat('M')) }}
+                            </div>
+
+                        </div>
+
+                        <div class="agenda-info">
+
+                            <div class="agenda-title">
+                                {{ $item->nama_penyewa }}
+                            </div>
+
+                            <div class="agenda-detail">
+
+                                <i class="feather icon-map-pin"></i>
+
+                                {{ $item->lokasi }}
+
+                            </div>
+
+                            <div class="agenda-detail">
+
+                                <i class="feather icon-package"></i>
+
+                                {{ $item->paket_barang }}
+
+                            </div>
+
+                            <span class="badge badge-{{ $item->status_pembayaran == 'Lunas' ? 'success' : 'warning' }}">
+
+                                {{ $item->status_pembayaran }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                @empty
+
+                    <p class="text-muted">
+
+                        Tidak ada agenda hari ini.
+
+                    </p>
+                @endforelse
+
+            </div>
+
+        </div>
+
+        {{-- Akan Datang --}}
+        <div class="sidebar-card">
+
+            <h5>Akan Datang</h5>
+
+            <div class="agenda-list">
+
+                @forelse($akanDatang as $item)
+                    <div class="agenda-card">
+
+                        <div class="agenda-date-box">
+
+                            <div class="day">
+                                {{ \Carbon\Carbon::parse($item->tanggal_mulai)->format('d') }}
+                            </div>
+
+                            <div class="month">
+                                {{ strtoupper(\Carbon\Carbon::parse($item->tanggal_mulai)->translatedFormat('M')) }}
+                            </div>
+
+                        </div>
+
+                        <div class="agenda-info">
+
+                            <div class="agenda-title">
+                                {{ $item->nama_penyewa }}
+                            </div>
+
+                            <div class="agenda-detail">
+
+                                <i class="feather icon-map-pin"></i>
+
+                                {{ $item->lokasi }}
+
+                            </div>
+
+                            <div class="agenda-detail">
+
+                                <i class="feather icon-package"></i>
+
+                                {{ $item->paket_barang }}
+
+                            </div>
+
+                            <span
+                                class="badge badge-{{ $item->status_pembayaran == 'Lunas' ? 'success' : 'warning' }}">
+
+                                {{ $item->status_pembayaran }}
+
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                @empty
+
+                    <p class="text-muted">
+
+                        Tidak ada agenda mendatang.
+
+                    </p>
+                @endforelse
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{{-- =======================
+    MODAL DETAIL
+======================== --}}
 <div class="modal fade" id="eventModal" tabindex="-1">
 
     <div class="modal-dialog modal-dialog-centered">
@@ -30,7 +226,9 @@
                 <div class="detail-item">
 
                     <div class="detail-icon">
+
                         <i class="feather icon-check-circle"></i>
+
                     </div>
 
                     <div class="detail-content">
@@ -46,7 +244,9 @@
                 <div class="detail-item">
 
                     <div class="detail-icon">
+
                         <i class="feather icon-package"></i>
+
                     </div>
 
                     <div class="detail-content">
@@ -62,7 +262,9 @@
                 <div class="detail-item">
 
                     <div class="detail-icon">
+
                         <i class="feather icon-map-pin"></i>
+
                     </div>
 
                     <div class="detail-content">
@@ -78,7 +280,9 @@
                 <div class="detail-item">
 
                     <div class="detail-icon">
+
                         <i class="feather icon-users"></i>
+
                     </div>
 
                     <div class="detail-content">
@@ -118,10 +322,13 @@
         let calendar = new FullCalendar.Calendar(calendarEl, {
 
             locale: 'id',
-
             initialView: 'dayGridMonth',
-
-            height: 700,
+            contentHeight: 'auto',
+            expandRows: true,
+            handleWindowResize: true,
+            windowResize: function() {
+                calendar.updateSize();
+            },
             events: "{{ admin_url('Jadwal-Acara/events') }}",
 
             headerToolbar: {

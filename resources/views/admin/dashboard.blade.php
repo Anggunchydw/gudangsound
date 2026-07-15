@@ -151,138 +151,138 @@
         </h3>
 
     </div>
+    <div class="box-body">
+        <div class="dashboard-table-wrapper">
 
-    <div class="box-body table-responsive">
+            <table class="table dashboard-table">
 
-        <table class="table dashboard-table">
+                <thead>
 
-            <thead>
-
-                <tr>
-
-                    <th>Nama Penyewa</th>
-
-                    <th>Tanggal Acara</th>
-
-                    <th>Paket / Barang</th>
-
-                    <th>Total Biaya</th>
-
-                    <th>Status</th>
-
-                    <th width="60">Aksi</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                @forelse($transaksiTerbaru as $item)
                     <tr>
 
-                        <td>
+                        <th>Nama Penyewa</th>
 
-                            {{ $item->nama_penyewa }}
+                        <th>Tanggal Acara</th>
 
-                        </td>
+                        <th>Paket / Barang</th>
 
-                        <td>
+                        <th>Total Biaya</th>
 
-                            {{ date('d M Y', strtotime($item->tanggal_mulai)) }}
+                        <th>Status</th>
 
-                        </td>
+                        <th width="60">Aksi</th>
 
-                        <td>
+                    </tr>
 
-                            @php
-                                $items = [];
+                </thead>
 
-                                // Paket
-                                foreach ($item->detailPaket as $detail) {
-                                    if ($detail->paket) {
-                                        $items[] = $detail->paket->nama_paket;
+                <tbody>
+
+                    @forelse($transaksiTerbaru as $item)
+                        <tr>
+
+                            <td>
+
+                                {{ $item->nama_penyewa }}
+
+                            </td>
+
+                            <td>
+
+                                {{ date('d M Y', strtotime($item->tanggal_mulai)) }}
+
+                            </td>
+
+                            <td>
+
+                                @php
+                                    $items = [];
+
+                                    // Paket
+                                    foreach ($item->detailPaket as $detail) {
+                                        if ($detail->paket) {
+                                            $items[] = $detail->paket->nama_paket;
+                                        }
                                     }
-                                }
 
-                                // Barang Custom
-                                foreach ($item->detailBarang as $detail) {
-                                    if ($detail->barang) {
-                                        $items[] = $detail->barang->nama_barang;
+                                    // Barang Custom
+                                    foreach ($item->detailBarang as $detail) {
+                                        if ($detail->barang) {
+                                            $items[] = $detail->barang->nama_barang;
+                                        }
                                     }
-                                }
 
-                                // Ambil maksimal 2 item pertama
-                                $preview = array_slice($items, 0, 2);
-                            @endphp
+                                    // Ambil maksimal 2 item pertama
+                                    $preview = array_slice($items, 0, 2);
+                                @endphp
 
-                            @if (count($items))
-                                {{ implode(', ', $preview) }}
+                                @if (count($items))
+                                    {{ implode(', ', $preview) }}
 
-                                @if (count($items) > 2)
-                                    <small class="text-muted">
-                                        +{{ count($items) - 2 }} lainnya
-                                    </small>
+                                    @if (count($items) > 2)
+                                        <small class="text-muted">
+                                            +{{ count($items) - 2 }} lainnya
+                                        </small>
+                                    @endif
+                                @else
+                                    -
                                 @endif
-                            @else
-                                -
-                            @endif
 
-                        </td>
+                            </td>
 
-                        <td>
+                            <td>
 
-                            Rp {{ number_format($item->total_harga, 0, ',', '.') }}
+                                Rp {{ number_format($item->total_harga, 0, ',', '.') }}
 
-                        </td>
+                            </td>
 
-                        <td>
+                            <td>
 
-                            @if ($item->status_pembayaran == 'DP')
-                                <span class="status-dp">
+                                @if ($item->status_pembayaran == 'DP')
+                                    <span class="status-dp">
 
-                                    DP
+                                        DP
 
-                                </span>
-                            @else
-                                <span class="status-lunas">
+                                    </span>
+                                @else
+                                    <span class="status-lunas">
 
-                                    Lunas
+                                        Lunas
 
-                                </span>
-                            @endif
+                                    </span>
+                                @endif
 
-                        </td>
+                            </td>
 
-                        <td>
+                            <td>
 
-                            <a href="{{ admin_url('penyewaan/' . $item->id) }}">
+                                <a href="{{ admin_url('penyewaan/' . $item->id) }}">
 
-                                <i class="feather icon-eye"></i>
+                                    <i class="feather icon-eye"></i>
 
-                            </a>
+                                </a>
 
-                        </td>
+                            </td>
 
-                    </tr>
+                        </tr>
 
-                @empty
+                    @empty
 
-                    <tr>
+                        <tr>
 
-                        <td colspan="6" class="text-center">
+                            <td colspan="6" class="text-center">
 
-                            Belum ada transaksi
+                                Belum ada transaksi
 
-                        </td>
+                            </td>
 
-                    </tr>
-                @endforelse
+                        </tr>
+                    @endforelse
 
-            </tbody>
+                </tbody>
 
-        </table>
+            </table>
+
+        </div>
 
     </div>
-
-</div>

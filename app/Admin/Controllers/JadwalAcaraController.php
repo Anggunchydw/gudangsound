@@ -18,9 +18,83 @@ class JadwalAcaraController extends AdminController
         // CSS milik sendiri
         Admin::css(asset('css/jadwal-acara.css'));
 
+        $totalAcara = Penyewaan::whereMonth(
+            'tanggal_mulai',
+            now()->month
+        )->count();
+
+        $belumLunas = Penyewaan::whereMonth(
+            'tanggal_mulai',
+            now()->month
+        )
+            ->where('status_pembayaran', 'DP')
+            ->count();
+
+        $agendaHariIni = Penyewaan::with([
+            'detailPaket.paket',
+            'detailBarang.barang'
+        ])
+            ->whereDate('tanggal_mulai', today())
+            ->get();
+
+        $akanDatang = Penyewaan::with([
+            'detailPaket.paket',
+            'detailBarang.barang'
+        ])
+            ->where('tanggal_mulai', '>', today())
+            ->orderBy('tanggal_mulai')
+            ->take(5)
+            ->get();
+
+        $agendaHariIni->each(function ($item) {
+
+            $paket = [];
+
+            foreach ($item->detailPaket as $d) {
+                if ($d->paket) {
+                    $paket[] = $d->paket->nama_paket;
+                }
+            }
+
+            foreach ($item->detailBarang as $d) {
+                if ($d->barang) {
+                    $paket[] = $d->barang->nama_barang;
+                }
+            }
+
+            $item->paket_barang = implode(', ', $paket);
+        });
+
+        $akanDatang->each(function ($item) {
+
+            $paket = [];
+
+            foreach ($item->detailPaket as $d) {
+                if ($d->paket) {
+                    $paket[] = $d->paket->nama_paket;
+                }
+            }
+
+            foreach ($item->detailBarang as $d) {
+                if ($d->barang) {
+                    $paket[] = $d->barang->nama_barang;
+                }
+            }
+
+            $item->paket_barang = implode(', ', $paket);
+        });
+
         return $content
             ->title('Jadwal Acara')
-            ->body(view('admin.jadwal.index'));
+            ->body(view(
+                'admin.jadwal.index',
+                compact(
+                    'totalAcara',
+                    'belumLunas',
+                    'agendaHariIni',
+                    'akanDatang'
+                )
+            ));
     }
     public function events()
     {
