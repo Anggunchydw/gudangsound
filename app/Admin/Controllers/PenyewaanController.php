@@ -12,7 +12,6 @@ use Dcat\Admin\Grid;
 use Dcat\Admin\Show;
 use App\Models\Barang;
 use App\Models\Paket;
-use Carbon\Carbon;
 use App\Services\InventoryService;
 use Dcat\Admin\Http\Controllers\AdminController;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -24,9 +23,23 @@ class PenyewaanController extends AdminController
      *
      * @return Grid
      */
+    protected function canManage()
+    {
+        return Admin::user()->isRole('administrator')
+            || Admin::user()->isRole('pemilik');
+    }
+
+    protected function authorizeManage()
+    {
+        if (! $this->canManage()) {
+            abort(403);
+        }
+    }
     protected function grid()
     {
-        return Grid::make(new PenyewaanRepository(), function (Grid $grid) {
+        $canManage = $this->canManage();
+        return Grid::make(new PenyewaanRepository(), function (Grid $grid) use ($canManage) {
+
             $grid->column('id')->sortable();
             $grid->column('nama_penyewa');
             $grid->column('no_tlp');
@@ -51,10 +64,22 @@ class PenyewaanController extends AdminController
                     return $value;
                 });
 
+            if (! $canManage) {
+
+                $grid->disableCreateButton();
+                $grid->disableEditButton();
+                $grid->disableDeleteButton();
+                $grid->disableBatchDelete();
+            }
             $grid->filter(function (Grid\Filter $filter) {
                 $filter->like('nama_penyewa');
             });
-            $grid->actions(function (Grid\Displayers\Actions $actions) {
+
+            $grid->actions(function (Grid\Displayers\Actions $actions) use ($canManage) {
+
+                if (! $canManage) {
+                    return;
+                }
 
                 $status = $actions->row->status_sekarang;
 
@@ -64,10 +89,10 @@ class PenyewaanController extends AdminController
 
                     $actions->append(
                         "<a class='btn btn-sm btn-danger'
-                            href='{$url}'
-                            onclick=\"return confirm('Batalkan penyewaan ini?')\">
-                            <i class='feather icon-x-circle'></i> Batalkan
-                        </a>"
+                href='{$url}'
+                onclick=\"return confirm('Batalkan penyewaan ini?')\">
+                <i class='feather icon-x-circle'></i> Batalkan
+            </a>"
                     );
                 }
             });
@@ -101,6 +126,7 @@ class PenyewaanController extends AdminController
      */
     protected function form()
     {
+        $this->authorizeManage();
         Admin::script(<<<JS
 
         function formatRupiah(angka){

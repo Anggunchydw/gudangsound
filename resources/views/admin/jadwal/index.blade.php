@@ -1,12 +1,18 @@
 <div class="jadwal-header">
 
-    <a href="{{ admin_url('penyewaan/create') }}" class="btn btn-primary">
+    @php
+        $user = auth('admin')->user();
+    @endphp
 
-        <i class="feather icon-plus"></i>
+    @if ($user->isRole('administrator') || $user->isRole('pemilik'))
+        <a href="{{ admin_url('penyewaan/create') }}" class="btn btn-primary">
 
-        Tambah Penyewaan
+            <i class="feather icon-plus"></i>
 
-    </a>
+            Tambah Penyewaan
+
+        </a>
+    @endif
 
 </div>
 

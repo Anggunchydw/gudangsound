@@ -22,86 +22,86 @@ class AdminTablesSeeder extends Seeder
                 [
                     "id" => 1,
                     "parent_id" => 0,
-                    "order" => 9,
+                    "order" => 10,
                     "title" => "Index",
                     "icon" => "feather icon-bar-chart-2",
                     "uri" => "/",
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:33:02",
-                    "updated_at" => "2026-06-19 05:57:16"
+                    "updated_at" => "2026-07-15 17:30:12"
                 ],
                 [
                     "id" => 2,
                     "parent_id" => 0,
-                    "order" => 10,
+                    "order" => 11,
                     "title" => "Admin",
                     "icon" => "feather icon-settings",
-                    "uri" => "",
+                    "uri" => NULL,
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:33:02",
-                    "updated_at" => "2026-06-19 05:57:16"
+                    "updated_at" => "2026-07-15 18:59:48"
                 ],
                 [
                     "id" => 3,
                     "parent_id" => 2,
-                    "order" => 11,
+                    "order" => 12,
                     "title" => "Users",
                     "icon" => "",
                     "uri" => "auth/users",
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:33:02",
-                    "updated_at" => "2026-06-19 05:57:16"
+                    "updated_at" => "2026-07-15 17:30:12"
                 ],
                 [
                     "id" => 4,
                     "parent_id" => 2,
-                    "order" => 12,
+                    "order" => 13,
                     "title" => "Roles",
                     "icon" => "",
                     "uri" => "auth/roles",
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:33:02",
-                    "updated_at" => "2026-06-19 05:57:16"
+                    "updated_at" => "2026-07-15 17:30:12"
                 ],
                 [
                     "id" => 5,
                     "parent_id" => 2,
-                    "order" => 13,
+                    "order" => 14,
                     "title" => "Permission",
                     "icon" => "",
                     "uri" => "auth/permissions",
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:33:02",
-                    "updated_at" => "2026-06-19 05:57:16"
+                    "updated_at" => "2026-07-15 17:30:12"
                 ],
                 [
                     "id" => 6,
                     "parent_id" => 2,
-                    "order" => 14,
+                    "order" => 15,
                     "title" => "Menu",
                     "icon" => "",
                     "uri" => "auth/menu",
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:33:02",
-                    "updated_at" => "2026-06-19 05:57:16"
+                    "updated_at" => "2026-07-15 17:30:12"
                 ],
                 [
                     "id" => 7,
                     "parent_id" => 2,
-                    "order" => 15,
+                    "order" => 16,
                     "title" => "Extensions",
                     "icon" => "",
                     "uri" => "auth/extensions",
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:33:02",
-                    "updated_at" => "2026-06-19 05:57:16"
+                    "updated_at" => "2026-07-15 17:30:12"
                 ],
                 [
                     "id" => 8,
@@ -198,6 +198,18 @@ class AdminTablesSeeder extends Seeder
                     "show" => 1,
                     "created_at" => "2026-06-19 05:56:10",
                     "updated_at" => "2026-06-19 05:57:16"
+                ],
+                [
+                    "id" => 16,
+                    "parent_id" => 0,
+                    "order" => 9,
+                    "title" => "Pengguna",
+                    "icon" => "fa-user",
+                    "uri" => "pengguna",
+                    "extension" => "",
+                    "show" => 1,
+                    "created_at" => "2026-07-15 17:29:56",
+                    "updated_at" => "2026-07-15 21:28:49"
                 ]
             ]
         );
@@ -270,6 +282,94 @@ class AdminTablesSeeder extends Seeder
                     "parent_id" => 1,
                     "created_at" => "2026-06-19 05:33:02",
                     "updated_at" => NULL
+                ],
+                [
+                    "id" => 7,
+                    "name" => "Barang",
+                    "slug" => "barang",
+                    "http_method" => "",
+                    "http_path" => "/barang*",
+                    "order" => 7,
+                    "parent_id" => 0,
+                    "created_at" => "2026-07-15 17:46:33",
+                    "updated_at" => "2026-07-15 18:40:45"
+                ],
+                [
+                    "id" => 8,
+                    "name" => "Paket",
+                    "slug" => "paket",
+                    "http_method" => "",
+                    "http_path" => "/paket*",
+                    "order" => 8,
+                    "parent_id" => 0,
+                    "created_at" => "2026-07-15 17:47:09",
+                    "updated_at" => "2026-07-15 18:43:29"
+                ],
+                [
+                    "id" => 9,
+                    "name" => "Penyewaan",
+                    "slug" => "penyewaan",
+                    "http_method" => "",
+                    "http_path" => "/penyewaan*",
+                    "order" => 9,
+                    "parent_id" => 0,
+                    "created_at" => "2026-07-15 17:47:24",
+                    "updated_at" => "2026-07-15 18:43:55"
+                ],
+                [
+                    "id" => 10,
+                    "name" => "Jadwal Acara",
+                    "slug" => "jadwal",
+                    "http_method" => "",
+                    "http_path" => "/Jadwal-Acara*",
+                    "order" => 10,
+                    "parent_id" => 0,
+                    "created_at" => "2026-07-15 17:47:50",
+                    "updated_at" => "2026-07-15 18:47:00"
+                ],
+                [
+                    "id" => 11,
+                    "name" => "Keuangan",
+                    "slug" => "keuangan",
+                    "http_method" => "",
+                    "http_path" => "/pemasukan*,/pengeluaran*,/rekap-keuangan*",
+                    "order" => 11,
+                    "parent_id" => 0,
+                    "created_at" => "2026-07-15 17:48:30",
+                    "updated_at" => "2026-07-15 18:50:07"
+                ],
+                [
+                    "id" => 12,
+                    "name" => "Pengguna",
+                    "slug" => "pengguna",
+                    "http_method" => "",
+                    "http_path" => "/pengguna*",
+                    "order" => 12,
+                    "parent_id" => 0,
+                    "created_at" => "2026-07-15 17:48:57",
+                    "updated_at" => "2026-07-15 21:30:58"
+                ],
+                [
+                    "id" => 13,
+                    "name" => "Penugasan",
+                    "slug" => "penugasan",
+                    "http_method" => "",
+                    "http_path" => "",
+                    "order" => 13,
+                    "parent_id" => 0,
+                    "created_at" => "2026-07-15 17:49:27",
+                    "updated_at" => "2026-07-15 17:49:27"
+                ],
+                [
+                    "id" => 14,
+                    "name" => "Dashboard",
+                    "slug" => "dashboard",
+                    "http_method" => "",
+                    "http_path" => "",
+                    "order" => 14,
+                    "parent_id" => 0,
+                    "created_at" => "2026-07-15 17:57:38",
+                    "updated_at" => "2026-07-15 17:57:38"
                 ]
             ]
         );
@@ -283,34 +383,75 @@ class AdminTablesSeeder extends Seeder
                     "slug" => "administrator",
                     "created_at" => "2026-06-19 05:33:02",
                     "updated_at" => "2026-06-19 05:33:02"
+                ],
+                [
+                    "id" => 2,
+                    "name" => "Pemilik",
+                    "slug" => "pemilik",
+                    "created_at" => "2026-07-15 17:51:05",
+                    "updated_at" => "2026-07-15 19:26:19"
+                ],
+                [
+                    "id" => 3,
+                    "name" => "Admin Operasional",
+                    "slug" => "admin",
+                    "created_at" => "2026-07-15 17:51:27",
+                    "updated_at" => "2026-07-15 17:51:27"
+                ],
+                [
+                    "id" => 4,
+                    "name" => "Pegawai",
+                    "slug" => "pegawai",
+                    "created_at" => "2026-07-15 17:51:54",
+                    "updated_at" => "2026-07-15 17:51:54"
                 ]
             ]
         );
 
         Models\Setting::truncate();
-        Models\Setting::insert(
-            []
-        );
+		Models\Setting::insert(
+			[
 
-        Models\Extension::truncate();
-        Models\Extension::insert(
-            []
-        );
+            ]
+		);
 
-        Models\ExtensionHistory::truncate();
-        Models\ExtensionHistory::insert(
-            []
-        );
+		Models\Extension::truncate();
+		Models\Extension::insert(
+			[
+
+            ]
+		);
+
+		Models\ExtensionHistory::truncate();
+		Models\ExtensionHistory::insert(
+			[
+
+            ]
+		);
 
         // pivot tables
         DB::table('admin_permission_menu')->truncate();
-        DB::table('admin_permission_menu')->insert(
-            []
-        );
+		DB::table('admin_permission_menu')->insert(
+			[
+
+            ]
+		);
 
         DB::table('admin_role_menu')->truncate();
         DB::table('admin_role_menu')->insert(
             [
+                [
+                    "role_id" => 1,
+                    "menu_id" => 1,
+                    "created_at" => "2026-07-15 18:59:36",
+                    "updated_at" => "2026-07-15 18:59:36"
+                ],
+                [
+                    "role_id" => 1,
+                    "menu_id" => 2,
+                    "created_at" => "2026-07-15 18:59:48",
+                    "updated_at" => "2026-07-15 18:59:48"
+                ],
                 [
                     "role_id" => 1,
                     "menu_id" => 8,
@@ -337,33 +478,186 @@ class AdminTablesSeeder extends Seeder
                 ],
                 [
                     "role_id" => 1,
+                    "menu_id" => 12,
+                    "created_at" => "2026-07-15 18:31:47",
+                    "updated_at" => "2026-07-15 18:31:47"
+                ],
+                [
+                    "role_id" => 1,
+                    "menu_id" => 13,
+                    "created_at" => "2026-07-15 18:31:27",
+                    "updated_at" => "2026-07-15 18:31:27"
+                ],
+                [
+                    "role_id" => 1,
                     "menu_id" => 14,
                     "created_at" => "2026-06-19 05:54:44",
                     "updated_at" => "2026-06-19 05:54:44"
+                ],
+                [
+                    "role_id" => 1,
+                    "menu_id" => 15,
+                    "created_at" => "2026-07-15 18:34:23",
+                    "updated_at" => "2026-07-15 18:34:23"
+                ],
+                [
+                    "role_id" => 1,
+                    "menu_id" => 16,
+                    "created_at" => "2026-07-15 17:29:56",
+                    "updated_at" => "2026-07-15 17:29:56"
+                ],
+                [
+                    "role_id" => 2,
+                    "menu_id" => 8,
+                    "created_at" => "2026-07-15 18:28:00",
+                    "updated_at" => "2026-07-15 18:28:00"
+                ],
+                [
+                    "role_id" => 2,
+                    "menu_id" => 9,
+                    "created_at" => "2026-07-15 18:30:55",
+                    "updated_at" => "2026-07-15 18:30:55"
+                ],
+                [
+                    "role_id" => 2,
+                    "menu_id" => 10,
+                    "created_at" => "2026-07-15 18:31:14",
+                    "updated_at" => "2026-07-15 18:31:14"
+                ],
+                [
+                    "role_id" => 2,
+                    "menu_id" => 11,
+                    "created_at" => "2026-07-15 18:31:37",
+                    "updated_at" => "2026-07-15 18:31:37"
+                ],
+                [
+                    "role_id" => 2,
+                    "menu_id" => 12,
+                    "created_at" => "2026-07-15 18:31:47",
+                    "updated_at" => "2026-07-15 18:31:47"
+                ],
+                [
+                    "role_id" => 2,
+                    "menu_id" => 13,
+                    "created_at" => "2026-07-15 18:31:27",
+                    "updated_at" => "2026-07-15 18:31:27"
+                ],
+                [
+                    "role_id" => 2,
+                    "menu_id" => 14,
+                    "created_at" => "2026-07-15 18:31:59",
+                    "updated_at" => "2026-07-15 18:31:59"
+                ],
+                [
+                    "role_id" => 2,
+                    "menu_id" => 15,
+                    "created_at" => "2026-07-15 18:34:23",
+                    "updated_at" => "2026-07-15 18:34:23"
+                ],
+                [
+                    "role_id" => 2,
+                    "menu_id" => 16,
+                    "created_at" => "2026-07-15 18:32:30",
+                    "updated_at" => "2026-07-15 18:32:30"
+                ],
+                [
+                    "role_id" => 3,
+                    "menu_id" => 10,
+                    "created_at" => "2026-07-15 18:31:14",
+                    "updated_at" => "2026-07-15 18:31:14"
+                ],
+                [
+                    "role_id" => 3,
+                    "menu_id" => 15,
+                    "created_at" => "2026-07-15 18:34:23",
+                    "updated_at" => "2026-07-15 18:34:23"
+                ],
+                [
+                    "role_id" => 4,
+                    "menu_id" => 15,
+                    "created_at" => "2026-07-15 18:34:23",
+                    "updated_at" => "2026-07-15 18:34:23"
                 ]
             ]
         );
 
         DB::table('admin_role_permissions')->truncate();
         DB::table('admin_role_permissions')->insert(
-            []
-        );
-        Models\Administrator::truncate();
-
-        Models\Administrator::create([
-            'id' => 1,
-            'username' => 'admin',
-            'password' => bcrypt('admin'),
-            'name' => 'Administrator',
-        ]);
-        DB::table('admin_role_users')->truncate();
-
-        DB::table('admin_role_users')->insert([
             [
-                'role_id' => 1,
-                'user_id' => 1,
+                [
+                    "role_id" => 2,
+                    "permission_id" => 7,
+                    "created_at" => "2026-07-15 18:00:06",
+                    "updated_at" => "2026-07-15 18:00:06"
+                ],
+                [
+                    "role_id" => 2,
+                    "permission_id" => 8,
+                    "created_at" => "2026-07-15 18:00:06",
+                    "updated_at" => "2026-07-15 18:00:06"
+                ],
+                [
+                    "role_id" => 2,
+                    "permission_id" => 9,
+                    "created_at" => "2026-07-15 18:00:06",
+                    "updated_at" => "2026-07-15 18:00:06"
+                ],
+                [
+                    "role_id" => 2,
+                    "permission_id" => 10,
+                    "created_at" => "2026-07-15 18:00:06",
+                    "updated_at" => "2026-07-15 18:00:06"
+                ],
+                [
+                    "role_id" => 2,
+                    "permission_id" => 11,
+                    "created_at" => "2026-07-15 18:00:06",
+                    "updated_at" => "2026-07-15 18:00:06"
+                ],
+                [
+                    "role_id" => 2,
+                    "permission_id" => 12,
+                    "created_at" => "2026-07-15 18:00:06",
+                    "updated_at" => "2026-07-15 18:00:06"
+                ],
+                [
+                    "role_id" => 2,
+                    "permission_id" => 14,
+                    "created_at" => "2026-07-15 18:00:06",
+                    "updated_at" => "2026-07-15 18:00:06"
+                ],
+                [
+                    "role_id" => 3,
+                    "permission_id" => 9,
+                    "created_at" => "2026-07-15 18:00:42",
+                    "updated_at" => "2026-07-15 18:00:42"
+                ],
+                [
+                    "role_id" => 3,
+                    "permission_id" => 10,
+                    "created_at" => "2026-07-15 18:00:42",
+                    "updated_at" => "2026-07-15 18:00:42"
+                ],
+                [
+                    "role_id" => 3,
+                    "permission_id" => 13,
+                    "created_at" => "2026-07-15 18:00:42",
+                    "updated_at" => "2026-07-15 18:00:42"
+                ],
+                [
+                    "role_id" => 4,
+                    "permission_id" => 10,
+                    "created_at" => "2026-07-15 18:01:01",
+                    "updated_at" => "2026-07-15 18:01:01"
+                ],
+                [
+                    "role_id" => 4,
+                    "permission_id" => 13,
+                    "created_at" => "2026-07-15 18:01:01",
+                    "updated_at" => "2026-07-15 18:01:01"
+                ]
             ]
-        ]);
+        );
 
         // finish
     }

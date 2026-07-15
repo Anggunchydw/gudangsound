@@ -1,3 +1,7 @@
+@php
+    $user = auth('admin')->user();
+    $canManage = $user->isRole('administrator') || $user->isRole('pemilik');
+@endphp
 <div class="mb-3">
 
     <a href="{{ admin_url('penyewaan') }}" class="btn btn-secondary">
@@ -12,12 +16,14 @@
 
     </a>
 
-    <a href="{{ admin_url('penyewaan/' . $penyewaan->id . '/edit') }}" class="btn btn-warning">
+    @if ($canManage)
+        <a href="{{ admin_url('penyewaan/' . $penyewaan->id . '/edit') }}" class="btn btn-warning">
 
-        <i class="feather icon-edit"></i>
-        Edit
+            <i class="feather icon-edit"></i>
+            Edit
 
-    </a>
+        </a>
+    @endif
 
 </div>
 <div class="card">
@@ -102,7 +108,7 @@
 
         </p>
 
-        @if ($penyewaan->status_pembayaran != 'Lunas')
+        @if ($canManage && $penyewaan->status_pembayaran != 'Lunas')
             <hr>
 
             <form method="POST" action="{{ admin_url('penyewaan/' . $penyewaan->id . '/pembayaran') }}">
