@@ -2,19 +2,27 @@
 
 namespace App\Admin\Controllers;
 
-
+use Dcat\Admin\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Barang;
 use App\Models\Pemasukan;
 use App\Models\Penyewaan;
-use Dcat\Admin\Layout\Column;
 use Dcat\Admin\Layout\Content;
-use Dcat\Admin\Layout\Row;
+
 
 class HomeController extends Controller
 {
     public function index(Content $content)
     {
+        $user = Admin::user();
+
+        if (
+            ! $user->isRole('administrator') &&
+            ! $user->isRole('pemilik')
+        ) {
+            return redirect(admin_url('Jadwal-Acara'));
+        }
+        
         $totalPenyewaan = Penyewaan::count();
 
         $stokBarang = Barang::all()->sum(function ($barang) {
