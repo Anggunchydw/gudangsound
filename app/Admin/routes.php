@@ -10,6 +10,7 @@ use App\Admin\Controllers\PemasukanController;
 use App\Admin\Controllers\PengeluaranController;
 use App\Admin\Controllers\RekapKeuanganController;
 use App\Admin\Controllers\PenggunaController;
+use App\Admin\Controllers\PenugasanController;
 
 Admin::routes();
 
@@ -26,6 +27,7 @@ Route::group([
     $router->resource('pemasukan', PemasukanController::class);
     $router->resource('pengeluaran', PengeluaranController::class);
     $router->resource('pengguna', PenggunaController::class);
+    $router->resource('penugasan', PenugasanController::class);
     Route::get(
         'penyewaan/{id}/cancel',
         [PenyewaanController::class, 'cancel']

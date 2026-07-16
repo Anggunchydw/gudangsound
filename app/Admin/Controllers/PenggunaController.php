@@ -7,7 +7,7 @@ use Dcat\Admin\Admin;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Http\Controllers\AdminController;
-use Dcat\Admin\Models\Administrator;
+use App\Models\Administrator;
 use Dcat\Admin\Models\Role;
 
 class PenggunaController extends AdminController

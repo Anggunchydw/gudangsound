@@ -18,16 +18,13 @@ class JadwalAcaraController extends AdminController
         // CSS milik sendiri
         Admin::css(asset('css/jadwal-acara.css'));
 
-        $totalAcara = Penyewaan::whereMonth(
-            'tanggal_mulai',
-            now()->month
-        )->count();
+        $totalAcara = Penyewaan::whereMonth('tanggal_mulai', now()->month)
+            ->where('status_penyewaan', '<>', 'dibatalkan')
+            ->count();
 
-        $belumLunas = Penyewaan::whereMonth(
-            'tanggal_mulai',
-            now()->month
-        )
+        $belumLunas = Penyewaan::whereMonth('tanggal_mulai', now()->month)
             ->where('status_pembayaran', 'DP')
+            ->where('status_penyewaan', '<>', 'dibatalkan')
             ->count();
 
         $agendaHariIni = Penyewaan::with([
@@ -35,6 +32,7 @@ class JadwalAcaraController extends AdminController
             'detailBarang.barang'
         ])
             ->whereDate('tanggal_mulai', today())
+            ->where('status_penyewaan', '<>', 'dibatalkan')
             ->get();
 
         $akanDatang = Penyewaan::with([
@@ -42,6 +40,7 @@ class JadwalAcaraController extends AdminController
             'detailBarang.barang'
         ])
             ->where('tanggal_mulai', '>', today())
+            ->where('status_penyewaan', '<>', 'dibatalkan')
             ->orderBy('tanggal_mulai')
             ->take(5)
             ->get();
@@ -101,80 +100,79 @@ class JadwalAcaraController extends AdminController
         $events = Penyewaan::with([
             'detailPaket.paket',
             'detailBarang.barang'
-        ])->get()->map(function ($item) {
+        ])
+            ->where('status_penyewaan', '<>', 'dibatalkan')
+            ->get()
+            ->map(function ($item) {
 
-            if ($item->status_penyewaan == 'dibatalkan') {
-                $color = '#dc3545';
-            } elseif ($item->status_pembayaran == 'Lunas') {
-                $color = '#16a34a';
-            } else {
-                $color = '#f59e0b';
-            }
-            $paket = [];
+                $color = $item->status_pembayaran == 'Lunas'
+                    ? '#16a34a'
+                    : '#f59e0b';
+                $paket = [];
 
-            foreach ($item->detailPaket as $detail) {
+                foreach ($item->detailPaket as $detail) {
 
-                if ($detail->paket) {
+                    if ($detail->paket) {
 
-                    $paket[] =
-                        '•' .
-                        $detail->paket->nama_paket .
-                        ' (x' .
-                        $detail->jumlah_paket .
-                        ')';
+                        $paket[] =
+                            '•' .
+                            $detail->paket->nama_paket .
+                            ' (x' .
+                            $detail->jumlah_paket .
+                            ')';
+                    }
                 }
-            }
 
-            foreach ($item->detailBarang as $detail) {
+                foreach ($item->detailBarang as $detail) {
 
-                if ($detail->barang) {
+                    if ($detail->barang) {
 
-                    $paket[] =
-                        '• ' .
-                        $detail->barang->nama_barang .
-                        ' (x' .
-                        $detail->jumlah_barang .
-                        ')';
+                        $paket[] =
+                            '• ' .
+                            $detail->barang->nama_barang .
+                            ' (x' .
+                            $detail->jumlah_barang .
+                            ')';
+                    }
                 }
-            }
 
-            return [
+                return [
 
-                'id'    => $item->id,
+                    'id'    => $item->id,
 
-                'title' => $item->nama_penyewa,
+                    'title' => $item->nama_penyewa,
 
-                'start' => $item->tanggal_mulai,
+                    'start' => $item->tanggal_mulai,
 
-                /*
+                    /*
              FullCalendar menganggap end exclusive,
              sehingga harus ditambah 1 hari
             */
-                'end'   => date(
-                    'Y-m-d',
-                    strtotime($item->tanggal_selesai . ' +1 day')
-                ),
+                    'end'   => date(
+                        'Y-m-d',
+                        strtotime($item->tanggal_selesai . ' +1 day')
+                    ),
 
-                'backgroundColor' => $color,
+                    'backgroundColor' => $color,
 
-                'borderColor' => $color,
-                // Data tambahan
-                'extendedProps' => [
+                    'borderColor' => $color,
+                    // Data tambahan
+                    'extendedProps' => [
 
-                    'lokasi' => $item->lokasi,
+                        'lokasi' => $item->lokasi,
 
-                    'status' => $item->status_pembayaran,
+                        'status' => $item->status_pembayaran,
 
-                    'mulai' => $item->tanggal_mulai,
+                        'mulai' => $item->tanggal_mulai,
 
-                    'selesai' => $item->tanggal_selesai,
+                        'selesai' => $item->tanggal_selesai,
 
-                    'paket' => implode('<br>', $paket),
+                        'paket' => implode('<br>', $paket),
 
-                ],
+                    ],
 
-            ];
-        });
+                ];
+            });
 
         return response()->json($events);
     }
