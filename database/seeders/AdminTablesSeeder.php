@@ -22,110 +22,110 @@ class AdminTablesSeeder extends Seeder
                 [
                     "id" => 1,
                     "parent_id" => 0,
-                    "order" => 10,
+                    "order" => 12,
                     "title" => "Index",
                     "icon" => "feather icon-bar-chart-2",
                     "uri" => "/",
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:33:02",
-                    "updated_at" => "2026-07-15 17:30:12"
+                    "updated_at" => "2026-07-17 06:34:25"
                 ],
                 [
                     "id" => 2,
                     "parent_id" => 0,
-                    "order" => 11,
+                    "order" => 13,
                     "title" => "Admin",
                     "icon" => "feather icon-settings",
                     "uri" => NULL,
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:33:02",
-                    "updated_at" => "2026-07-15 18:59:48"
+                    "updated_at" => "2026-07-17 06:34:25"
                 ],
                 [
                     "id" => 3,
                     "parent_id" => 2,
-                    "order" => 12,
+                    "order" => 14,
                     "title" => "Users",
                     "icon" => "",
                     "uri" => "auth/users",
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:33:02",
-                    "updated_at" => "2026-07-15 17:30:12"
+                    "updated_at" => "2026-07-17 06:34:25"
                 ],
                 [
                     "id" => 4,
                     "parent_id" => 2,
-                    "order" => 13,
+                    "order" => 15,
                     "title" => "Roles",
                     "icon" => "",
                     "uri" => "auth/roles",
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:33:02",
-                    "updated_at" => "2026-07-15 17:30:12"
+                    "updated_at" => "2026-07-17 06:34:25"
                 ],
                 [
                     "id" => 5,
                     "parent_id" => 2,
-                    "order" => 14,
+                    "order" => 16,
                     "title" => "Permission",
                     "icon" => "",
                     "uri" => "auth/permissions",
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:33:02",
-                    "updated_at" => "2026-07-15 17:30:12"
+                    "updated_at" => "2026-07-17 06:34:25"
                 ],
                 [
                     "id" => 6,
                     "parent_id" => 2,
-                    "order" => 15,
+                    "order" => 17,
                     "title" => "Menu",
                     "icon" => "",
                     "uri" => "auth/menu",
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:33:02",
-                    "updated_at" => "2026-07-15 17:30:12"
+                    "updated_at" => "2026-07-17 06:34:25"
                 ],
                 [
                     "id" => 7,
                     "parent_id" => 2,
-                    "order" => 16,
+                    "order" => 18,
                     "title" => "Extensions",
                     "icon" => "",
                     "uri" => "auth/extensions",
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:33:02",
-                    "updated_at" => "2026-07-15 17:30:12"
+                    "updated_at" => "2026-07-17 06:34:25"
                 ],
                 [
                     "id" => 8,
                     "parent_id" => 0,
                     "order" => 1,
                     "title" => "Barang",
-                    "icon" => "fa-inbox",
+                    "icon" => "fa-cube",
                     "uri" => "/barang",
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:40:03",
-                    "updated_at" => "2026-06-19 05:43:43"
+                    "updated_at" => "2026-07-17 06:30:16"
                 ],
                 [
                     "id" => 9,
                     "parent_id" => 0,
                     "order" => 2,
                     "title" => "Paket",
-                    "icon" => "fa-dropbox",
+                    "icon" => "fa-cubes",
                     "uri" => "/paket",
                     "extension" => "",
                     "show" => 1,
                     "created_at" => "2026-06-19 05:43:30",
-                    "updated_at" => "2026-06-19 05:43:43"
+                    "updated_at" => "2026-07-17 06:30:30"
                 ],
                 [
                     "id" => 10,
@@ -210,6 +210,30 @@ class AdminTablesSeeder extends Seeder
                     "show" => 1,
                     "created_at" => "2026-07-15 17:29:56",
                     "updated_at" => "2026-07-15 21:28:49"
+                ],
+                [
+                    "id" => 17,
+                    "parent_id" => 0,
+                    "order" => 10,
+                    "title" => "Penugasan",
+                    "icon" => "fa-calendar-plus-o",
+                    "uri" => "/penugasan",
+                    "extension" => "",
+                    "show" => 1,
+                    "created_at" => "2026-07-16 15:40:27",
+                    "updated_at" => "2026-07-16 15:40:42"
+                ],
+                [
+                    "id" => 18,
+                    "parent_id" => 0,
+                    "order" => 11,
+                    "title" => "Kondisi Barang",
+                    "icon" => "fa-cog",
+                    "uri" => "/kondisi-barang",
+                    "extension" => "",
+                    "show" => 1,
+                    "created_at" => "2026-07-17 06:33:57",
+                    "updated_at" => "2026-07-17 06:34:25"
                 ]
             ]
         );
@@ -354,11 +378,11 @@ class AdminTablesSeeder extends Seeder
                     "name" => "Penugasan",
                     "slug" => "penugasan",
                     "http_method" => "",
-                    "http_path" => "",
+                    "http_path" => "/penugasan*",
                     "order" => 13,
                     "parent_id" => 0,
                     "created_at" => "2026-07-15 17:49:27",
-                    "updated_at" => "2026-07-15 17:49:27"
+                    "updated_at" => "2026-07-17 05:42:41"
                 ],
                 [
                     "id" => 14,
@@ -370,6 +394,17 @@ class AdminTablesSeeder extends Seeder
                     "parent_id" => 0,
                     "created_at" => "2026-07-15 17:57:38",
                     "updated_at" => "2026-07-15 17:57:38"
+                ],
+                [
+                    "id" => 15,
+                    "name" => "kondisi barang",
+                    "slug" => "kondisi barang",
+                    "http_method" => "",
+                    "http_path" => "/kondisi-barang*",
+                    "order" => 15,
+                    "parent_id" => 0,
+                    "created_at" => "2026-07-17 08:01:42",
+                    "updated_at" => "2026-07-17 08:01:42"
                 ]
             ]
         );
@@ -507,6 +542,18 @@ class AdminTablesSeeder extends Seeder
                     "updated_at" => "2026-07-15 17:29:56"
                 ],
                 [
+                    "role_id" => 1,
+                    "menu_id" => 17,
+                    "created_at" => "2026-07-16 15:40:27",
+                    "updated_at" => "2026-07-16 15:40:27"
+                ],
+                [
+                    "role_id" => 1,
+                    "menu_id" => 18,
+                    "created_at" => "2026-07-17 06:33:57",
+                    "updated_at" => "2026-07-17 06:33:57"
+                ],
+                [
                     "role_id" => 2,
                     "menu_id" => 8,
                     "created_at" => "2026-07-15 18:28:00",
@@ -561,6 +608,12 @@ class AdminTablesSeeder extends Seeder
                     "updated_at" => "2026-07-15 18:32:30"
                 ],
                 [
+                    "role_id" => 2,
+                    "menu_id" => 18,
+                    "created_at" => "2026-07-17 06:33:57",
+                    "updated_at" => "2026-07-17 06:33:57"
+                ],
+                [
                     "role_id" => 3,
                     "menu_id" => 10,
                     "created_at" => "2026-07-15 18:31:14",
@@ -573,10 +626,28 @@ class AdminTablesSeeder extends Seeder
                     "updated_at" => "2026-07-15 18:34:23"
                 ],
                 [
+                    "role_id" => 3,
+                    "menu_id" => 17,
+                    "created_at" => "2026-07-16 15:40:27",
+                    "updated_at" => "2026-07-16 15:40:27"
+                ],
+                [
                     "role_id" => 4,
                     "menu_id" => 15,
                     "created_at" => "2026-07-15 18:34:23",
                     "updated_at" => "2026-07-15 18:34:23"
+                ],
+                [
+                    "role_id" => 4,
+                    "menu_id" => 17,
+                    "created_at" => "2026-07-17 06:16:57",
+                    "updated_at" => "2026-07-17 06:16:57"
+                ],
+                [
+                    "role_id" => 4,
+                    "menu_id" => 18,
+                    "created_at" => "2026-07-17 06:33:57",
+                    "updated_at" => "2026-07-17 06:33:57"
                 ]
             ]
         );
@@ -655,6 +726,12 @@ class AdminTablesSeeder extends Seeder
                     "permission_id" => 13,
                     "created_at" => "2026-07-15 18:01:01",
                     "updated_at" => "2026-07-15 18:01:01"
+                ],
+                [
+                    "role_id" => 4,
+                    "permission_id" => 15,
+                    "created_at" => "2026-07-17 08:02:23",
+                    "updated_at" => "2026-07-17 08:02:23"
                 ]
             ]
         );

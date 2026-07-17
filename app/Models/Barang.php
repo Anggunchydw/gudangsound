@@ -21,4 +21,11 @@ class Barang extends Model
     {
         return $this->jumlah_total - $this->stok_hari_ini;
     }
+    public function kondisiBarang()
+{
+    return $this->hasMany(
+        KondisiBarang::class,
+        'barang_id'
+    );
+}
 }

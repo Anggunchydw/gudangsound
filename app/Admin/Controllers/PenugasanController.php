@@ -5,6 +5,7 @@ namespace App\Admin\Controllers;
 use App\Models\Administrator;
 use App\Models\Penugasan;
 use App\Models\Penyewaan;
+use Dcat\Admin\Admin;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Models\Role;
@@ -13,12 +14,31 @@ use Dcat\Admin\Http\Controllers\AdminController;
 
 class PenugasanController extends AdminController
 {
+    /**
+     * Hanya Administrator & Admin Operasional
+     */
+    protected function authorizeManage()
+    {
+        $user = Admin::user();
+
+        if (
+            ! $user->isRole('administrator') &&
+            ! $user->isRole('admin')
+        ) {
+            abort(403);
+        }
+    }
+
     protected function grid()
     {
         return Grid::make(new Penugasan(), function (Grid $grid) {
 
-            $grid->model()
-                ->with(['penyewaan', 'pegawai']);
+            $user = Admin::user();
+
+            $grid->model()->with([
+                'penyewaan',
+                'pegawai'
+            ]);
 
             $grid->column('id')->sortable();
 
@@ -38,17 +58,28 @@ class PenugasanController extends AdminController
                     return date('d-m-Y', strtotime($value));
                 });
 
-            $grid->disableViewButton();
+            // Pegawai hanya melihat
+            if (
+                ! $user->isRole('administrator') &&
+                ! $user->isRole('admin')
+            ) {
+
+                $grid->disableCreateButton();
+                $grid->disableActions();
+            }
 
             $grid->filter(function (Grid\Filter $filter) {
 
-                $filter->like('penyewaan.nama_penyewa');
+                $filter->like('penyewaan.nama_penyewa', 'Nama Penyewa');
 
-                $filter->like('tim');
+                $filter->like('tim', 'Nama Tim');
             });
         });
     }
 
+    /**
+     * DETAIL
+     */
     protected function detail($id)
     {
         return Show::make($id, new Penugasan(), function (Show $show) {
@@ -57,14 +88,20 @@ class PenugasanController extends AdminController
 
             $show->field('penyewaan.nama_penyewa', 'Nama Penyewa');
 
-            $show->field('tim');
+            $show->field('tim', 'Nama Tim');
 
-            $show->field('created_at');
+            $show->field('created_at', 'Tanggal Dibuat');
         });
     }
 
+    /**
+     * FORM
+     */
     protected function form()
     {
+        // hanya admin & administrator
+        $this->authorizeManage();
+
         return Form::make(new Penugasan(), function (Form $form) {
 
             $form->display('id');
@@ -72,22 +109,32 @@ class PenugasanController extends AdminController
             $form->select('penyewaan_id', 'Penyewaan')
                 ->options(
 
-                    Penyewaan::whereIn('status_penyewaan', [
-                        'booking',
-                        'berlangsung'
-                    ])
+                    Penyewaan::where('status_penyewaan', '<>', 'dibatalkan')
                         ->whereDoesntHave('penugasan')
                         ->orderBy('tanggal_mulai')
                         ->get()
                         ->mapWithKeys(function ($item) {
 
+                            $label = '';
+
+                            if ($item->tanggal_mulai < today()) {
+
+                                $label = '⚠ TERLEWAT | ';
+                            } elseif ($item->tanggal_mulai == today()) {
+
+                                $label = '🔥 HARI INI | ';
+                            }
+
                             return [
+
                                 $item->id =>
-                                $item->nama_penyewa
-                                    . ' | '
-                                    . date('d-m-Y', strtotime($item->tanggal_mulai))
-                                    . ' | '
-                                    . $item->lokasi
+                                $label .
+                                    $item->nama_penyewa .
+                                    ' | ' .
+                                    date('d-m-Y', strtotime($item->tanggal_mulai)) .
+                                    ' | ' .
+                                    $item->lokasi
+
                             ];
                         })
 
@@ -121,7 +168,9 @@ class PenugasanController extends AdminController
 
                 $pegawai = request('pegawai', []);
 
-                $form->model()->pegawai()->sync($pegawai);
+                $form->model()
+                    ->pegawai()
+                    ->sync($pegawai);
             });
         });
     }

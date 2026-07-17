@@ -11,6 +11,7 @@ use App\Admin\Controllers\PengeluaranController;
 use App\Admin\Controllers\RekapKeuanganController;
 use App\Admin\Controllers\PenggunaController;
 use App\Admin\Controllers\PenugasanController;
+use App\Admin\Controllers\KondisiBarangController;
 
 Admin::routes();
 
@@ -28,6 +29,7 @@ Route::group([
     $router->resource('pengeluaran', PengeluaranController::class);
     $router->resource('pengguna', PenggunaController::class);
     $router->resource('penugasan', PenugasanController::class);
+
     Route::get(
         'penyewaan/{id}/cancel',
         [PenyewaanController::class, 'cancel']
@@ -56,5 +58,19 @@ Route::group([
     $router->get(
         'Jadwal-Acara/events',
         'JadwalAcaraController@events'
+    );
+    $router->get(
+        'kondisi-barang',
+        'KondisiBarangController@index'
+    );
+
+    $router->get(
+        'kondisi-barang/{penugasan}/input',
+        'KondisiBarangController@input'
+    );
+
+    $router->post(
+        'kondisi-barang/{penugasan}/simpan',
+        'KondisiBarangController@simpan'
     );
 });

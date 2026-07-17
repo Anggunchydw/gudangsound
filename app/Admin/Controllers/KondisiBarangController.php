@@ -2,73 +2,183 @@
 
 namespace App\Admin\Controllers;
 
-use App\Admin\Repositories\KondisiBarang;
-use Dcat\Admin\Form;
-use Dcat\Admin\Grid;
-use Dcat\Admin\Show;
+use Illuminate\Http\Request;
+use App\Models\Penugasan;
+use Dcat\Admin\Layout\Content;
+use App\Models\KondisiBarang;
 use Dcat\Admin\Http\Controllers\AdminController;
 
 class KondisiBarangController extends AdminController
 {
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
-    protected function grid()
+    public function index(Content $content)
     {
-        return Grid::make(new KondisiBarang(), function (Grid $grid) {
-            $grid->column('id')->sortable();
-            $grid->column('detail_penyewaan_id');
-            $grid->column('kondisi_sebelum');
-            $grid->column('kondisi_sesudah');
-            $grid->column('catatan');
-            $grid->column('created_at');
-            $grid->column('updated_at')->sortable();
-        
-            $grid->filter(function (Grid\Filter $filter) {
-                $filter->equal('id');
-        
-            });
-        });
+        $pegawai = auth('admin')->user();
+
+        $penugasan = Penugasan::with('penyewaan')
+            ->whereHas('pegawai', function ($q) use ($pegawai) {
+                $q->where('admin_users.id', $pegawai->id);
+            })
+            ->get();
+
+        return $content
+            ->title('Kondisi Barang')
+            ->body(view(
+                'admin.kondisi.daftar-penugasan',
+                compact('penugasan')
+            ));
     }
 
-    /**
-     * Make a show builder.
-     *
-     * @param mixed $id
-     *
-     * @return Show
-     */
-    protected function detail($id)
+    public function input(Penugasan $penugasan, Content $content)
     {
-        return Show::make($id, new KondisiBarang(), function (Show $show) {
-            $show->field('id');
-            $show->field('detail_penyewaan_id');
-            $show->field('kondisi_sebelum');
-            $show->field('kondisi_sesudah');
-            $show->field('catatan');
-            $show->field('created_at');
-            $show->field('updated_at');
-        });
+        $penugasan->load([
+            'penyewaan.detailBarang.barang',
+            'penyewaan.detailPaket.paket.detail.barang',
+            'kondisiBarang'
+        ]);
+
+        $barang = [];
+
+        /*
+    |--------------------------------------------------------------------------
+    | Barang langsung
+    |--------------------------------------------------------------------------
+    */
+
+        foreach ($penugasan->penyewaan->detailBarang as $detail) {
+
+            if (!$detail->barang) {
+                continue;
+            }
+
+            $id = $detail->barang->id;
+
+            if (!isset($barang[$id])) {
+
+                $barang[$id] = [
+                    'id' => $id,
+                    'nama' => $detail->barang->nama_barang,
+                    'jumlah' => 0,
+                ];
+            }
+
+            $barang[$id]['jumlah'] += $detail->jumlah_barang;
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Barang dari paket
+    |--------------------------------------------------------------------------
+    */
+
+        foreach ($penugasan->penyewaan->detailPaket as $paket) {
+
+            if (!$paket->paket) {
+                continue;
+            }
+
+            foreach ($paket->paket->detail as $detail) {
+
+                if (!$detail->barang) {
+                    continue;
+                }
+
+                $id = $detail->barang->id;
+
+                if (!isset($barang[$id])) {
+
+                    $barang[$id] = [
+                        'id' => $id,
+                        'nama' => $detail->barang->nama_barang,
+                        'jumlah' => 0,
+                    ];
+                }
+
+                $barang[$id]['jumlah'] +=
+                    $detail->jumlah * $paket->jumlah_paket;
+            }
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Ambil data kondisi yang sudah pernah disimpan
+    |--------------------------------------------------------------------------
+    */
+
+        $kondisi = $penugasan
+            ->kondisiBarang
+            ->keyBy('barang_id');
+
+        /*
+    |--------------------------------------------------------------------------
+    | Gabungkan dengan daftar barang
+    |--------------------------------------------------------------------------
+    */
+
+        foreach ($barang as &$item) {
+
+            if (isset($kondisi[$item['id']])) {
+
+                $item['kondisi_sebelum'] =
+                    $kondisi[$item['id']]->kondisi_sebelum;
+
+                $item['kondisi_sesudah'] =
+                    $kondisi[$item['id']]->kondisi_sesudah;
+
+                $item['catatan'] =
+                    $kondisi[$item['id']]->catatan;
+            } else {
+
+                $item['kondisi_sebelum'] = null;
+                $item['kondisi_sesudah'] = null;
+                $item['catatan'] = null;
+            }
+        }
+
+        unset($item);
+
+        return $content
+            ->title('Input Kondisi Barang')
+            ->body(
+                view(
+                    'admin.kondisi.input-kondisi',
+                    [
+                        'penugasan' => $penugasan,
+                        'barang' => collect($barang)->values(),
+                    ]
+                )
+            );
     }
 
-    /**
-     * Make a form builder.
-     *
-     * @return Form
-     */
-    protected function form()
+    public function simpan(Request $request, Penugasan $penugasan)
     {
-        return Form::make(new KondisiBarang(), function (Form $form) {
-            $form->display('id');
-            $form->text('detail_penyewaan_id');
-            $form->text('kondisi_sebelum');
-            $form->text('kondisi_sesudah');
-            $form->text('catatan');
-        
-            $form->display('created_at');
-            $form->display('updated_at');
-        });
+        foreach ($request->barang as $item) {
+
+            KondisiBarang::updateOrCreate(
+
+                [
+                    'penugasan_id' => $penugasan->id,
+                    'barang_id'    => $item['barang_id']
+                ],
+
+                [
+                    'jumlah_barang'     => $item['jumlah_barang'],
+
+                    'kondisi_sebelum'   => $item['kondisi_sebelum'] ?? null,
+
+                    'kondisi_sesudah'   => $item['kondisi_sesudah'] ?? null,
+
+                    'catatan'           => $item['catatan'] ?? null,
+                ]
+            );
+        }
+
+        admin_success(
+            'Berhasil',
+            'Data kondisi barang berhasil disimpan.'
+        );
+
+        return redirect(
+            admin_url('kondisi-barang')
+        );
     }
 }

@@ -99,7 +99,8 @@ class JadwalAcaraController extends AdminController
     {
         $events = Penyewaan::with([
             'detailPaket.paket',
-            'detailBarang.barang'
+            'detailBarang.barang',
+            'penugasan.pegawai'
         ])
             ->where('status_penyewaan', '<>', 'dibatalkan')
             ->get()
@@ -135,6 +136,17 @@ class JadwalAcaraController extends AdminController
                             ')';
                     }
                 }
+                $pegawai = [];
+
+                foreach ($item->penugasan as $penugasan) {
+
+                    foreach ($penugasan->pegawai as $user) {
+
+                        $pegawai[] = $user->name;
+                    }
+                }
+
+                $pegawai = implode(', ', array_unique($pegawai));
 
                 return [
 
@@ -144,10 +156,6 @@ class JadwalAcaraController extends AdminController
 
                     'start' => $item->tanggal_mulai,
 
-                    /*
-             FullCalendar menganggap end exclusive,
-             sehingga harus ditambah 1 hari
-            */
                     'end'   => date(
                         'Y-m-d',
                         strtotime($item->tanggal_selesai . ' +1 day')
@@ -160,15 +168,11 @@ class JadwalAcaraController extends AdminController
                     'extendedProps' => [
 
                         'lokasi' => $item->lokasi,
-
                         'status' => $item->status_pembayaran,
-
                         'mulai' => $item->tanggal_mulai,
-
                         'selesai' => $item->tanggal_selesai,
-
                         'paket' => implode('<br>', $paket),
-
+                        'pegawai'=> $pegawai,
                     ],
 
                 ];

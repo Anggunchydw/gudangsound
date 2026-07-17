@@ -35,4 +35,11 @@ class Penugasan extends Model
             'user_id'
         );
     }
+    public function kondisiBarang()
+    {
+        return $this->hasMany(
+            KondisiBarang::class,
+            'penugasan_id'
+        );
+    }
 }

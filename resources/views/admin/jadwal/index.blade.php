@@ -382,7 +382,7 @@
                     data.extendedProps.paket ?? '-'
                 );
 
-                $('#m-pegawai').html('-');
+                $('#m-pegawai').html(data.extendedProps.pegawai || '-');
 
                 $('#eventModal').modal('show');
 
