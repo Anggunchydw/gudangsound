@@ -6,20 +6,69 @@ use Illuminate\Http\Request;
 use App\Models\Penugasan;
 use Dcat\Admin\Layout\Content;
 use App\Models\KondisiBarang;
+use App\Models\Barang;
 use Dcat\Admin\Http\Controllers\AdminController;
 
 class KondisiBarangController extends AdminController
 {
+
     public function index(Content $content)
     {
         $pegawai = auth('admin')->user();
 
-        $penugasan = Penugasan::with('penyewaan')
+        $penugasan = Penugasan::with([
+            'penyewaan.detailBarang',
+            'penyewaan.detailPaket.paket.detail',
+            'kondisiBarang'
+        ])
             ->whereHas('pegawai', function ($q) use ($pegawai) {
                 $q->where('admin_users.id', $pegawai->id);
             })
             ->get();
 
+        foreach ($penugasan as $item) {
+
+            // hitung jumlah barang yang seharusnya diinput
+            $barang = [];
+
+            foreach ($item->penyewaan->detailBarang as $detail) {
+
+                $barang[$detail->barang_id] = true;
+            }
+
+            foreach ($item->penyewaan->detailPaket as $paket) {
+
+                if (!$paket->paket) {
+                    continue;
+                }
+
+                foreach ($paket->paket->detail as $detail) {
+                    $barang[$detail->barang_id] = true;
+                }
+            }
+
+            $totalBarang = count($barang);
+
+            $totalInput = $item->kondisiBarang->count();
+
+            $belumLengkap = $item->kondisiBarang
+                ->filter(function ($k) {
+                    return empty($k->kondisi_sebelum)
+                        || empty($k->kondisi_sesudah);
+                })
+                ->count();
+
+            if ($totalInput == 0) {
+
+                $item->status_input = 'belum';
+            } elseif ($totalInput < $totalBarang || $belumLengkap > 0) {
+
+                $item->status_input = 'belum_lengkap';
+            } else {
+
+                $item->status_input = 'lengkap';
+            }
+        }
         return $content
             ->title('Kondisi Barang')
             ->body(view(
@@ -151,25 +200,80 @@ class KondisiBarangController extends AdminController
 
     public function simpan(Request $request, Penugasan $penugasan)
     {
+        // Jumlah barang yang memang harus diinput
+        $totalBarang = count($request->barang);
+
         foreach ($request->barang as $item) {
 
-            KondisiBarang::updateOrCreate(
+            $barang = Barang::findOrFail($item['barang_id']);
 
+            /*
+        |------------------------------------------------------------
+        | Ambil kondisi lama
+        |------------------------------------------------------------
+        */
+
+            $kondisiSebelumnya = KondisiBarang::where(
+                'penugasan_id',
+                $penugasan->id
+            )
+                ->where('barang_id', $item['barang_id'])
+                ->value('kondisi_sesudah');
+
+            /*
+        |------------------------------------------------------------
+        | Simpan / Update kondisi
+        |------------------------------------------------------------
+        */
+
+            KondisiBarang::updateOrCreate(
                 [
                     'penugasan_id' => $penugasan->id,
-                    'barang_id'    => $item['barang_id']
+                    'barang_id'    => $item['barang_id'],
                 ],
-
                 [
-                    'jumlah_barang'     => $item['jumlah_barang'],
-
-                    'kondisi_sebelum'   => $item['kondisi_sebelum'] ?? null,
-
-                    'kondisi_sesudah'   => $item['kondisi_sesudah'] ?? null,
-
-                    'catatan'           => $item['catatan'] ?? null,
+                    'jumlah_barang'   => $item['jumlah_barang'],
+                    'kondisi_sebelum' => $item['kondisi_sebelum'] ?? null,
+                    'kondisi_sesudah' => $item['kondisi_sesudah'] ?? null,
+                    'catatan'         => $item['catatan'] ?? null,
                 ]
             );
+
+            $kondisiBaru = $item['kondisi_sesudah'] ?? null;
+
+            /*
+        |------------------------------------------------------------
+        | Baik -> Rusak / Hilang
+        |------------------------------------------------------------
+        */
+
+            if (
+                !in_array($kondisiSebelumnya, ['rusak', 'hilang']) &&
+                in_array($kondisiBaru, ['rusak', 'hilang'])
+            ) {
+
+                $barang->decrement(
+                    'jumlah_total',
+                    $item['jumlah_barang']
+                );
+            }
+
+            /*
+        |------------------------------------------------------------
+        | Rusak / Hilang -> Baik
+        |------------------------------------------------------------
+        */
+
+            if (
+                in_array($kondisiSebelumnya, ['rusak', 'hilang']) &&
+                $kondisiBaru == 'baik'
+            ) {
+
+                $barang->increment(
+                    'jumlah_total',
+                    $item['jumlah_barang']
+                );
+            }
         }
 
         admin_success(
@@ -177,8 +281,6 @@ class KondisiBarangController extends AdminController
             'Data kondisi barang berhasil disimpan.'
         );
 
-        return redirect(
-            admin_url('kondisi-barang')
-        );
+        return redirect(admin_url('kondisi-barang'));
     }
 }

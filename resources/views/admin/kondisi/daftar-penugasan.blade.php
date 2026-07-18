@@ -1,3 +1,26 @@
+<style>
+    .label-success {
+        background: #28a745;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+
+    .label-warning {
+        background: #ffc107;
+        color: #212529;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+
+    .label-danger {
+        background: #dc3545;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 20px;
+    }
+</style>
+
 <div class="box">
 
     <div class="box-header">
@@ -13,6 +36,7 @@
                     <th>Penyewa</th>
                     <th>Tanggal</th>
                     <th>Tim</th>
+                    <th>Status</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -32,10 +56,34 @@
 
                         <td>
 
+                            @if ($item->status_input == 'belum')
+                                <span class="label label-warning">
+                                    Belum Diinput
+                                </span>
+                            @elseif($item->status_input == 'belum_lengkap')
+                                <span class="label label-danger">
+                                    Input Belum Lengkap
+                                </span>
+                            @else
+                                <span class="label label-success">
+                                    Sudah Lengkap
+                                </span>
+                            @endif
+
+                        </td>
+
+                        <td>
+
                             <a href="{{ admin_url('kondisi-barang/' . $item->id . '/input') }}"
                                 class="btn btn-primary btn-sm">
 
-                                Input Kondisi
+                                @if ($item->status_input == 'belum')
+                                    Input Kondisi
+                                @elseif($item->status_input == 'belum_lengkap')
+                                    Lanjutkan Input
+                                @else
+                                    Lihat / Edit
+                                @endif
 
                             </a>
 
@@ -46,9 +94,11 @@
                 @empty
 
                     <tr>
-                        <td colspan="4" align="center">
+
+                        <td colspan="5" align="center">
                             Tidak ada penugasan.
                         </td>
+
                     </tr>
                 @endforelse
 

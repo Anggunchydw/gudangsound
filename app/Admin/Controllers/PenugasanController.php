@@ -52,7 +52,6 @@ class PenugasanController extends AdminController
                         ->pluck('name')
                         ->implode(', ');
                 });
-
             $grid->column('created_at', 'Tanggal Penugasan')
                 ->display(function ($value) {
                     return date('d-m-Y', strtotime($value));

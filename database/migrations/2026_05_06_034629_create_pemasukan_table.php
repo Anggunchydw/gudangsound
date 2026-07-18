@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('penyewaan_id');
 
             $table->date('tanggal_masuk');
-            $table->integer('jumlah');
+            $table->bigInteger('jumlah');
             $table->enum('jenis_pembayaran', ['DP', 'Lunas']);
             $table->string('keterangan', 100)->nullable();
             $table->timestamps();

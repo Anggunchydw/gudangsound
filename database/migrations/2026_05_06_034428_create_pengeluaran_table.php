@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('penyewaan_id')->nullable();
 
-            $table->integer('jumlah_pengeluaran');
+            $table->bigInteger('jumlah_pengeluaran');
             $table->date('tanggal_pengeluaran');
             $table->enum('kategori', ['transport', 'perbaikan', 'gaji', 'operasional', 'lainnya']);
             $table->string('keterangan', 255)->nullable();

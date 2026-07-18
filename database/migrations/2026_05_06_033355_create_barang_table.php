@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('satuan', 20);
             $table->integer('jumlah_total');
             $table->enum('status', ['aktif', 'nonaktif']);
-            $table->string('keterangan', 100)->nullable();
+            $table->string('keterangan', 200)->nullable();
             $table->timestamps();
         });
     }

@@ -7,7 +7,7 @@ use Dcat\Admin\Admin;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Show;
-use App\Services\InventoryService;
+use App\Models\Barang as BarangModel;
 use Dcat\Admin\Http\Controllers\AdminController;
 
 class BarangController extends AdminController
@@ -47,8 +47,6 @@ class BarangController extends AdminController
                 return "<span class='status-nonaktif'>Nonaktif</span>";
             });
             $grid->column('keterangan');
-            // $grid->column('created_at');
-            // $grid->column('updated_at')->sortable();
 
             $grid->filter(function (Grid\Filter $filter) {
                 $filter->equal('id');
@@ -65,18 +63,107 @@ class BarangController extends AdminController
      */
     protected function detail($id)
     {
-        return Show::make($id, new Barang(), function (Show $show) {
-            $show->field('id');
-            $show->field('nama_barang');
-            $show->field('Kategori');
-            $show->field('satuan');
-            $show->field('jumlah_total');
-            $show->field('stok_hari_ini');
-            $show->field('dipakai_hari_ini');
-            $show->field('status');
-            $show->field('keterangan');
-            // $show->field('created_at');
-            // $show->field('updated_at');
+        $barang = BarangModel::with([
+            'kondisiBarang.penugasan.penyewaan'
+        ])->findOrFail($id);
+
+        return Show::make($id, new Barang(), function (Show $show) use ($barang) {
+
+            $show->field('id', 'ID');
+
+            $show->field('nama_barang', 'Nama Barang');
+
+            $show->field('Kategori', 'Kategori');
+
+            $show->field('satuan', 'Satuan');
+
+            $show->field('jumlah_total', 'Jumlah Total');
+
+            $show->field('stok_hari_ini', 'Stok Hari Ini')
+                ->as(function () use ($barang) {
+                    return $barang->stok_hari_ini;
+                });
+
+            $show->field('dipakai_hari_ini', 'Dipakai Hari Ini')
+                ->as(function () use ($barang) {
+                    return $barang->dipakai_hari_ini;
+                });
+
+            $show->field('status', 'Status');
+
+            $show->field('keterangan', 'Keterangan');
+
+            $show->divider();
+
+            $show->html(function () use ($barang) {
+
+                $html = '
+            <h4 style="margin-bottom:15px">
+                Riwayat Kondisi Barang
+            </h4>
+
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Penyewa</th>
+                        <th>Quantity</th>
+                        <th>Sebelum</th>
+                        <th>Sesudah</th>
+                        <th>Catatan</th>
+                    </tr>
+                </thead>
+                <tbody>';
+
+                if ($barang->kondisiBarang->count() == 0) {
+
+                    $html .= '
+                    <tr>
+                        <td colspan="6" align="center">
+                            Belum ada riwayat kondisi.
+                        </td>
+                    </tr>';
+                } else {
+
+                    foreach ($barang->kondisiBarang as $kondisi) {
+
+                        $tanggal = '-';
+                        $penyewa = '-';
+
+                        if ($kondisi->penugasan && $kondisi->penugasan->penyewaan) {
+
+                            $tanggal = \Carbon\Carbon::parse(
+                                $kondisi->penugasan->penyewaan->tanggal_mulai
+                            )->format('d-m-Y');
+
+                            $penyewa = $kondisi->penugasan->penyewaan->nama_penyewa;
+                        }
+
+                        $html .= '
+                    <tr>
+
+                        <td>' . $tanggal . '</td>
+
+                        <td>' . $penyewa . '</td>
+
+                        <td>' . $kondisi->jumlah_barang . '</td>
+
+                        <td>' . $kondisi->kondisi_sebelum . '</td>
+
+                        <td>' . $kondisi->kondisi_sesudah . '</td>
+
+                        <td>' . $kondisi->catatan . '</td>
+
+                    </tr>';
+                    }
+                }
+
+                $html .= '
+                </tbody>
+            </table>';
+
+                return $html;
+            });
         });
     }
 
