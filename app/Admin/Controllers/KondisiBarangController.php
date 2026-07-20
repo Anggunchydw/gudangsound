@@ -87,12 +87,6 @@ class KondisiBarangController extends AdminController
 
         $barang = [];
 
-        /*
-    |--------------------------------------------------------------------------
-    | Barang langsung
-    |--------------------------------------------------------------------------
-    */
-
         foreach ($penugasan->penyewaan->detailBarang as $detail) {
 
             if (!$detail->barang) {
@@ -102,7 +96,6 @@ class KondisiBarangController extends AdminController
             $id = $detail->barang->id;
 
             if (!isset($barang[$id])) {
-
                 $barang[$id] = [
                     'id' => $id,
                     'nama' => $detail->barang->nama_barang,
@@ -112,12 +105,6 @@ class KondisiBarangController extends AdminController
 
             $barang[$id]['jumlah'] += $detail->jumlah_barang;
         }
-
-        /*
-    |--------------------------------------------------------------------------
-    | Barang dari paket
-    |--------------------------------------------------------------------------
-    */
 
         foreach ($penugasan->penyewaan->detailPaket as $paket) {
 
@@ -134,7 +121,6 @@ class KondisiBarangController extends AdminController
                 $id = $detail->barang->id;
 
                 if (!isset($barang[$id])) {
-
                     $barang[$id] = [
                         'id' => $id,
                         'nama' => $detail->barang->nama_barang,
@@ -147,84 +133,115 @@ class KondisiBarangController extends AdminController
             }
         }
 
-        /*
-    |--------------------------------------------------------------------------
-    | Ambil data kondisi yang sudah pernah disimpan
-    |--------------------------------------------------------------------------
-    */
-
-        $kondisi = $penugasan
-            ->kondisiBarang
-            ->keyBy('barang_id');
-
-        /*
-    |--------------------------------------------------------------------------
-    | Gabungkan dengan daftar barang
-    |--------------------------------------------------------------------------
-    */
+        $kondisi = $penugasan->kondisiBarang->keyBy('barang_id');
 
         foreach ($barang as &$item) {
 
-            if (isset($kondisi[$item['id']])) {
+            $data = $kondisi->get($item['id']);
 
-                $item['kondisi_sebelum'] =
-                    $kondisi[$item['id']]->kondisi_sebelum;
-
-                $item['kondisi_sesudah'] =
-                    $kondisi[$item['id']]->kondisi_sesudah;
-
-                $item['catatan'] =
-                    $kondisi[$item['id']]->catatan;
-            } else {
-
-                $item['kondisi_sebelum'] = null;
-                $item['kondisi_sesudah'] = null;
-                $item['catatan'] = null;
-            }
+            $item['kondisi_sebelum'] = $data->kondisi_sebelum ?? null;
+            $item['kondisi_sesudah'] = $data->kondisi_sesudah ?? null;
+            $item['jumlah_bermasalah'] = $data->jumlah_bermasalah ?? 0;
+            $item['catatan'] = $data->catatan ?? null;
         }
 
         unset($item);
 
         return $content
             ->title('Input Kondisi Barang')
-            ->body(
-                view(
-                    'admin.kondisi.input-kondisi',
-                    [
-                        'penugasan' => $penugasan,
-                        'barang' => collect($barang)->values(),
-                    ]
-                )
-            );
+            ->body(view(
+                'admin.kondisi.input-kondisi',
+                [
+                    'penugasan' => $penugasan,
+                    'barang' => collect($barang)->values(),
+                ]
+            ));
     }
 
     public function simpan(Request $request, Penugasan $penugasan)
     {
-        // Jumlah barang yang memang harus diinput
-        $totalBarang = count($request->barang);
-
         foreach ($request->barang as $item) {
+
+            $jumlahBarang      = (int) $item['jumlah_barang'];
+            $jumlahBermasalah  = (int) $item['jumlah_bermasalah'];
+            $kondisiBaru = $item['kondisi_sesudah'] ?? null;
+
+            if (
+                in_array($kondisiBaru, ['rusak', 'hilang']) &&
+                $jumlahBermasalah <= 0
+            ) {
+                admin_error(
+                    'Gagal',
+                    'Masukkan jumlah barang yang rusak atau hilang.'
+                );
+
+                return back();
+            }
+
+            if (
+                $kondisiBaru == 'baik' &&
+                $jumlahBermasalah > 0
+            ) {
+                admin_error(
+                    'Gagal',
+                    'Jika kondisi sesudah baik maka jumlah barang bermasalah harus 0.'
+                );
+
+                return back();
+            }
+
+            if ($jumlahBermasalah > $jumlahBarang) {
+
+                admin_error(
+                    'Gagal',
+                    'Jumlah barang rusak/hilang tidak boleh melebihi jumlah barang yang dibawa.'
+                );
+
+                return back();
+            }
 
             $barang = Barang::findOrFail($item['barang_id']);
 
-            /*
-        |------------------------------------------------------------
-        | Ambil kondisi lama
-        |------------------------------------------------------------
-        */
-
-            $kondisiSebelumnya = KondisiBarang::where(
+            $dataLama = KondisiBarang::where(
                 'penugasan_id',
                 $penugasan->id
             )
-                ->where('barang_id', $item['barang_id'])
-                ->value('kondisi_sesudah');
+                ->where(
+                    'barang_id',
+                    $item['barang_id']
+                )
+                ->first();
 
-            /*
-        |------------------------------------------------------------
-        | Simpan / Update kondisi
-        |------------------------------------------------------------
-        */
+            $kondisiLama = $dataLama->kondisi_sesudah ?? null;
+            $jumlahLama  = (int) ($dataLama->jumlah_bermasalah ?? 0);
+
+            if ($kondisiBaru == 'baik') {
+
+                if (in_array($kondisiLama, ['rusak', 'hilang'])) {
+
+                    $barang->increment(
+                        'jumlah_total',
+                        $jumlahLama
+                    );
+                }
+            } else {
+
+                $selisih = $jumlahBermasalah - $jumlahLama;
+
+                if ($selisih > 0) {
+
+                    $barang->decrement(
+                        'jumlah_total',
+                        $selisih
+                    );
+                } elseif ($selisih < 0) {
+
+                    $barang->increment(
+                        'jumlah_total',
+                        abs($selisih)
+                    );
+                }
+            }
 
             KondisiBarang::updateOrCreate(
                 [
@@ -232,48 +249,13 @@ class KondisiBarangController extends AdminController
                     'barang_id'    => $item['barang_id'],
                 ],
                 [
-                    'jumlah_barang'   => $item['jumlah_barang'],
-                    'kondisi_sebelum' => $item['kondisi_sebelum'] ?? null,
-                    'kondisi_sesudah' => $item['kondisi_sesudah'] ?? null,
-                    'catatan'         => $item['catatan'] ?? null,
+                    'jumlah_barang'      => $jumlahBarang,
+                    'jumlah_bermasalah'  => $jumlahBermasalah,
+                    'kondisi_sebelum'    => $item['kondisi_sebelum'] ?? null,
+                    'kondisi_sesudah'    => $kondisiBaru,
+                    'catatan'            => $item['catatan'] ?? null,
                 ]
             );
-
-            $kondisiBaru = $item['kondisi_sesudah'] ?? null;
-
-            /*
-        |------------------------------------------------------------
-        | Baik -> Rusak / Hilang
-        |------------------------------------------------------------
-        */
-
-            if (
-                !in_array($kondisiSebelumnya, ['rusak', 'hilang']) &&
-                in_array($kondisiBaru, ['rusak', 'hilang'])
-            ) {
-
-                $barang->decrement(
-                    'jumlah_total',
-                    $item['jumlah_barang']
-                );
-            }
-
-            /*
-        |------------------------------------------------------------
-        | Rusak / Hilang -> Baik
-        |------------------------------------------------------------
-        */
-
-            if (
-                in_array($kondisiSebelumnya, ['rusak', 'hilang']) &&
-                $kondisiBaru == 'baik'
-            ) {
-
-                $barang->increment(
-                    'jumlah_total',
-                    $item['jumlah_barang']
-                );
-            }
         }
 
         admin_success(

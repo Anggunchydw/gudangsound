@@ -153,86 +153,68 @@
 <div class="card">
 
     <div class="card-header">
-
-        Detail Barang
-
+        Daftar Barang yang Harus Dibawa
     </div>
 
     <div class="card-body">
 
-        <table class="table">
+        <table class="table table-bordered">
 
             <thead>
 
                 <tr>
-
                     <th>No</th>
-
-                    <th>Barang</th>
-
+                    <th>Nama Barang</th>
+                    <th>Asal</th>
                     <th>Jumlah</th>
-
                 </tr>
 
             </thead>
 
             <tbody>
 
-                @foreach ($penyewaan->detailBarang as $i => $barang)
+                @php
+                    $no = 1;
+                @endphp
+                @foreach ($penyewaan->detailBarang as $barang)
                     <tr>
 
-                        <td>{{ $i + 1 }}</td>
+                        <td>{{ $no++ }}</td>
 
                         <td>{{ $barang->barang->nama_barang }}</td>
+
+                        <td>
+                            Barang Satuan
+
+                        </td>
 
                         <td>{{ $barang->jumlah_barang }}</td>
 
                     </tr>
                 @endforeach
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-</div>
-<div class="card">
-
-    <div class="card-header">
-
-        Detail Paket
-
-    </div>
-
-    <div class="card-body">
-
-        <table class="table">
-
-            <thead>
-
-                <tr>
-
-                    <th>Paket</th>
-
-                    <th>Jumlah</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
                 @foreach ($penyewaan->detailPaket as $paket)
-                    <tr>
+                    @foreach ($paket->paket->detail as $detail)
+                        <tr>
 
-                        <td>{{ $paket->paket->nama_paket }}</td>
+                            <td>{{ $no++ }}</td>
 
-                        <td>{{ $paket->jumlah_paket }}</td>
+                            <td>{{ $detail->barang->nama_barang }}</td>
 
-                    </tr>
+                            <td>
+
+                                {{ $paket->paket->nama_paket }}
+
+                            </td>
+
+                            <td>
+
+                                {{ $detail->jumlah * $paket->jumlah_paket }}
+
+                            </td>
+
+                        </tr>
+                    @endforeach
                 @endforeach
-
             </tbody>
 
         </table>

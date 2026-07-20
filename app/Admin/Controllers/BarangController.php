@@ -47,10 +47,32 @@ class BarangController extends AdminController
                 return "<span class='status-nonaktif'>Nonaktif</span>";
             });
             $grid->column('keterangan');
-
-            $grid->filter(function (Grid\Filter $filter) {
-                $filter->equal('id');
+            $grid->quickSearch(function ($model, $keyword) {
+                $model->where('nama_barang', 'like', "%{$keyword}%");
             });
+            // $grid->filter(function (Grid\Filter $filter) {
+
+            //     // Popup
+            //     $filter->panel();
+
+            //     // Hilangkan filter ID bawaan
+            //     $filter->disableIdFilter();
+
+            //     // Cari berdasarkan nama barang
+            //     $filter->like('nama_barang', 'Nama Barang');
+
+            //     // Filter kategori
+            //     $filter->equal('Kategori', 'Kategori')->select([
+            //         'inti' => 'Inti',
+            //         'pendukung' => 'Pendukung',
+            //     ]);
+
+            //     // Filter status
+            //     $filter->equal('status', 'Status')->select([
+            //         'aktif' => 'Aktif',
+            //         'nonaktif' => 'Nonaktif',
+            //     ]);
+            // });
         });
     }
 
@@ -61,110 +83,24 @@ class BarangController extends AdminController
      *
      * @return Show
      */
+    /**
+     * Detail Barang
+     */
     protected function detail($id)
     {
         $barang = BarangModel::with([
-            'kondisiBarang.penugasan.penyewaan'
+            'kondisiBarang' => function ($q) {
+
+                $q->latest();
+            },
+            'kondisiBarang.penugasan.penyewaan',
+            'kondisiBarang.penugasan.pegawai',
         ])->findOrFail($id);
 
-        return Show::make($id, new Barang(), function (Show $show) use ($barang) {
-
-            $show->field('id', 'ID');
-
-            $show->field('nama_barang', 'Nama Barang');
-
-            $show->field('Kategori', 'Kategori');
-
-            $show->field('satuan', 'Satuan');
-
-            $show->field('jumlah_total', 'Jumlah Total');
-
-            $show->field('stok_hari_ini', 'Stok Hari Ini')
-                ->as(function () use ($barang) {
-                    return $barang->stok_hari_ini;
-                });
-
-            $show->field('dipakai_hari_ini', 'Dipakai Hari Ini')
-                ->as(function () use ($barang) {
-                    return $barang->dipakai_hari_ini;
-                });
-
-            $show->field('status', 'Status');
-
-            $show->field('keterangan', 'Keterangan');
-
-            $show->divider();
-
-            $show->html(function () use ($barang) {
-
-                $html = '
-            <h4 style="margin-bottom:15px">
-                Riwayat Kondisi Barang
-            </h4>
-
-            <table class="table table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th>Tanggal</th>
-                        <th>Penyewa</th>
-                        <th>Quantity</th>
-                        <th>Sebelum</th>
-                        <th>Sesudah</th>
-                        <th>Catatan</th>
-                    </tr>
-                </thead>
-                <tbody>';
-
-                if ($barang->kondisiBarang->count() == 0) {
-
-                    $html .= '
-                    <tr>
-                        <td colspan="6" align="center">
-                            Belum ada riwayat kondisi.
-                        </td>
-                    </tr>';
-                } else {
-
-                    foreach ($barang->kondisiBarang as $kondisi) {
-
-                        $tanggal = '-';
-                        $penyewa = '-';
-
-                        if ($kondisi->penugasan && $kondisi->penugasan->penyewaan) {
-
-                            $tanggal = \Carbon\Carbon::parse(
-                                $kondisi->penugasan->penyewaan->tanggal_mulai
-                            )->format('d-m-Y');
-
-                            $penyewa = $kondisi->penugasan->penyewaan->nama_penyewa;
-                        }
-
-                        $html .= '
-                    <tr>
-
-                        <td>' . $tanggal . '</td>
-
-                        <td>' . $penyewa . '</td>
-
-                        <td>' . $kondisi->jumlah_barang . '</td>
-
-                        <td>' . $kondisi->kondisi_sebelum . '</td>
-
-                        <td>' . $kondisi->kondisi_sesudah . '</td>
-
-                        <td>' . $kondisi->catatan . '</td>
-
-                    </tr>';
-                    }
-                }
-
-                $html .= '
-                </tbody>
-            </table>';
-
-                return $html;
-            });
-        });
+        return view(
+            'admin.barang.detail-barang',
+            compact('barang')
+        );
     }
 
     /**
@@ -174,95 +110,84 @@ class BarangController extends AdminController
      */
     protected function form()
     {
-        // Custom style khusus halaman form barang
-        Admin::style('
-        /* Container utama content */
-        .content {
-            max-width: 1300px;
-        }
-
-        /* Card / Box form */
-        .box,
-        .card {
-            max-width: 1050px;
-            margin-left: 10px;
-            border-radius: 10px;
-        }
-
-        /* Padding dalam form */
-        .box-body,
-        .card-body {
-            padding: 30px !important;
-        }
-
-        /* Jarak antar field */
-        .form-group {
-            margin-bottom: 22px;
-        }
-
-        /* Input biar lebih clean */
-        .form-control {
-            border-radius: 6px;
-        }
-
-        /* Tombol submit */
-        .btn {
-            border-radius: 6px;
-        }
-    ');
 
         return Form::make(new Barang(), function (Form $form) {
 
-            $form->display('id');
+            $form->display('id', 'ID');
+
+            /*
+        |--------------------------------------------------------------------------
+        | Baris 1
+        |--------------------------------------------------------------------------
+        */
 
             $form->row(function ($row) {
 
-                $row->width(12)->text('nama_barang', 'Nama Barang')
+                $row->width(6)
+                    ->text('nama_barang', 'Nama Barang')
+                    ->required();
+
+                $row->width(6)
+                    ->select('status', 'Status')
+                    ->options([
+                        'aktif'    => 'Aktif',
+                        'nonaktif' => 'Nonaktif',
+                    ])
+                    ->default('aktif')
                     ->required();
             });
 
+            /*
+        |--------------------------------------------------------------------------
+        | Baris 2
+        |--------------------------------------------------------------------------
+        */
+
             $form->row(function ($row) {
 
-                $row->width(6)->select('Kategori', 'Kategori')
+                $row->width(6)
+                    ->select('Kategori', 'Kategori')
                     ->options([
-                        'inti' => 'Inti',
-                        'pendukung' => 'Pendukung',
+                        'inti'       => 'Inti',
+                        'pendukung'  => 'Pendukung',
                     ])
                     ->required();
 
-                $row->width(6)->number('jumlah_total', 'Jumlah Total')
+                $row->width(6)
+                    ->number('jumlah_total', 'Jumlah Total')
                     ->min(0)
                     ->default(0)
                     ->required();
             });
 
+            /*
+        |--------------------------------------------------------------------------
+        | Baris 3
+        |--------------------------------------------------------------------------
+        */
+
             $form->row(function ($row) {
 
-                $row->width(6)->select('satuan', 'Satuan')
+                $row->width(6)
+                    ->select('satuan', 'Satuan')
                     ->options([
-                        'pcs' => 'Pcs',
+                        'pcs'  => 'Pcs',
                         'unit' => 'Unit',
-                        'set' => 'Set',
+                        'set'  => 'Set',
                         'roll' => 'Roll',
                     ])
                     ->required();
+
+                $row->width(6)
+                    ->textarea('keterangan', 'Keterangan')
+                    ->rows(4);
             });
 
-            $form->row(function ($row) {
+            $form->divider();
 
-                $row->width(6)->select('status', 'Status')
-                    ->options([
-                        'aktif' => 'Aktif',
-                        'nonaktif' => 'Non-Aktif',
-                    ])
-                    ->default('aktif')
-                    ->required();
+            $form->display('created_at', 'Dibuat');
 
-                $row->width(6)->text('keterangan', 'Keterangan (Opsional)');
-            });
-
-            $form->display('created_at');
-            $form->display('updated_at');
+            $form->display('updated_at', 'Diubah');
         });
     }
 }

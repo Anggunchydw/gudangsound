@@ -17,6 +17,7 @@ class KondisiBarang extends Model
         'jumlah_barang',
         'kondisi_sebelum',
         'kondisi_sesudah',
+        'jumlah_bermasalah',
         'catatan',
     ];
 

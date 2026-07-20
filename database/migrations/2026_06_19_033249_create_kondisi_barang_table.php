@@ -23,7 +23,7 @@ return new class extends Migration
                     'rusak',
                     'hilang'
                 ]
-            );
+            )->nullable();
 
             $table->enum(
                 'kondisi_sesudah',
@@ -32,7 +32,9 @@ return new class extends Migration
                     'rusak',
                     'hilang'
                 ]
-            );
+            )->nullable();
+            $table->unsignedInteger('jumlah_bermasalah')
+                ->default(0);
 
             $table->string(
                 'catatan',

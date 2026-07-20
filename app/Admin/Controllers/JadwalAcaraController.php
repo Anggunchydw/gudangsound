@@ -15,32 +15,45 @@ class JadwalAcaraController extends AdminController
         Admin::css('https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/main.min.css');
         Admin::js('https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js');
 
-        // CSS milik sendiri
         Admin::css(asset('css/jadwal-acara.css'));
 
-        $totalAcara = Penyewaan::whereMonth('tanggal_mulai', now()->month)
-            ->where('status_penyewaan', '<>', 'dibatalkan')
+        $user = Admin::user();
+
+        $query = Penyewaan::query()
+            ->where('status_penyewaan', '<>', 'dibatalkan');
+
+        // Pegawai hanya melihat jadwal miliknya
+        if ($user->isRole('pegawai')) {
+
+            $query->whereHas('penugasan.pegawai', function ($q) use ($user) {
+
+                $q->where('admin_users.id', $user->id);
+            });
+        }
+
+        $totalAcara = (clone $query)
+            ->whereMonth('tanggal_mulai', now()->month)
             ->count();
 
-        $belumLunas = Penyewaan::whereMonth('tanggal_mulai', now()->month)
+        $belumLunas = (clone $query)
+            ->whereMonth('tanggal_mulai', now()->month)
             ->where('status_pembayaran', 'DP')
-            ->where('status_penyewaan', '<>', 'dibatalkan')
             ->count();
 
-        $agendaHariIni = Penyewaan::with([
-            'detailPaket.paket',
-            'detailBarang.barang'
-        ])
+        $agendaHariIni = (clone $query)
+            ->with([
+                'detailPaket.paket',
+                'detailBarang.barang'
+            ])
             ->whereDate('tanggal_mulai', today())
-            ->where('status_penyewaan', '<>', 'dibatalkan')
             ->get();
 
-        $akanDatang = Penyewaan::with([
-            'detailPaket.paket',
-            'detailBarang.barang'
-        ])
+        $akanDatang = (clone $query)
+            ->with([
+                'detailPaket.paket',
+                'detailBarang.barang'
+            ])
             ->where('tanggal_mulai', '>', today())
-            ->where('status_penyewaan', '<>', 'dibatalkan')
             ->orderBy('tanggal_mulai')
             ->take(5)
             ->get();
@@ -95,20 +108,35 @@ class JadwalAcaraController extends AdminController
                 )
             ));
     }
+    
     public function events()
     {
-        $events = Penyewaan::with([
+        $user = Admin::user();
+
+        $query = Penyewaan::with([
             'detailPaket.paket',
             'detailBarang.barang',
             'penugasan.pegawai'
         ])
-            ->where('status_penyewaan', '<>', 'dibatalkan')
+            ->where('status_penyewaan', '<>', 'dibatalkan');
+
+        // Pegawai hanya melihat event yang menjadi penugasannya
+        if ($user->isRole('pegawai')) {
+
+            $query->whereHas('penugasan.pegawai', function ($q) use ($user) {
+
+                $q->where('admin_users.id', $user->id);
+            });
+        }
+
+        $events = $query
             ->get()
             ->map(function ($item) {
 
                 $color = $item->status_pembayaran == 'Lunas'
                     ? '#16a34a'
                     : '#f59e0b';
+
                 $paket = [];
 
                 foreach ($item->detailPaket as $detail) {
@@ -116,7 +144,7 @@ class JadwalAcaraController extends AdminController
                     if ($detail->paket) {
 
                         $paket[] =
-                            '•' .
+                            '• ' .
                             $detail->paket->nama_paket .
                             ' (x' .
                             $detail->jumlah_paket .
@@ -136,6 +164,7 @@ class JadwalAcaraController extends AdminController
                             ')';
                     }
                 }
+
                 $pegawai = [];
 
                 foreach ($item->penugasan as $penugasan) {
@@ -145,8 +174,6 @@ class JadwalAcaraController extends AdminController
                         $pegawai[] = $user->name;
                     }
                 }
-
-                $pegawai = implode(', ', array_unique($pegawai));
 
                 return [
 
@@ -164,15 +191,21 @@ class JadwalAcaraController extends AdminController
                     'backgroundColor' => $color,
 
                     'borderColor' => $color,
-                    // Data tambahan
+
                     'extendedProps' => [
 
                         'lokasi' => $item->lokasi,
+
                         'status' => $item->status_pembayaran,
+
                         'mulai' => $item->tanggal_mulai,
+
                         'selesai' => $item->tanggal_selesai,
+
                         'paket' => implode('<br>', $paket),
-                        'pegawai'=> $pegawai,
+
+                        'pegawai' => implode(', ', array_unique($pegawai)),
+
                     ],
 
                 ];

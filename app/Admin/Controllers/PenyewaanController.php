@@ -110,7 +110,7 @@ class PenyewaanController extends AdminController
     {
         $penyewaan = Penyewaan::with([
             'detailBarang.barang',
-            'detailPaket.paket',
+            'detailPaket.paket.detail.barang',
         ])->findOrFail($id);
 
         return view(
@@ -245,14 +245,14 @@ class PenyewaanController extends AdminController
                 </div>
             </div>
             ');
-            $form->radio('status_pembayaran', 'Status Pembayaran')
-                ->options([
-                    'DP'    => '<span class="status-dp">DP</span>',
-                    'Lunas' => '<span class="status-lunas">Lunas</span>',
-                ])
-                ->default('DP')
-                ->attribute(['class' => 'status-radio'])
-                ->required();
+            // $form->radio('status_pembayaran', 'Status Pembayaran')
+            //     ->options([
+            //         'DP'    => '<span class="status-dp">DP</span>',
+            //         'Lunas' => '<span class="status-lunas">Lunas</span>',
+            //     ])
+            //     ->default('DP')
+            //     ->attribute(['class' => 'status-radio'])
+            //     ->required();
 
             $form->hidden('status_penyewaan')->default('booking');
 
