@@ -19,9 +19,8 @@ class InventoryService
         $detailPaket = [],
         $penyewaanId = null
     ) {
-        // ==========================
+
         // Barang satuan
-        // ==========================
         foreach ($detailBarang as $item) {
 
             $barang = Barang::find($item['barang_id']);
@@ -46,10 +45,8 @@ class InventoryService
                 );
             }
         }
-
-        // ==========================
         // Paket
-        // ==========================
+
         foreach ($detailPaket as $paketItem) {
 
             $detail = DetailPaket::where('paket_id', $paketItem['paket_id'])->get();
@@ -131,12 +128,6 @@ class InventoryService
 
         foreach ($penyewaan as $item) {
 
-            /*
-        ===================
-        Barang satuan
-        ===================
-        */
-
             foreach ($item->detailBarang as $barang) {
 
                 if ($barang->barang_id == $barangId) {
@@ -144,12 +135,6 @@ class InventoryService
                     $total += $barang->jumlah_barang;
                 }
             }
-
-            /*
-        ===================
-        Barang dari Paket
-        ===================
-        */
 
             foreach ($item->detailPaket as $paket) {
 

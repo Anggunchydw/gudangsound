@@ -12,6 +12,7 @@ use Dcat\Admin\Grid;
 use Dcat\Admin\Show;
 use App\Models\Barang;
 use App\Models\Paket;
+use Dcat\Admin\Layout\Content;
 use App\Services\InventoryService;
 use Dcat\Admin\Http\Controllers\AdminController;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -108,6 +109,7 @@ class PenyewaanController extends AdminController
      */
     protected function detail($id)
     {
+        // Admin::css(asset('css/penyewaan.css'));
         $penyewaan = Penyewaan::with([
             'detailBarang.barang',
             'detailPaket.paket.detail.barang',
@@ -245,17 +247,8 @@ class PenyewaanController extends AdminController
                 </div>
             </div>
             ');
-            // $form->radio('status_pembayaran', 'Status Pembayaran')
-            //     ->options([
-            //         'DP'    => '<span class="status-dp">DP</span>',
-            //         'Lunas' => '<span class="status-lunas">Lunas</span>',
-            //     ])
-            //     ->default('DP')
-            //     ->attribute(['class' => 'status-radio'])
-            //     ->required();
 
             $form->hidden('status_penyewaan')->default('booking');
-
 
             $form->saving(function (Form $form) {
                 $totalHarga = (float) str_replace(',', '', $form->total_harga);

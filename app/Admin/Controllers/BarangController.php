@@ -13,11 +13,7 @@ use Dcat\Admin\Http\Controllers\AdminController;
 class BarangController extends AdminController
 
 {
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
+
     protected function grid()
     {
         return Grid::make(new Barang(), function (Grid $grid) {
@@ -47,47 +43,23 @@ class BarangController extends AdminController
                 return "<span class='status-nonaktif'>Nonaktif</span>";
             });
             $grid->column('keterangan');
+
+            $grid->actions(function (Grid\Displayers\Actions $actions) {
+                $actions->disableDelete();
+            });
+            $grid->batchActions(function (Grid\Tools\BatchActions $batch) {
+                $batch->disableDelete();
+            });
             $grid->quickSearch(function ($model, $keyword) {
                 $model->where('nama_barang', 'like', "%{$keyword}%");
             });
-            // $grid->filter(function (Grid\Filter $filter) {
-
-            //     // Popup
-            //     $filter->panel();
-
-            //     // Hilangkan filter ID bawaan
-            //     $filter->disableIdFilter();
-
-            //     // Cari berdasarkan nama barang
-            //     $filter->like('nama_barang', 'Nama Barang');
-
-            //     // Filter kategori
-            //     $filter->equal('Kategori', 'Kategori')->select([
-            //         'inti' => 'Inti',
-            //         'pendukung' => 'Pendukung',
-            //     ]);
-
-            //     // Filter status
-            //     $filter->equal('status', 'Status')->select([
-            //         'aktif' => 'Aktif',
-            //         'nonaktif' => 'Nonaktif',
-            //     ]);
-            // });
         });
     }
 
-    /**
-     * Make a show builder.
-     *
-     * @param mixed $id
-     *
-     * @return Show
-     */
-    /**
-     * Detail Barang
-     */
+
     protected function detail($id)
     {
+        Admin::css(asset('css/barang.css'));
         $barang = BarangModel::with([
             'kondisiBarang' => function ($q) {
 
@@ -103,23 +75,16 @@ class BarangController extends AdminController
         );
     }
 
-    /**
-     * Make a form builder.
-     *
-     * @return Form
-     */
+
     protected function form()
     {
+        Admin::css(asset('css/barang.css'));
 
         return Form::make(new Barang(), function (Form $form) {
 
-            $form->display('id', 'ID');
+            $form->html('<div class="barang-form-wrapper">');
 
-            /*
-        |--------------------------------------------------------------------------
-        | Baris 1
-        |--------------------------------------------------------------------------
-        */
+            $form->display('id', 'ID');
 
             $form->row(function ($row) {
 
@@ -137,21 +102,17 @@ class BarangController extends AdminController
                     ->required();
             });
 
-            /*
-        |--------------------------------------------------------------------------
-        | Baris 2
-        |--------------------------------------------------------------------------
-        */
 
             $form->row(function ($row) {
 
                 $row->width(6)
                     ->select('Kategori', 'Kategori')
                     ->options([
-                        'inti'       => 'Inti',
-                        'pendukung'  => 'Pendukung',
+                        'inti' => 'Inti',
+                        'pendukung' => 'Pendukung',
                     ])
                     ->required();
+
 
                 $row->width(6)
                     ->number('jumlah_total', 'Jumlah Total')
@@ -160,34 +121,34 @@ class BarangController extends AdminController
                     ->required();
             });
 
-            /*
-        |--------------------------------------------------------------------------
-        | Baris 3
-        |--------------------------------------------------------------------------
-        */
 
             $form->row(function ($row) {
 
                 $row->width(6)
                     ->select('satuan', 'Satuan')
                     ->options([
-                        'pcs'  => 'Pcs',
+                        'pcs' => 'Pcs',
                         'unit' => 'Unit',
-                        'set'  => 'Set',
+                        'set' => 'Set',
                         'roll' => 'Roll',
                     ])
                     ->required();
+
 
                 $row->width(6)
                     ->textarea('keterangan', 'Keterangan')
                     ->rows(4);
             });
 
+
             $form->divider();
 
-            $form->display('created_at', 'Dibuat');
 
+            $form->display('created_at', 'Dibuat');
             $form->display('updated_at', 'Diubah');
+
+
+            $form->html('</div>');
         });
     }
 }

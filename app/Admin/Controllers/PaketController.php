@@ -9,7 +9,7 @@ use Dcat\Admin\Show;
 use Dcat\Admin\Http\Controllers\AdminController;
 use App\Models\Paket;
 use App\Models\Barang;
-use Dcat\Admin\Widgets\Table;
+use Dcat\Admin\Admin;
 
 class PaketController extends AdminController
 {
@@ -45,9 +45,18 @@ class PaketController extends AdminController
                         $rows
                     );
                 });
-            // $grid->column('created_at');
-            // $grid->column('updated_at')->sortable();
+            $grid->column('', 'Action')->display(function () {
 
+                $id = $this->getKey();
+
+                return "
+
+        <a href='" . admin_url("paket/$id/edit") . "' title='Edit' style='margin-right:10px'>
+            <i class='feather icon-edit'></i>
+        </a>
+    ";
+            });
+            $grid->disableActions();
             $grid->filter(function (Grid\Filter $filter) {
                 $filter->equal('id');
             });
@@ -101,18 +110,29 @@ class PaketController extends AdminController
      *
      * @return Form
      */
+
     protected function form()
     {
+        Admin::css(asset('css/paket.css'));
+
         return Form::make(
             PaketRepository::with(['detail']),
             function (Form $form) {
-                $form->display('id');
-                $form->text('nama_paket')->required();
-                $form->textarea('deskripsi');
 
-                // Detail paket dalam satu form
+                $form->html('<div class="paket-form-wrapper">');
+
+                $form->display('id', 'ID');
+
+                $form->text('nama_paket', 'Nama Paket')
+                    ->required();
+
+                $form->textarea('deskripsi', 'Deskripsi')
+                    ->rows(4);
+
+
                 $form->hasMany('detail', 'Isi Barang (Detail Paket)', function (Form\NestedForm $form) {
-                    $form->select('barang_id', 'Barang')
+
+                    $form->select('barang_id', 'Nama Barang')
                         ->options(
                             Barang::where('status', 'aktif')
                                 ->pluck('nama_barang', 'id')
@@ -125,8 +145,26 @@ class PaketController extends AdminController
                         ->required();
                 })->useTable();
 
-                $form->display('created_at');
-                $form->display('updated_at');
+
+                $form->saving(function (Form $form) {
+
+                    $details = request()->input('detail');
+
+                    foreach ($details as $detail) {
+
+                        $barang = Barang::find($detail['barang_id']);
+
+                        if ($barang && $detail['jumlah'] > $barang->jumlah_total) {
+
+                            return $form->response()->error(
+                                "Jumlah {$barang->nama_barang} melebihi stok tersedia ({$barang->jumlah_total})"
+                            );
+                        }
+                    }
+                });
+
+
+                $form->html('</div>');
             }
         );
     }
