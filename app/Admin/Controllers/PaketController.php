@@ -3,113 +3,63 @@
 namespace App\Admin\Controllers;
 
 use App\Admin\Repositories\Paket as PaketRepository;
+use App\Models\Barang;
+use App\Models\Paket;
+use Dcat\Admin\Admin;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
-use Dcat\Admin\Show;
 use Dcat\Admin\Http\Controllers\AdminController;
-use App\Models\Paket;
-use App\Models\Barang;
-use Dcat\Admin\Admin;
+
 
 class PaketController extends AdminController
 {
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
+
     protected function grid()
     {
         return Grid::make(new Paket(), function (Grid $grid) {
+
             $grid->model()->with(['detail.barang']);
+
             $grid->column('id')->sortable();
             $grid->column('nama_paket');
             $grid->column('deskripsi');
 
             $grid->column('detail', 'Jumlah Barang')
                 ->display(function ($detail) {
-                    $total = collect($detail)->sum('jumlah');
-                    return $total . ' Barang';
+                    return collect($detail)->sum('jumlah') . ' Barang';
                 })
                 ->expand(function () {
+
                     $rows = [];
-                    $detailItems = $this->getRelation('detail') ?? [];
-                    foreach ($detailItems as $item) {
+
+                    foreach ($this->getRelation('detail') ?? [] as $item) {
                         $rows[] = [
                             'Barang' => optional($item->barang)->nama_barang,
                             'Jumlah' => $item->jumlah,
                         ];
                     }
+
                     return new \Dcat\Admin\Widgets\Table(
                         ['Barang', 'Jumlah'],
                         $rows
                     );
                 });
-            $grid->column('', 'Action')->display(function () {
 
-                $id = $this->getKey();
+            $grid->actions(function (Grid\Displayers\Actions $actions) {
 
-                return "
-
-        <a href='" . admin_url("paket/$id/edit") . "' title='Edit' style='margin-right:10px'>
-            <i class='feather icon-edit'></i>
-        </a>
-    ";
+                $actions->disableView();
+                $actions->disableDelete();
             });
-            $grid->disableActions();
-            $grid->filter(function (Grid\Filter $filter) {
-                $filter->equal('id');
+            $grid->batchActions(function (Grid\Tools\BatchActions $batch) {
+                $batch->disableDelete();
+            });
+            $grid->disableRowSelector();
+            $grid->quickSearch(function ($model, $keyword) {
+
+                $model->where('nama_paket', 'like', "%{$keyword}%");
             });
         });
     }
-
-
-    /**
-     * Make a show builder.
-     *
-     * @param mixed $id
-     *
-     * @return Show
-     */
-    protected function detail($id)
-    {
-        return Show::make($id, new Paket(), function (Show $show) {
-            // Eager load relasi detail + barang
-            $show->model()->load('detail.barang');
-
-            $show->field('id', 'ID');
-            $show->field('nama_paket', 'Nama Paket');
-            $show->field('deskripsi', 'Deskripsi');
-
-            // Tampilkan tabel detail barang dalam paket
-            $show->html(function () use ($show) {
-                $rows = [];
-
-                foreach ($show->model()->detail as $item) {
-                    $rows[] = [
-                        optional($item->barang)->nama_barang,
-                        $item->jumlah,
-                        optional($item->barang)->satuan,
-                    ];
-                }
-
-                if (empty($rows)) {
-                    return '<p class="text-muted">Belum ada barang dalam paket ini.</p>';
-                }
-
-                return new \Dcat\Admin\Widgets\Table(
-                    ['Barang', 'Jumlah', 'Satuan'],
-                    $rows
-                );
-            }, 'Daftar Barang');
-        });
-    }
-
-    /**
-     * Make a form builder.
-     *
-     * @return Form
-     */
 
     protected function form()
     {
@@ -118,8 +68,11 @@ class PaketController extends AdminController
         return Form::make(
             PaketRepository::with(['detail']),
             function (Form $form) {
-
-                $form->html('<div class="paket-form-wrapper">');
+                $form->disableDeleteButton();
+                $form->disableViewButton();
+                $form->disableEditingCheck();
+                $form->disableCreatingCheck();
+                $form->disableViewCheck();
 
                 $form->display('id', 'ID');
 
@@ -129,8 +82,7 @@ class PaketController extends AdminController
                 $form->textarea('deskripsi', 'Deskripsi')
                     ->rows(4);
 
-
-                $form->hasMany('detail', 'Isi Barang (Detail Paket)', function (Form\NestedForm $form) {
+                $form->hasMany('detail', 'Detail Paket', function (Form\NestedForm $form) {
 
                     $form->select('barang_id', 'Nama Barang')
                         ->options(
@@ -145,26 +97,44 @@ class PaketController extends AdminController
                         ->required();
                 })->useTable();
 
-
                 $form->saving(function (Form $form) {
 
-                    $details = request()->input('detail');
+                    $detail = request()->input('detail', []);
 
-                    foreach ($details as $detail) {
+                    if (count($detail) == 0) {
+                        return $form->response()->error(
+                            'Minimal pilih satu barang.'
+                        );
+                    }
 
-                        $barang = Barang::find($detail['barang_id']);
+                    $barangDipilih = [];
 
-                        if ($barang && $detail['jumlah'] > $barang->jumlah_total) {
+                    foreach ($detail as $item) {
 
+                        $barangId = $item['barang_id'] ?? null;
+                        $jumlah   = (int) ($item['jumlah'] ?? 0);
+
+                        if (in_array($barangId, $barangDipilih)) {
                             return $form->response()->error(
-                                "Jumlah {$barang->nama_barang} melebihi stok tersedia ({$barang->jumlah_total})"
+                                'Barang yang sama tidak boleh dipilih lebih dari satu kali.'
+                            );
+                        }
+
+                        $barangDipilih[] = $barangId;
+
+                        $barang = Barang::find($barangId);
+
+                        if (!$barang) {
+                            continue;
+                        }
+
+                        if ($jumlah > $barang->jumlah_total) {
+                            return $form->response()->error(
+                                "Jumlah {$barang->nama_barang} melebihi stok fisik ({$barang->jumlah_total})."
                             );
                         }
                     }
                 });
-
-
-                $form->html('</div>');
             }
         );
     }

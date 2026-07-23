@@ -1,249 +1,106 @@
 
-.paket-form-wrapper.box{
-    max-width:1000px;
-    width:100%;
-    margin-left:0;
-    border-radius:10px;
+@media (max-width:768px){
+
+    .content-wrapper,
+    .content{
+        padding:10px !important;
+    }
+
+    .box,
+    .card{
+        width:100% !important;
+    }
+
 }
 
-.paket-form-wrapper .box-header{
-    padding:18px 24px;
-    background:#fff;
-    border-bottom:1px solid #eee;
-}
-
-.paket-form-wrapper .box-header h3{
-    margin:0;
-    font-size:18px;
-    font-weight:600;
-}
-
-.paket-form-wrapper .box-body{
-    padding:24px;
-    overflow:visible;
-}
-
-.paket-form-wrapper .form-horizontal .form-group{
-    display:block;
-    margin-bottom:22px;
-}
-
-.paket-form-wrapper .form-horizontal .control-label{
-    width:100%;
-    max-width:100%;
-    text-align:left;
-    padding:0;
-    margin-bottom:8px;
-    font-weight:600;
-    color:#374151;
-}
-
-.paket-form-wrapper .form-horizontal .col-sm-2,
-.paket-form-wrapper .form-horizontal .col-sm-8,
-.paket-form-wrapper .form-horizontal .col-sm-9,
-.paket-form-wrapper .form-horizontal .col-sm-10{
-    width:100%;
-    max-width:100%;
-    flex:0 0 100%;
-}
-
-.paket-form-wrapper .form-horizontal .form-field{
+.has-many-table-detail{
     width:100%;
 }
 
-.paket-form-wrapper .form-control{
-    height:42px;
-    border-radius:0 8px 8px 0;
-    border-left:none;
-    box-shadow:none;
+@media (max-width:768px){
+
+    .has-many-table-detail{
+
+        display:block;
+        overflow-x:auto;
+        overflow-y:hidden;
+        -webkit-overflow-scrolling:touch;
+
+    }
+
+    .has-many-table-detail table{
+
+        min-width:700px;
+        width:max-content;
+        border-collapse:collapse;
+
+    }
+
+    .has-many-table-detail th,
+    .has-many-table-detail td{
+
+        white-space:nowrap;
+        vertical-align:middle;
+
+    }
+
+    .has-many-table-detail td:first-child{
+
+        min-width:250px;
+
+    }
+
+    .has-many-table-detail td:nth-child(2){
+
+        min-width:100px;
+
+    }
+
 }
 
-.paket-form-wrapper textarea.form-control{
-    height:90px;
-    resize:none;
-    border-radius:8px;
-    border-left:1px solid #dcdfe6;
-}
+.has-many-table-detail .select2-container{
 
-.paket-form-wrapper .input-group{
-    display:flex;
-    width:100%;
-}
-
-.paket-form-wrapper .input-group-addon{
-    width:48px;
-    min-width:48px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#fff;
-    border:1px solid #dcdfe6;
-    border-right:none;
-    border-radius:8px 0 0 8px;
-}
-
-.paket-form-wrapper .input-group .form-control{
-    border:1px solid #dcdfe6;
-    border-left:none;
-}
-
-.paket-form-wrapper .input-group .form-control:focus{
-    border-color:#4f6cf7;
-    box-shadow:none;
-}
-
-.paket-form-wrapper .input-group:focus-within .input-group-addon{
-    border-color:#4f6cf7;
-}
-
-.paket-form-wrapper div.has-many-table-detail{
-    width:100%;
-    overflow:visible;
-}
-
-.paket-form-wrapper table.has-many-table-detail{
-    width:100%;
-    border-collapse:collapse;
-}
-
-.paket-form-wrapper table.has-many-table-detail thead{
-    background:#f5f7fb;
-}
-
-.paket-form-wrapper table.has-many-table-detail th{
-    padding:12px;
-    font-size:13px;
-    font-weight:600;
-    color:#6b7280;
-    white-space:nowrap;
-}
-
-.paket-form-wrapper table.has-many-table-detail td{
-    padding:10px;
-    vertical-align:middle;
-}
-
-.paket-form-wrapper table.has-many-table-detail .select2-container{
+    width:220px !important;
     min-width:220px;
+
 }
 
-.paket-form-wrapper table.has-many-table-detail input{
+.has-many-table-detail .select2-selection{
+
+    min-width:220px;
+
+}
+
+.has-many-table-detail input[type=number]{
+
+    width:90px;
     min-width:90px;
+
 }
 
-.paket-form-wrapper table.has-many-table-detail .btn-success{
-    width:100%;
-    background:#fff;
-    color:#2563eb;
-    border:1px dashed #d1d5db;
-    border-radius:8px;
+.has-many-table .btn{
+
+    white-space:nowrap;
+
 }
 
-.paket-form-wrapper table.has-many-table-detail .btn-danger{
-    border-radius:6px;
+.has-many-table .btn-success{
+
+    min-width:90px;
+
 }
 
-@media (max-width:576px){
+.has-many-table .btn-danger{
 
-    .content .box-body{
-        padding:16px;
-    }
+    min-width:40px;
 
-    table.has-many-table-detail thead{
-        display:none;
-    }
+}
+.select2-container--open{
+    touch-action:pan-y;
+}
 
-    table.has-many-table-detail,
-    table.has-many-table-detail tbody,
-    table.has-many-table-detail tr,
-    table.has-many-table-detail td{
-        display:block;
-        width:100%;
-    }
-
-    table.has-many-table-detail tr{
-        background:#fff;
-        border:1px solid #e5e7eb;
-        border-radius:10px;
-        margin-bottom:18px;
-        padding:14px;
-    }
-
-    table.has-many-table-detail td{
-        padding:8px 0;
-        border:none;
-    }
-
-    table.has-many-table-detail td.hidden{
-        display:none;
-    }
-
-    table.has-many-table-detail td:nth-child(1)::before{
-        content:"Nama Barang";
-        display:block;
-        margin-bottom:6px;
-        color:#6b7280;
-        font-size:12px;
-        font-weight:600;
-    }
-
-    table.has-many-table-detail td:nth-child(2)::before{
-        content:"Jumlah";
-        display:block;
-        margin-bottom:6px;
-        color:#6b7280;
-        font-size:12px;
-        font-weight:600;
-    }
-
-    table.has-many-table-detail td:last-child::before{
-        content:"Aksi";
-        display:block;
-        margin-bottom:6px;
-        color:#6b7280;
-        font-size:12px;
-        font-weight:600;
-    }
-
-    table.has-many-table-detail .select2-container{
-        width:100%!important;
-        min-width:100%!important;
-    }
-
-    table.has-many-table-detail .select2-selection{
-        width:100%!important;
-    }
-
-    table.has-many-table-detail .number-group,
-    table.has-many-table-detail .input-group{
-        display:flex!important;
-        flex-wrap:nowrap!important;
-        width:100%!important;
-        align-items:center;
-    }
-
-    table.has-many-table-detail .number-group .input-group-btn,
-    table.has-many-table-detail .input-group-btn{
-        width:38px!important;
-        min-width:38px!important;
-        flex:0 0 38px!important;
-    }
-
-    table.has-many-table-detail .number-group input,
-    table.has-many-table-detail .input-group input{
-        flex:1 1 auto!important;
-        width:1%!important;
-        min-width:0!important;
-        text-align:center;
-    }
-
-    table.has-many-table-detail .btn-danger{
-        width:100%;
-        margin-top:8px;
-    }
-
-    table.has-many-table-detail .btn-success{
-        width:100%;
-    }
-
+.select2-results__options{
+    max-height:250px !important;
+    overflow-y:auto !important;
+    -webkit-overflow-scrolling:touch;
 }

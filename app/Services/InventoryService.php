@@ -28,6 +28,12 @@ class InventoryService
             if (!$barang) {
                 continue;
             }
+            if ($item['jumlah_barang'] < 1) {
+
+                throw new \Exception(
+                    "Jumlah {$barang->nama_barang} minimal 1."
+                );
+            }
 
             $dipakai = self::jumlahBarangDipakai(
                 $barang->id,
@@ -51,9 +57,24 @@ class InventoryService
 
             $detail = DetailPaket::where('paket_id', $paketItem['paket_id'])->get();
 
+            // Validasi paket kosong
+            if ($detail->isEmpty()) {
+
+                throw new \Exception(
+                    "Paket yang dipilih tidak memiliki barang."
+                );
+            }
+
             foreach ($detail as $barangPaket) {
 
                 $barang = Barang::find($barangPaket->barang_id);
+
+                if (!$barang) {
+                    throw new \Exception(
+                        "Terdapat barang pada paket yang sudah tidak ditemukan."
+                    );
+                }
+
                 if ($barang->status != 'aktif') {
                     throw new \Exception(
                         "Barang {$barang->nama_barang} sudah tidak aktif sehingga paket tidak dapat disewakan."
@@ -69,7 +90,6 @@ class InventoryService
                     $tanggalMulai,
                     $tanggalSelesai,
                     $penyewaanId
-
                 );
 
                 $tersisa = $barang->jumlah_total - $dipakai;

@@ -24,10 +24,8 @@ use Dcat\Admin\Show;
  * Admin::js('/packages/prettydocs/js/main.js');
  *
  */
-Admin::css('/css/barang.css');
-Admin::css('/css/jadwal-acara.css');
-Admin::css('/css/dashboard.css');
-Admin::css('/css/rekap-keuangan.css');
-Admin::css('/css/penyewaan.css');
-Admin::css('/css/pemasukan.css');
+
+// Admin::css('/css/jadwal-acara.css');
+// Admin::css('/css/dashboard.css');
+// Admin::css('/css/pemasukan.css');
 

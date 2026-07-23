@@ -324,3 +324,81 @@
     }
 
 }
+/* 1. Mobile Layout */
+@media (max-width:768px){
+
+.content-wrapper,
+.content{
+    padding:10px!important;
+}
+
+.box,
+.card{
+    width:100%!important;
+}
+
+}
+
+/* 2. HasMany Scroll */
+@media (max-width:768px){
+
+.has-many-table-detailPaket,
+.has-many-table-detailBarang{
+
+    display:block;
+    width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+
+}
+
+.has-many-table-detailPaket table,
+.has-many-table-detailBarang table{
+
+    min-width:700px;
+    width:max-content;
+
+}
+
+}
+
+/* 3. Isi tabel */
+@media (max-width:768px){
+
+.has-many-table-detailPaket td,
+.has-many-table-detailBarang td{
+
+    white-space:nowrap;
+
+}
+
+.has-many-table-detailPaket input,
+.has-many-table-detailBarang input{
+
+    min-width:70px;
+
+}
+
+.has-many-table-detailPaket select,
+.has-many-table-detailBarang select{
+
+    min-width:180px;
+
+}
+
+}
+
+/* 4. Select2 */
+.select2-container{
+    width:100%!important;
+}
+
+.select2-selection{
+    min-width:180px;
+}
+
+/* 5. Tombol */
+.has-many-table .btn{
+    white-space:nowrap;
+}

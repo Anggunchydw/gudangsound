@@ -66,7 +66,9 @@ class PenugasanController extends AdminController
                 $grid->disableCreateButton();
                 $grid->disableActions();
             }
-
+            $grid->actions(function (Grid\Displayers\Actions $actions) {
+                $actions->disableView();
+            });
             $grid->filter(function (Grid\Filter $filter) {
 
                 $filter->like('penyewaan.nama_penyewa', 'Nama Penyewa');
@@ -102,14 +104,33 @@ class PenugasanController extends AdminController
         $this->authorizeManage();
 
         return Form::make(new Penugasan(), function (Form $form) {
-
+            $form->disableDeleteButton();
+             $form->disableViewButton();
+            $form->disableEditingCheck();
+            $form->disableCreatingCheck();
+            $form->disableViewCheck();
             $form->display('id');
 
             $form->select('penyewaan_id', 'Penyewaan')
-                ->options(
+                ->options(function () use ($form) {
 
-                    Penyewaan::where('status_penyewaan', '<>', 'dibatalkan')
-                        ->whereDoesntHave('penugasan')
+                    $query = Penyewaan::where('status_penyewaan', '<>', 'dibatalkan');
+
+                    // Jika edit, tampilkan juga penyewaan yang sedang dipakai
+                    if ($form->isEditing()) {
+
+                        $current = $form->model()->penyewaan_id;
+
+                        $query->where(function ($q) use ($current) {
+                            $q->whereDoesntHave('penugasan')
+                                ->orWhere('id', $current);
+                        });
+                    } else {
+
+                        $query->whereDoesntHave('penugasan');
+                    }
+
+                    return $query
                         ->orderBy('tanggal_mulai')
                         ->get()
                         ->mapWithKeys(function ($item) {
@@ -117,27 +138,22 @@ class PenugasanController extends AdminController
                             $label = '';
 
                             if ($item->tanggal_mulai < today()) {
-
                                 $label = '⚠ TERLEWAT | ';
                             } elseif ($item->tanggal_mulai == today()) {
-
                                 $label = '🔥 HARI INI | ';
                             }
 
                             return [
-
                                 $item->id =>
                                 $label .
                                     $item->nama_penyewa .
                                     ' | ' .
                                     date('d-m-Y', strtotime($item->tanggal_mulai)) .
                                     ' | ' .
-                                    $item->lokasi
-
+                                    $item->lokasi,
                             ];
-                        })
-
-                )
+                        });
+                })
                 ->required();
 
             $form->text('tim', 'Nama Tim')

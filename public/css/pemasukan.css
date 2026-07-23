@@ -18,3 +18,26 @@
     font-weight: 700;
     color: #27426e;
 }
+.status-dp{
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.status-lunas{
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+ 
+    background: #dcfce7;
+    color: #166534;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+}

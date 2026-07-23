@@ -2,42 +2,50 @@
 
 namespace App\Admin\Controllers;
 
-use App\Services\PemasukanService;
-use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Dcat\Admin\Admin;
-use App\Admin\Repositories\Penyewaan as PenyewaanRepository;
-use App\Models\Penyewaan;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
-use Dcat\Admin\Show;
+use Dcat\Admin\Http\Controllers\AdminController;
+use Illuminate\Http\Request;
+
+use App\Admin\Repositories\Penyewaan as PenyewaanRepository;
 use App\Models\Barang;
 use App\Models\Paket;
-use Dcat\Admin\Layout\Content;
-use App\Services\InventoryService;
-use Dcat\Admin\Http\Controllers\AdminController;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\Penyewaan;
+use App\Services\PembayaranService;
+use App\Services\PenyewaanService;
 
 class PenyewaanController extends AdminController
 {
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
+
     protected function canManage()
     {
         return Admin::user()->isRole('administrator')
             || Admin::user()->isRole('pemilik');
     }
-
+    protected function canView()
+    {
+        return Admin::user()->isRole('administrator')
+            || Admin::user()->isRole('pemilik')
+            || Admin::user()->isRole('admin');
+    }
     protected function authorizeManage()
     {
         if (! $this->canManage()) {
             abort(403);
         }
     }
+    protected function authorizeView()
+    {
+        if (! $this->canView()) {
+            abort(403);
+        }
+    }
     protected function grid()
     {
+        $this->authorizeView();
+        Admin::css(asset('css/penyewaan.css'));
         $canManage = $this->canManage();
         return Grid::make(new PenyewaanRepository(), function (Grid $grid) use ($canManage) {
 
@@ -73,11 +81,29 @@ class PenyewaanController extends AdminController
                 $grid->disableBatchDelete();
             }
             $grid->filter(function (Grid\Filter $filter) {
-                $filter->like('nama_penyewa');
+
+                $filter->like('nama_penyewa', 'Nama Penyewa');
+
+                $filter->equal('status_pembayaran')
+                    ->select([
+                        'DP' => 'DP',
+                        'Lunas' => 'Lunas'
+                    ]);
+
+                $filter->between('tanggal_mulai', 'Tanggal Mulai')
+                    ->date();
             });
-
+            // $grid->batchActions(function (Grid\Tools\BatchActions $batch) {
+            //     $batch->disableDelete();
+            // });
+            // $grid->disableRowSelector();
+            $grid->quickSearch(function ($model, $keyword) {
+                $model->where('nama_penyewa', 'like', "%{$keyword}%")
+                    ->orWhere('no_tlp', 'like', "%{$keyword}%")
+                    ->orWhere('lokasi', 'like', "%{$keyword}%");
+            });
             $grid->actions(function (Grid\Displayers\Actions $actions) use ($canManage) {
-
+                $actions->disableDelete();
                 if (! $canManage) {
                     return;
                 }
@@ -100,16 +126,9 @@ class PenyewaanController extends AdminController
         });
     }
 
-    /**
-     * Make a show builder.
-     *
-     * @param mixed $id
-     *
-     * @return Show
-     */
     protected function detail($id)
     {
-        // Admin::css(asset('css/penyewaan.css'));
+        $this->authorizeView();
         $penyewaan = Penyewaan::with([
             'detailBarang.barang',
             'detailPaket.paket.detail.barang',
@@ -121,11 +140,6 @@ class PenyewaanController extends AdminController
         );
     }
 
-    /**
-     * Make a form builder.
-     *
-     * @return Form
-     */
     protected function form()
     {
         $this->authorizeManage();
@@ -166,7 +180,6 @@ class PenyewaanController extends AdminController
             );
         }
 
-
         $(document).on(
             'keyup change',
             'input[name="total_harga"], input[name="uang_muka"]',
@@ -175,12 +188,17 @@ class PenyewaanController extends AdminController
 
         hitungPelunasan();
 
-
         JS);
         return Form::make(PenyewaanRepository::with([
+
             'detailPaket',
             'detailBarang'
         ]), function (Form $form) {
+            $form->disableDeleteButton();
+            $form->disableEditingCheck();
+            $form->disableCreatingCheck();
+            $form->disableViewCheck();
+
             $form->display('id');
             $form->text('nama_penyewa')
                 ->required();
@@ -251,62 +269,23 @@ class PenyewaanController extends AdminController
             $form->hidden('status_penyewaan')->default('booking');
 
             $form->saving(function (Form $form) {
-                $totalHarga = (float) str_replace(',', '', $form->total_harga);
-                $uangMuka   = (float) str_replace(',', '', request('uang_muka'));
 
-                $form->uang_muka = $uangMuka;
-
-                if ($uangMuka < 0) {
-
-                    return $form->response()->error(
-                        'Uang muka (DP) tidak boleh bernilai negatif.'
-                    );
-                }
-                if ($uangMuka > $totalHarga) {
-
-                    return $form->response()->error(
-                        'Uang muka (DP) tidak boleh melebihi total harga.'
-                    );
-                }
-                $form->status_pembayaran =
-                    $uangMuka >= $totalHarga
-                    ? 'Lunas'
-                    : 'DP';
                 try {
 
-                    InventoryService::checkAvailability(
-
-                        $form->tanggal_mulai,
-                        $form->tanggal_selesai,
-
-
-                        request()->input('detailBarang', []),
-
-                        request()->input('detailPaket', []),
-
-                        $form->model()->id // null saat tambah
-
-                    );
+                    PenyewaanService::validate($form);
                 } catch (\Exception $e) {
 
-                    return $form->response()->error($e->getMessage());
-                }
-            });
-            $form->saved(function (Form $form) {
-
-                $penyewaan = Penyewaan::find($form->getKey());
-
-                if ($penyewaan->uang_muka > 0) {
-
-                    PemasukanService::simpan(
-                        $penyewaan,
-                        $penyewaan->uang_muka,
-                        $penyewaan->status_pembayaran == 'Lunas'
-                            ? 'Lunas'
-                            : 'DP',
-                        'Pembayaran awal'
+                    return $form->response()->error(
+                        $e->getMessage()
                     );
                 }
+            });
+
+            $form->saved(function (Form $form) {
+
+                PenyewaanService::buatPembayaranAwal(
+                    $form->getKey()
+                );
 
                 return $form->response()
                     ->success('Penyewaan berhasil disimpan.')
@@ -323,41 +302,18 @@ class PenyewaanController extends AdminController
 
         $penyewaan = Penyewaan::findOrFail($id);
 
-        $sisa =
-            $penyewaan->total_harga
-            -
-            $penyewaan->uang_muka;
+        try {
 
-        if ($request->nominal > $sisa) {
+            PembayaranService::tambahPembayaran(
+                $penyewaan,
+                (float) $request->nominal
+            );
+        } catch (\Exception $e) {
 
-            return back()
-                ->withErrors([
-                    'nominal' => 'Nominal melebihi sisa tagihan.'
-                ]);
+            return back()->withErrors([
+                'nominal' => $e->getMessage()
+            ]);
         }
-
-        $penyewaan->uang_muka += $request->nominal;
-
-        if (
-            $penyewaan->uang_muka >=
-            $penyewaan->total_harga
-        ) {
-
-            $penyewaan->status_pembayaran = 'Lunas';
-        } else {
-
-            $penyewaan->status_pembayaran = 'DP';
-        }
-
-        $penyewaan->save();
-        PemasukanService::simpan(
-            $penyewaan,
-            $request->nominal,
-            $penyewaan->status_pembayaran == 'Lunas'
-                ? 'Lunas'
-                : 'DP',
-            'Pembayaran lanjutan'
-        );
 
         admin_success(
             'Berhasil',
@@ -368,9 +324,10 @@ class PenyewaanController extends AdminController
             admin_url("penyewaan/{$penyewaan->id}")
         );
     }
+
     public function cetak($id)
     {
-        $penyewaan = \App\Models\Penyewaan::with([
+        $penyewaan = Penyewaan::with([
             'detailBarang.barang',
             'detailPaket.paket.detail.barang',
         ])->findOrFail($id);
@@ -388,13 +345,28 @@ class PenyewaanController extends AdminController
     }
     public function cancel($id)
     {
-        $penyewaan = \App\Models\Penyewaan::findOrFail($id);
+        $this->authorizeManage();
+
+        $penyewaan = Penyewaan::findOrFail($id);
+
+        if (!in_array($penyewaan->status_sekarang, ['booking', 'berlangsung'])) {
+
+            admin_error(
+                'Gagal',
+                'Penyewaan tidak dapat dibatalkan.'
+            );
+
+            return back();
+        }
 
         $penyewaan->update([
             'status_penyewaan' => 'dibatalkan'
         ]);
 
-        admin_success('Berhasil', 'Penyewaan berhasil dibatalkan.');
+        admin_success(
+            'Berhasil',
+            'Penyewaan berhasil dibatalkan.'
+        );
 
         return redirect(admin_url('penyewaan'));
     }

@@ -1,63 +1,5 @@
-.barang-form-wrapper{
-    max-width:1050px;
-    width:100%;
-}
 
-.barang-form-wrapper .box,
-.barang-form-wrapper .card{
-    border-radius:12px;
-    overflow:hidden;
-}
-
-
-.barang-form-wrapper .box-body,
-.barang-form-wrapper .card-body{
-    padding:30px !important;
-}
-
-.barang-form-wrapper .form-group{
-    margin-bottom:20px;
-}
-
-
-.barang-form-wrapper .form-control{
-    height:42px;
-    border-radius:8px;
-    box-shadow:none;
-}
-
-
-.barang-form-wrapper textarea.form-control{
-    height:100px;
-    resize:none;
-}
-
-
-.barang-form-wrapper .input-group{
-    width:100%;
-}
-
-
-.barang-form-wrapper .input-group .form-control{
-    width:100%;
-}
-
-
-.barang-form-wrapper .btn{
-    border-radius:8px;
-}
-
-.barang-form-wrapper .row{
-    margin-left:-10px;
-    margin-right:-10px;
-}
-
-
-.barang-form-wrapper .row > div{
-    padding-left:10px;
-    padding-right:10px;
-}
-
+/* GRID BARANG */
 .badge-kategori{
     display:inline-block;
     background:#e5e7eb;
@@ -67,7 +9,6 @@
     font-size:12px;
     font-weight:600;
 }
-
 
 .status-aktif{
     display:inline-block;
@@ -89,219 +30,205 @@
     font-size:12px;
     font-weight:600;
 }
+/*  */
 
+/* FORM BARANG */
+.barang-form-wrapper{
+    max-width:1050px;
+    width:100%;
+}
+
+.barang-form-wrapper .box,
+.barang-form-wrapper .card{
+    border-radius:12px;
+    overflow:hidden;
+}
+
+.barang-form-wrapper .box-body,
+.barang-form-wrapper .card-body{
+    padding:30px !important;
+}
+
+.barang-form-wrapper .form-group{
+    margin-bottom:20px;
+}
+
+.barang-form-wrapper .form-control{
+    height:42px;
+    border-radius:8px;
+    box-shadow:none;
+}
+
+.barang-form-wrapper textarea.form-control{
+    height:100px;
+    resize:none;
+}
+
+.barang-form-wrapper .input-group{
+    width:100%;
+}
+
+.barang-form-wrapper .input-group .form-control{
+    width:100%;
+}
+
+.barang-form-wrapper .btn{
+    border-radius:8px;
+}
+
+.barang-form-wrapper .row{
+    margin-left:-10px;
+    margin-right:-10px;
+}
+
+.barang-form-wrapper .row>div{
+    padding-left:10px;
+    padding-right:10px;
+}
+
+@media(max-width:425px){
+
+    .barang-form-wrapper .box-body,
+    .barang-form-wrapper .card-body{
+        padding:18px!important;
+    }
+
+    .barang-form-wrapper .row{
+        display:block;
+    }
+
+    .barang-form-wrapper .col-md-6,
+    .barang-form-wrapper .col-sm-6,
+    .barang-form-wrapper .col-lg-6{
+        width:100%;
+        max-width:100%;
+    }
+
+    .barang-form-wrapper .form-control,
+    .barang-form-wrapper .input-group{
+        width:100%;
+    }
+
+}
+/* */
+
+/* dETAIL BARANG */
 .detail-wrapper{
     max-width:1200px;
     margin:auto;
 }
 
-
 .detail-wrapper .detail-card{
-
-    background:white;
+    background:#fff;
     border-radius:12px;
     border:1px solid #e5e7eb;
     overflow:hidden;
     margin-bottom:24px;
-
 }
 
-
 .detail-wrapper .detail-header{
-
     padding:16px 22px;
     background:#fafafa;
     border-bottom:1px solid #eee;
     font-weight:600;
-
 }
 
-
 .detail-wrapper .detail-body{
-
     padding:28px;
-
 }
 
 .detail-wrapper .barang-info-grid{
-
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:40px;
-
 }
-
 
 .detail-wrapper .barang-info-item{
-
     padding:14px 0;
     border-bottom:1px solid #eee;
-
 }
-
 
 .detail-wrapper .barang-info-title{
-
     font-size:13px;
     color:#9ca3af;
-
 }
 
-
 .detail-wrapper .barang-info-value{
-
     margin-top:5px;
     font-size:16px;
     font-weight:600;
     word-break:break-word;
-
 }
 
-.detail-wrapper .badge-status{
+/* Badge */
 
+.detail-wrapper .badge-status{
     display:inline-block;
     padding:4px 10px;
     border-radius:20px;
     font-size:12px;
     font-weight:600;
-
 }
 
-.detail-wrapper .badge-status.aktif{
-
-    background:#dcfce7;
-    color:#15803d;
-
-}
-
-
-.detail-wrapper .badge-status.nonaktif{
-
-    background:#fee2e2;
-    color:#b91c1c;
-
-}
-
-
+.detail-wrapper .badge-status.aktif,
 .detail-wrapper .badge-status.baik{
-
     background:#dcfce7;
     color:#15803d;
-
 }
 
-
-.detail-wrapper .badge-status.rusak{
-
-    background:#fee2e2;
-    color:#b91c1c;
-
-}
-
-
+.detail-wrapper .badge-status.nonaktif,
+.detail-wrapper .badge-status.rusak,
 .detail-wrapper .badge-status.hilang{
-
     background:#fee2e2;
     color:#b91c1c;
-
 }
+
+/* Table */
 
 .detail-wrapper .table-responsive{
-
     width:100%;
     overflow-x:auto;
 }
 
-
 .detail-wrapper .table-riwayat{
-
     width:100%;
     min-width:700px;
     border-collapse:collapse;
-
 }
 
-
 .detail-wrapper .table-riwayat th{
-
     padding:14px;
     background:#f8fafc;
     white-space:nowrap;
-
 }
 
-
 .detail-wrapper .table-riwayat td{
-
     padding:14px;
     border-bottom:1px solid #eee;
-
 }
 
 @media(max-width:425px){
 
-
-    .barang-form-wrapper .box-body,
-    .barang-form-wrapper .card-body{
-
-        padding:18px !important;
-
-    }
-
-    .barang-form-wrapper .row{
-
-        display:block;
-
-    }
-
-
-    .barang-form-wrapper .col-md-6,
-    .barang-form-wrapper .col-sm-6,
-    .barang-form-wrapper .col-lg-6{
-
-        width:100%;
-        max-width:100%;
-
-    }
-
-    .barang-form-wrapper .form-control,
-    .barang-form-wrapper .input-group{
-
-        width:100%;
-
-    }
-
     .detail-wrapper .detail-body{
-
         padding:18px;
-
     }
-
 
     .detail-wrapper .barang-info-grid{
-
         grid-template-columns:1fr;
         gap:0;
-
     }
-
 
     .detail-wrapper .barang-info-value{
-
         font-size:14px;
-
     }
-
-
 
     .detail-wrapper .table-riwayat{
-
         min-width:650px;
-
     }
+
 }
 
-@media (min-width:769px) and (max-width:992px){
+@media(min-width:769px) and (max-width:992px){
 
     .detail-wrapper{
         max-width:100%;
@@ -315,5 +242,5 @@
         gap:20px;
     }
 
-
 }
+/*  */

@@ -6,7 +6,6 @@ use App\Admin\Repositories\Barang;
 use Dcat\Admin\Admin;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
-use Dcat\Admin\Show;
 use App\Models\Barang as BarangModel;
 use Dcat\Admin\Http\Controllers\AdminController;
 
@@ -16,6 +15,7 @@ class BarangController extends AdminController
 
     protected function grid()
     {
+        Admin::css(asset('css/barang.css'));
         return Grid::make(new Barang(), function (Grid $grid) {
             $grid->column('id', 'ID')->sortable();
             $grid->column('nama_barang');
@@ -50,12 +50,14 @@ class BarangController extends AdminController
             $grid->batchActions(function (Grid\Tools\BatchActions $batch) {
                 $batch->disableDelete();
             });
+            $grid->disableRowSelector();
             $grid->quickSearch(function ($model, $keyword) {
-                $model->where('nama_barang', 'like', "%{$keyword}%");
+                $model->where('nama_barang', 'like', "%{$keyword}%")
+                    ->orWhere('kategori', 'like', "%{$keyword}%")
+                    ->orWhere('satuan', 'like', "%{$keyword}%");
             });
         });
     }
-
 
     protected function detail($id)
     {
@@ -75,12 +77,15 @@ class BarangController extends AdminController
         );
     }
 
-
     protected function form()
     {
         Admin::css(asset('css/barang.css'));
 
         return Form::make(new Barang(), function (Form $form) {
+            $form->disableDeleteButton();
+            $form->disableEditingCheck();
+            $form->disableCreatingCheck();
+            $form->disableViewCheck();
 
             $form->html('<div class="barang-form-wrapper">');
 
@@ -102,7 +107,6 @@ class BarangController extends AdminController
                     ->required();
             });
 
-
             $form->row(function ($row) {
 
                 $row->width(6)
@@ -113,14 +117,12 @@ class BarangController extends AdminController
                     ])
                     ->required();
 
-
                 $row->width(6)
                     ->number('jumlah_total', 'Jumlah Total')
                     ->min(0)
                     ->default(0)
                     ->required();
             });
-
 
             $form->row(function ($row) {
 
@@ -134,21 +136,30 @@ class BarangController extends AdminController
                     ])
                     ->required();
 
-
                 $row->width(6)
                     ->textarea('keterangan', 'Keterangan')
                     ->rows(4);
             });
 
-
             $form->divider();
-
-
-            $form->display('created_at', 'Dibuat');
-            $form->display('updated_at', 'Diubah');
-
-
             $form->html('</div>');
+
+            $form->saving(function (Form $form) {
+
+                $barang = $form->model();
+
+                if ($barang->exists) {
+
+                    $dipakai = $barang->dipakai_hari_ini;
+
+                    if ($form->jumlah_total < $dipakai) {
+
+                        return $form->response()->error(
+                            "Jumlah total tidak boleh lebih kecil dari barang yang sedang dipakai ($dipakai)."
+                        );
+                    }
+                }
+            });
         });
     }
 }

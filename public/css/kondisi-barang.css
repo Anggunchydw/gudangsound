@@ -1,0 +1,146 @@
+/* ===========================
+   WRAPPER
+=========================== */
+
+.kondisi-wrapper{
+    width:100%;
+}
+
+.kondisi-wrapper .box-body{
+    padding:20px;
+    overflow:hidden;
+}
+
+/* ===========================
+   TABLE WRAPPER
+=========================== */
+
+.info-table,
+.kondisi-table{
+    width:100%;
+    overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    margin-bottom:20px;
+}
+
+.info-table table{
+    width:100%;
+    min-width:500px;
+}
+
+.kondisi-table table{
+    width:100%;
+    min-width:1200px;
+    border-collapse:collapse;
+}
+
+.table{
+    margin-bottom:0;
+}
+
+.table th{
+    font-weight:600;
+    white-space:nowrap;
+    vertical-align:middle;
+}
+
+.table td{
+    vertical-align:top;
+}
+
+/* ===========================
+   KOLOM
+=========================== */
+
+.barang-col{
+    min-width:220px;
+}
+
+.qty-col{
+    min-width:70px;
+    text-align:center;
+}
+
+.kondisi-col{
+    min-width:170px;
+}
+
+.jumlah-col{
+    min-width:220px;
+}
+
+.catatan-col{
+    min-width:260px;
+}
+
+/* ===========================
+   RADIO
+=========================== */
+
+.radio-group{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.radio-group label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin:0;
+    font-weight:normal;
+}
+
+.radio-group input{
+    margin:0;
+}
+
+/* ===========================
+   FORM
+=========================== */
+
+.table textarea{
+    width:100%;
+    min-width:220px;
+    min-height:70px;
+    resize:vertical;
+}
+
+.table input[type=number]{
+    width:100%;
+    min-width:120px;
+}
+
+.table small{
+    display:block;
+    margin-top:5px;
+}
+
+/* ===========================
+   BUTTON
+=========================== */
+
+.btn-area{
+    margin-top:20px;
+}
+
+/* ===========================
+   MOBILE
+=========================== */
+
+@media (max-width:768px){
+
+    .kondisi-wrapper .box-body{
+        padding:12px;
+    }
+
+    .btn-area .btn{
+        width:100%;
+    }
+
+    .table{
+        font-size:13px;
+    }
+
+}

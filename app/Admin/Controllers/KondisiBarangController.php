@@ -7,6 +7,7 @@ use App\Models\Penugasan;
 use Dcat\Admin\Layout\Content;
 use App\Models\KondisiBarang;
 use App\Models\Barang;
+use Dcat\Admin\Admin;
 use Dcat\Admin\Http\Controllers\AdminController;
 
 class KondisiBarangController extends AdminController
@@ -79,6 +80,7 @@ class KondisiBarangController extends AdminController
 
     public function input(Penugasan $penugasan, Content $content)
     {
+        Admin::css(asset('css/kondisi-barang.css'));
         $penugasan->load([
             'penyewaan.detailBarang.barang',
             'penyewaan.detailPaket.paket.detail.barang',

@@ -13,7 +13,7 @@ use Dcat\Admin\Layout\Content;
 class HomeController extends Controller
 {
     public function index(Content $content)
-    {
+    {Admin::css(asset('css/dashboard.css'));
         $user = Admin::user();
 
         if (
@@ -22,7 +22,7 @@ class HomeController extends Controller
         ) {
             return redirect(admin_url('Jadwal-Acara'));
         }
-        
+
         $totalPenyewaan = Penyewaan::count();
 
         $stokBarang = Barang::all()->sum(function ($barang) {

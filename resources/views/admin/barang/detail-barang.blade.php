@@ -117,14 +117,14 @@
 
     </div>
 
-    {{-- =======================
-        RIWAYAT KONDISI
-    ======================== --}}
+
+    {{-- RIWAYAT KONDISI --}}
+
 
     <div class="detail-card">
 
         <div class="detail-header">
-            Riwayat Kondisi Barang
+            Riwayat Kondisi
         </div>
 
         <div class="detail-body">
@@ -138,11 +138,11 @@
                         <tr>
 
                             <th>Tanggal</th>
-                            <th>Penyewa</th>
-                            <th>Qty</th>
+                            <th>Jumlah</th>
                             <th>Sebelum</th>
                             <th>Sesudah</th>
                             <th>Catatan</th>
+                            <th>Pegawai</th>
 
                         </tr>
 
@@ -160,33 +160,32 @@
                                         -
                                     @endif
                                 </td>
-
-                                <td>
-                                    {{ optional(optional($item->penugasan)->penyewaan)->nama_penyewa ?? '-' }}
-                                </td>
-
                                 <td>
                                     {{ $item->jumlah_barang }}
                                 </td>
 
                                 <td>
-
                                     <span class="badge-status {{ $item->kondisi_sebelum }}">
                                         {{ ucfirst($item->kondisi_sebelum) }}
                                     </span>
-
                                 </td>
 
                                 <td>
-
                                     <span class="badge-status {{ $item->kondisi_sesudah }}">
                                         {{ ucfirst($item->kondisi_sesudah) }}
                                     </span>
-
                                 </td>
 
                                 <td>
                                     {{ $item->catatan ?: '-' }}
+                                </td>
+
+                                <td>
+                                    @if ($item->penugasan && $item->penugasan->pegawai->count())
+                                        {{ $item->penugasan->pegawai->pluck('name')->join(', ') }}
+                                    @else
+                                        -
+                                    @endif
                                 </td>
 
                             </tr>

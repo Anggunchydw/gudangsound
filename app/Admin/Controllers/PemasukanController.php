@@ -7,21 +7,18 @@ use App\Admin\Repositories\Pemasukan;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Show;
+use Dcat\Admin\Admin;
 use Dcat\Admin\Http\Controllers\AdminController;
 
 class PemasukanController extends AdminController
 {
-    /**
-     * Make a grid builder.
-     *
-     * @return Grid
-     */
     protected function grid()
     {
+        Admin::css(asset('css/pemasukan.css'));
         return Grid::make(new Pemasukan(), function (Grid $grid) {
             $grid->model()
                 ->with('penyewaan')
-                ->orderByDesc('id');
+                ->orderByDesc('tanggal_masuk');
             $totalPemasukan = PemasukanModel::sum('jumlah');
 
             $grid->header("
@@ -39,7 +36,7 @@ class PemasukanController extends AdminController
 
             $grid->column('tanggal_masuk');
             $grid->column('penyewaan.nama_penyewa', 'Nama Penyewa');
-            $grid->column('jenis_pembayaran')
+            $grid->column('jenis_pembayaran', 'Jenis')
                 ->display(function ($status) {
 
                     if ($status == 'DP') {
@@ -52,13 +49,27 @@ class PemasukanController extends AdminController
                     return 'Rp ' . number_format($value, 0, ',', '.');
                 });;
             $grid->column('keterangan');
-
+            $grid->quickSearch(function ($model, $keyword) {
+                $model->whereHas('penyewaan', function ($q) use ($keyword) {
+                    $q->where('nama_penyewa', 'like', "%{$keyword}%");
+                })
+                    ->orWhere('keterangan', 'like', "%{$keyword}%");
+            });
             $grid->filter(function (Grid\Filter $filter) {
-                $filter->equal('id');
+
+                $filter->equal('jenis_pembayaran')
+                    ->select([
+                        'DP' => 'DP',
+                        'Lunas' => 'Lunas',
+                    ]);
+
+                $filter->between('tanggal_masuk')
+                    ->date();
             });
             $grid->disableCreateButton();
             $grid->disableActions();
-            // $grid->disableBatchDelete();
+            $grid->disableBatchDelete();
+            $grid->disableRowSelector();
         });
     }
 
