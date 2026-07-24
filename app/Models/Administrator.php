@@ -12,6 +12,7 @@ class Administrator extends DcatAdministrator
         'password',
         'name',
         'email',
+        'telegram_chat_id',
         'avatar',
     ];
     public function detailPenugasan()

@@ -66,6 +66,11 @@
                                 {{ $penyewaan->lokasi }}
                             </div>
                         </div>
+                        <div class="info-item">
+                            <div class="info-label">Keterangan</div>
+                            <div class="info-value">{{ $penyewaan->keterangan }}
+                            </div>
+                        </div>
 
                     </div>
 

@@ -108,7 +108,7 @@ class JadwalAcaraController extends AdminController
                 )
             ));
     }
-    
+
     public function events()
     {
         $user = Admin::user();
@@ -195,15 +195,11 @@ class JadwalAcaraController extends AdminController
                     'extendedProps' => [
 
                         'lokasi' => $item->lokasi,
-
+                        'keterangan' => $item->keterangan,
                         'status' => $item->status_pembayaran,
-
                         'mulai' => $item->tanggal_mulai,
-
                         'selesai' => $item->tanggal_selesai,
-
                         'paket' => implode('<br>', $paket),
-
                         'pegawai' => implode(', ', array_unique($pegawai)),
 
                     ],

@@ -15,6 +15,9 @@ use App\Models\Paket;
 use App\Models\Penyewaan;
 use App\Services\PembayaranService;
 use App\Services\PenyewaanService;
+use App\Models\Administrator;
+use App\Services\TelegramService;
+
 
 class PenyewaanController extends AdminController
 {
@@ -247,6 +250,8 @@ class PenyewaanController extends AdminController
                     ->default(1)
                     ->min(1);
             })->useTable();
+            $form->textarea('keterangan', 'Keterangan')
+                ->rows(3);
             $form->divider('Pembayaran');
             $form->currency('total_harga', 'Total Harga')
                 ->symbol('Rp')
@@ -287,6 +292,107 @@ class PenyewaanController extends AdminController
                     $form->getKey()
                 );
 
+                $penyewaan = Penyewaan::with([
+                    'detailPaket.paket',
+                    'detailBarang.barang'
+                ])->find($form->getKey());
+
+                if ($form->isCreating()) {
+
+                    $judulTelegram = "📅 PENYEWAAN BARU";
+                } else {
+
+                    $judulTelegram = "⚠️ RALAT PENYEWAAN";
+                }
+                $paket = '';
+
+                foreach ($penyewaan->detailPaket as $detail) {
+
+                    if ($detail->paket) {
+
+                        $paket .=
+                            "• {$detail->paket->nama_paket} x{$detail->jumlah_paket}\n";
+                    }
+                }
+                $barang = '';
+
+                foreach ($penyewaan->detailBarang as $detail) {
+
+                    if ($detail->barang) {
+
+                        $barang .=
+                            "• {$detail->barang->nama_barang} x{$detail->jumlah_barang}\n";
+                    }
+                }
+
+                $telegram = new TelegramService();
+
+                $pesan =
+                    $judulTelegram . "\n\n" .
+
+                    " Penyewa : {$penyewaan->nama_penyewa}\n" .
+                    " No. HP : {$penyewaan->no_tlp}\n" .
+                    " Lokasi : {$penyewaan->lokasi}\n" .
+                    " Tanggal : " .
+                    date('d-m-Y', strtotime($penyewaan->tanggal_mulai)) .
+                    " s/d " .
+                    date('d-m-Y', strtotime($penyewaan->tanggal_selesai)) .
+                    "\n\n";
+
+                if ($paket != '') {
+
+                    $pesan .=
+                        " Paket\n" .
+                        $paket .
+                        "\n";
+                }
+
+                if ($barang != '') {
+
+                    $pesan .=
+                        " Barang Satuan\n" .
+                        $barang .
+                        "\n";
+                }
+
+                $pesan .=
+                    "📝 Keterangan\n" .
+                    ($penyewaan->keterangan ?: "-") .
+                    "\n\n" .
+
+                    "💳 Status Pembayaran : {$penyewaan->status_pembayaran}";
+                    
+                // Admin
+                $admins = Administrator::whereHas('roles', function ($q) {
+                    $q->where('slug', 'admin');
+                })->get();
+
+                foreach ($admins as $admin) {
+
+                    if ($admin->telegram_chat_id) {
+
+                        $telegram->sendMessage(
+                            $admin->telegram_chat_id,
+                            $pesan
+                        );
+                    }
+                }
+
+                // Pemilik
+                $pemiliks = Administrator::whereHas('roles', function ($q) {
+                    $q->where('slug', 'pemilik');
+                })->get();
+
+                foreach ($pemiliks as $pemilik) {
+
+                    if ($pemilik->telegram_chat_id) {
+
+                        $telegram->sendMessage(
+                            $pemilik->telegram_chat_id,
+                            $pesan
+                        );
+                    }
+                }
                 return $form->response()
                     ->success('Penyewaan berhasil disimpan.')
                     ->redirect(admin_url('penyewaan/' . $form->getKey()));

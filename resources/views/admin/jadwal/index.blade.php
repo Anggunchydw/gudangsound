@@ -290,6 +290,23 @@
                         <i class="feather icon-users"></i>
 
                     </div>
+                    <div class="detail-content">
+
+                        <small>KETERANGAN</small>
+
+                        <div id="m-keterangan"></div>
+
+                    </div>
+
+                </div>
+
+                <div class="detail-item">
+
+                    <div class="detail-icon">
+
+                        <i class="feather icon-file-text"></i>
+
+                    </div>
 
                     <div class="detail-content">
 
@@ -377,13 +394,13 @@
                 }
 
                 $('#m-lokasi').text(data.extendedProps.lokasi);
-
+                $('#m-keterangan').text(
+                    data.extendedProps.keterangan || '-'
+                );
                 $('#m-paket').html(
                     data.extendedProps.paket ?? '-'
                 );
-
                 $('#m-pegawai').html(data.extendedProps.pegawai || '-');
-
                 $('#eventModal').modal('show');
 
             }

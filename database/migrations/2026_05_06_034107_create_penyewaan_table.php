@@ -18,6 +18,7 @@ return new class extends Migration
             $table->date('tanggal_mulai');
             $table->date('tanggal_selesai');
             $table->string('lokasi', 100);
+            $table->text('keterangan')->nullable();
             $table->bigInteger('total_harga');
             $table->bigInteger('uang_muka')->default(0);
             $table->enum('status_pembayaran', ['DP', 'Lunas']);

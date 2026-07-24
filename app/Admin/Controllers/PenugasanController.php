@@ -10,6 +10,8 @@ use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Models\Role;
 use Dcat\Admin\Show;
+use App\Services\GoogleCalendarService;
+use App\Services\TelegramService;
 use Dcat\Admin\Http\Controllers\AdminController;
 
 class PenugasanController extends AdminController
@@ -105,7 +107,7 @@ class PenugasanController extends AdminController
 
         return Form::make(new Penugasan(), function (Form $form) {
             $form->disableDeleteButton();
-             $form->disableViewButton();
+            $form->disableViewButton();
             $form->disableEditingCheck();
             $form->disableCreatingCheck();
             $form->disableViewCheck();
@@ -163,14 +165,15 @@ class PenugasanController extends AdminController
 
             $form->checkbox('pegawai', 'Pegawai')
                 ->options(
-
                     Administrator::whereHas('roles', function ($q) use ($pegawaiRole) {
-
                         $q->where('admin_roles.id', $pegawaiRole->id);
                     })->pluck('name', 'id')
-
                 )
                 ->customFormat(function () use ($form) {
+
+                    if (!$form->model()) {
+                        return [];
+                    }
 
                     return $form->model()
                         ->pegawai
@@ -181,11 +184,198 @@ class PenugasanController extends AdminController
 
             $form->saved(function (Form $form) {
 
-                $pegawai = request('pegawai', []);
+                // 1. SIMPAN PEGAWAI
+                $pegawai = array_filter(request('pegawai', []));
 
-                $form->model()
-                    ->pegawai()
-                    ->sync($pegawai);
+                $penugasan = Penugasan::find($form->getKey());
+
+                $penugasan->pegawai()->sync($pegawai);
+
+                $penugasan->load([
+                    'pegawai',
+                    'penyewaan.detailPaket.paket',
+                    'penyewaan.detailBarang.barang',
+                ]);
+
+                // 2. PERSIAPAN DATA
+                $namaPegawai = $penugasan->pegawai
+                    ->pluck('name')
+                    ->implode(', ');
+
+                $emailsPegawai = $penugasan->pegawai
+                    ->pluck('email')
+                    ->filter()
+                    ->toArray();
+
+                $emailsPemilik = Administrator::whereHas('roles', function ($q) {
+                    $q->where('slug', 'pemilik');
+                })
+                    ->pluck('email')
+                    ->filter()
+                    ->toArray();
+
+                $emailsAdmin = Administrator::whereHas('roles', function ($q) {
+                    $q->where('slug', 'admin');
+                })
+                    ->pluck('email')
+                    ->filter()
+                    ->toArray();
+
+                $emails = array_unique(array_merge(
+                    $emailsPegawai,
+                    $emailsPemilik,
+                    $emailsAdmin
+                ));
+
+                $deskripsi =
+                    "Penyewa : {$penugasan->penyewaan->nama_penyewa}\n" .
+                    "Tim : {$penugasan->tim}\n" .
+                    "Lokasi : {$penugasan->penyewaan->lokasi}\n" .
+                    "Tanggal Mulai : " .
+                    date('d F Y', strtotime($penugasan->penyewaan->tanggal_mulai)) . "\n" .
+                    "Tanggal Selesai : " .
+                    date('d F Y', strtotime($penugasan->penyewaan->tanggal_selesai)) . "\n" .
+                    "Pegawai : {$namaPegawai}";
+
+                if ($form->isCreating()) {
+
+                    $judulGoogle = 'Penugasan Baru - ' . $penugasan->penyewaan->nama_penyewa;
+
+                    $judulTelegram = "📢 PENUGASAN BARU";
+                } else {
+
+                    $judulGoogle = 'RALAT PENUGASAN - ' . $penugasan->penyewaan->nama_penyewa;
+
+                    $judulTelegram = "⚠️ RALAT PENUGASAN";
+                }
+
+                // 3. GOOGLE CALENDAR
+                $google = new GoogleCalendarService();
+
+                // MODE TEST
+                $google->createEvent(
+                    $judulGoogle,
+                    $penugasan->penyewaan->lokasi,
+                    $deskripsi,
+                    now()->addMinutes(10)->format('Y-m-d\TH:i:s'),
+                    now()->addHours(2)->format('Y-m-d\TH:i:s'),
+                    $emails
+                );
+
+
+                // MODE PRODUKSI
+                /*
+                $google->createEvent(
+                    $judulGoogle,
+                    $penugasan->penyewaan->lokasi,
+                    $deskripsi,
+                    $penugasan->penyewaan->tanggal_mulai,
+                    $penugasan->penyewaan->tanggal_selesai,
+                    $emails
+                );
+                */
+
+                // 4. PERSIAPAN PESAN TELEGRAM
+                $paket = '';
+
+                foreach ($penugasan->penyewaan->detailPaket as $detail) {
+
+                    if ($detail->paket) {
+
+                        $paket .=
+                            "• {$detail->paket->nama_paket} x{$detail->jumlah_paket}\n";
+                    }
+                }
+
+                $barang = '';
+
+                foreach ($penugasan->penyewaan->detailBarang as $detail) {
+
+                    if ($detail->barang) {
+
+                        $barang .=
+                            "• {$detail->barang->nama_barang} x{$detail->jumlah_barang}\n";
+                    }
+                }
+
+                $pesan =
+                    $judulTelegram . "\n\n" .
+
+                    "👤 Penyewa : {$penugasan->penyewaan->nama_penyewa}\n" .
+                    "👥 Tim : {$penugasan->tim}\n" .
+                    "📍 Lokasi : {$penugasan->penyewaan->lokasi}\n" .
+                    "📅 Tanggal : " .
+                    date('d-m-Y', strtotime($penugasan->penyewaan->tanggal_mulai)) .
+                    " s/d " .
+                    date('d-m-Y', strtotime($penugasan->penyewaan->tanggal_selesai)) .
+                    "\n\n";
+
+                if ($paket != '') {
+
+                    $pesan .= "📦 Paket\n";
+                    $pesan .= $paket . "\n";
+                }
+
+                if ($barang != '') {
+
+                    $pesan .= "🎵 Barang Satuan\n";
+                    $pesan .= $barang . "\n";
+                }
+
+                $pesan .=
+                    "📝 Keterangan\n" .
+                    ($penugasan->penyewaan->keterangan ?: '-') .
+                    "\n\n" .
+
+                    "👷 Pegawai Bertugas\n" .
+                    $namaPegawai;
+
+                // TELEGRAM
+                $telegram = new TelegramService();
+
+                // Pegawai
+                foreach ($penugasan->pegawai as $pegawai) {
+
+                    if (!empty($pegawai->telegram_chat_id)) {
+
+                        $telegram->sendMessage(
+                            $pegawai->telegram_chat_id,
+                            $pesan
+                        );
+                    }
+                }
+
+                // Admin
+                $admins = Administrator::whereHas('roles', function ($q) {
+                    $q->where('slug', 'admin');
+                })->get();
+
+                foreach ($admins as $admin) {
+
+                    if (!empty($admin->telegram_chat_id)) {
+
+                        $telegram->sendMessage(
+                            $admin->telegram_chat_id,
+                            $pesan
+                        );
+                    }
+                }
+
+                // Pemilik
+                $pemiliks = Administrator::whereHas('roles', function ($q) {
+                    $q->where('slug', 'pemilik');
+                })->get();
+
+                foreach ($pemiliks as $pemilik) {
+
+                    if (!empty($pemilik->telegram_chat_id)) {
+
+                        $telegram->sendMessage(
+                            $pemilik->telegram_chat_id,
+                            $pesan
+                        );
+                    }
+                }
             });
         });
     }

@@ -29,6 +29,7 @@ class CreateAdminTables extends Migration
             $table->string('password', 80);
             $table->string('name');
             $table->string('email')->unique();
+             $table->string('telegram_chat_id')->nullable();
             $table->string('avatar')->nullable();
             $table->string('remember_token', 100)->nullable();
             $table->timestamps();

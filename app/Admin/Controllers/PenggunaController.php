@@ -33,6 +33,7 @@ class PenggunaController extends AdminController
             $grid->column('username', 'Username');
 
             $grid->column('email', 'Email');
+            $grid->column('telegram_chat_id', 'Telegram Chat ID');
 
             $grid->column('roles')
                 ->display(function ($roles) {
@@ -126,6 +127,7 @@ class PenggunaController extends AdminController
                     'email',
                     Rule::unique('admin_users', 'email')->ignore($form->model()->id),
                 ]);
+            $form->text('telegram_chat_id', 'Telegram Chat ID');
 
             $password = $form->password('password', 'Password')
                 ->customFormat(function () {

@@ -30,6 +30,21 @@ Route::group([
     $router->resource('pengguna', PenggunaController::class);
     $router->resource('penugasan', PenugasanController::class);
 
+    // Google Calendar OAuth
+    // $router->get(
+    //     'google/login',
+    //     'GoogleAuthController@login'
+    // );
+
+    // $router->get(
+    //     'google/callback',
+    //     'GoogleAuthController@callback'
+    // );
+    // $router->get(
+    //     'google/test',
+    //     'GoogleAuthController@testCalendar'
+    // );
+
     Route::get(
         'penyewaan/{id}/cancel',
         [PenyewaanController::class, 'cancel']
