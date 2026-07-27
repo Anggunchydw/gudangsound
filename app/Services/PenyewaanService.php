@@ -40,11 +40,8 @@ class PenyewaanService
 
         $detailPaket = request()->input('detailPaket', []);
 
-        /*
-        |--------------------------------------------------------------------------
-        | Validasi tanggal
-        |--------------------------------------------------------------------------
-        */
+        // Validasi tanggal
+
 
         if ($form->tanggal_selesai < $form->tanggal_mulai) {
 
@@ -53,27 +50,30 @@ class PenyewaanService
             );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Minimal memilih barang / paket
-        |--------------------------------------------------------------------------
-        */
+        // Minimal memilih barang / paket
 
-        if (
-            count($detailBarang) == 0 &&
-            count($detailPaket) == 0
-        ) {
 
+        $detailBarang = collect(request()->input('detailBarang', []))
+            ->filter(function ($item) {
+                return !empty($item['barang_id']) && empty($item['_remove_']);
+            })
+            ->values()
+            ->all();
+
+        $detailPaket = collect(request()->input('detailPaket', []))
+            ->filter(function ($item) {
+                return !empty($item['paket_id']) && empty($item['_remove_']);
+            })
+            ->values()
+            ->all();
+        if (empty($detailBarang) && empty($detailPaket)) {
             throw new \Exception(
                 'Minimal pilih satu paket atau satu barang.'
             );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Barang tidak boleh dobel
-        |--------------------------------------------------------------------------
-        */
+        //Barang tidak boleh dobel
+
 
         $barangIds = [];
 
@@ -93,11 +93,7 @@ class PenyewaanService
             $barangIds[] = $item['barang_id'];
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Paket tidak boleh dobel
-        |--------------------------------------------------------------------------
-        */
+        // Paket tidak boleh dobel
 
         $paketIds = [];
 

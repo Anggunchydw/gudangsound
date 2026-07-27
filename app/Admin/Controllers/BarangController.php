@@ -95,7 +95,9 @@ class BarangController extends AdminController
 
                 $row->width(6)
                     ->text('nama_barang', 'Nama Barang')
-                    ->required();
+                    ->required()
+                    ->creationRules('required|unique:barang,nama_barang')
+                    ->updateRules('required|unique:barang,nama_barang,{{id}}');
 
                 $row->width(6)
                     ->select('status', 'Status')
@@ -119,9 +121,9 @@ class BarangController extends AdminController
 
                 $row->width(6)
                     ->number('jumlah_total', 'Jumlah Total')
-                    ->min(0)
-                    ->default(0)
-                    ->required();
+                    ->min(1)
+                    ->default(1)
+                    ->rules('required|integer|min:1');
             });
 
             $form->row(function ($row) {

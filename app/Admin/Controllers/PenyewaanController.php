@@ -191,6 +191,26 @@ class PenyewaanController extends AdminController
 
         hitungPelunasan();
 
+        $(document).on('change', 'select[name*="[paket_id]"]', function () {
+
+            let row = $(this).closest('tr');
+            let jumlah = row.find('input[name*="[jumlah_paket]"]');
+
+            if (!jumlah.val()) {
+                jumlah.val(1).trigger('change');
+            }
+        });
+
+        // Barang
+        $(document).on('change', 'select[name*="[barang_id]"]', function () {
+
+            let row = $(this).closest('tr');
+            let jumlah = row.find('input[name*="[jumlah_barang]"]');
+
+            if (!jumlah.val()) {
+                jumlah.val(1).trigger('change');
+            }
+        });
         JS);
         return Form::make(PenyewaanRepository::with([
 
@@ -206,8 +226,14 @@ class PenyewaanController extends AdminController
             $form->text('nama_penyewa')
                 ->required();
 
-            $form->mobile('no_tlp')
-                ->required();
+            $form->text('no_tlp', 'No. Telepon')
+                ->required()
+                ->rules([
+                    'required',
+                    'regex:/^\+?[1-9]\d{7,14}$/'
+                ], [
+                    'regex' => 'Nomor telepon tidak valid.'
+                ]);
 
             $form->date('tanggal_mulai')
                 ->required();
@@ -258,7 +284,6 @@ class PenyewaanController extends AdminController
                 ->required();
             $form->currency('uang_muka', 'Uang Muka (DP)')
                 ->symbol('Rp')
-                ->default(0)
                 ->required();
             $form->html('
             <div class="form-group">
@@ -361,7 +386,7 @@ class PenyewaanController extends AdminController
                     "\n\n" .
 
                     "💳 Status Pembayaran : {$penyewaan->status_pembayaran}";
-                    
+
                 // Admin
                 $admins = Administrator::whereHas('roles', function ($q) {
                     $q->where('slug', 'admin');

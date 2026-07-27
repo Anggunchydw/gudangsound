@@ -11,6 +11,7 @@ class JadwalAcaraController extends AdminController
 {
     public function index(Content $content)
     {
+        
         // Load FullCalendar
         Admin::css('https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/main.min.css');
         Admin::js('https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js');

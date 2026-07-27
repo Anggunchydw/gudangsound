@@ -94,16 +94,26 @@ class PaketController extends AdminController
                     $form->number('jumlah', 'Jumlah')
                         ->min(1)
                         ->default(1)
-                        ->required();
+                        ->rules('required|integer|min:1');
                 })->useTable();
 
                 $form->saving(function (Form $form) {
 
-                    $detail = request()->input('detail', []);
+                    $detail = collect(request()->input('detail', []))
+                        ->filter(function ($item) {
 
-                    if (count($detail) == 0) {
+                            if (!empty($item['_remove_'])) {
+                                return false;
+                            }
+
+                            return !empty($item['barang_id']);
+                        })
+                        ->values()
+                        ->toArray();
+
+                    if (count($detail) < 1) {
                         return $form->response()->error(
-                            'Minimal pilih satu barang.'
+                            'Minimal tambahkan satu barang ke dalam paket.'
                         );
                     }
 
@@ -111,8 +121,14 @@ class PaketController extends AdminController
 
                     foreach ($detail as $item) {
 
-                        $barangId = $item['barang_id'] ?? null;
+                        $barangId = $item['barang_id'];
                         $jumlah   = (int) ($item['jumlah'] ?? 0);
+
+                        if ($jumlah < 1) {
+                            return $form->response()->error(
+                                'Jumlah barang minimal 1.'
+                            );
+                        }
 
                         if (in_array($barangId, $barangDipilih)) {
                             return $form->response()->error(
@@ -125,7 +141,9 @@ class PaketController extends AdminController
                         $barang = Barang::find($barangId);
 
                         if (!$barang) {
-                            continue;
+                            return $form->response()->error(
+                                'Barang tidak ditemukan.'
+                            );
                         }
 
                         if ($jumlah > $barang->jumlah_total) {
