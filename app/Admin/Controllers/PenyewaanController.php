@@ -15,6 +15,8 @@ use App\Models\Paket;
 use App\Models\Penyewaan;
 use App\Services\PembayaranService;
 use App\Services\PenyewaanService;
+use App\Models\Penugasan;
+use App\Services\GoogleCalendarService;
 use App\Models\Administrator;
 use App\Services\TelegramService;
 
@@ -33,6 +35,11 @@ class PenyewaanController extends AdminController
             || Admin::user()->isRole('pemilik')
             || Admin::user()->isRole('admin');
     }
+    protected function canPrint()
+    {
+        return Admin::user()->isRole('administrator')
+            || Admin::user()->isRole('pemilik');
+    }
     protected function authorizeManage()
     {
         if (! $this->canManage()) {
@@ -42,6 +49,12 @@ class PenyewaanController extends AdminController
     protected function authorizeView()
     {
         if (! $this->canView()) {
+            abort(403);
+        }
+    }
+    protected function authorizePrint()
+    {
+        if (! $this->canPrint()) {
             abort(403);
         }
     }
@@ -71,7 +84,7 @@ class PenyewaanController extends AdminController
 
                     return "<span class='{$class}'>{$value}</span>";
                 });
-            $grid->column('status_badge', 'Status')
+            $grid->column('status_badge', 'Status Penyewaan')
                 ->display(function ($value) {
                     return $value;
                 });
@@ -96,10 +109,10 @@ class PenyewaanController extends AdminController
                 $filter->between('tanggal_mulai', 'Tanggal Mulai')
                     ->date();
             });
-            // $grid->batchActions(function (Grid\Tools\BatchActions $batch) {
-            //     $batch->disableDelete();
-            // });
-            // $grid->disableRowSelector();
+            $grid->batchActions(function (Grid\Tools\BatchActions $batch) {
+                $batch->disableDelete();
+            });
+            $grid->disableRowSelector();
             $grid->quickSearch(function ($model, $keyword) {
                 $model->where('nama_penyewa', 'like', "%{$keyword}%")
                     ->orWhere('no_tlp', 'like', "%{$keyword}%")
@@ -107,6 +120,16 @@ class PenyewaanController extends AdminController
             });
             $grid->actions(function (Grid\Displayers\Actions $actions) use ($canManage) {
                 $actions->disableDelete();
+
+                if ($actions->row->status_pembayaran == 'DP') {
+
+                    $actions->append(
+                        '<a href="' . admin_url("penyewaan/{$actions->getKey()}") . '" class="btn btn-sm btn-payment">
+                <i class="feather icon-dollar-sign"></i> Tambah Pembayaran
+            </a>'
+                    );
+                }
+
                 if (! $canManage) {
                     return;
                 }
@@ -230,7 +253,7 @@ class PenyewaanController extends AdminController
                 ->required()
                 ->rules([
                     'required',
-                    'regex:/^\+?[1-9]\d{7,14}$/'
+                    'regex:/^\+?[0-9]\d{7,14}$/'
                 ], [
                     'regex' => 'Nomor telepon tidak valid.'
                 ]);
@@ -295,7 +318,7 @@ class PenyewaanController extends AdminController
                 </div>
             </div>
             ');
-
+            $form->hidden('status_pembayaran');
             $form->hidden('status_penyewaan')->default('booking');
 
             $form->saving(function (Form $form) {
@@ -313,22 +336,124 @@ class PenyewaanController extends AdminController
 
             $form->saved(function (Form $form) {
 
-                PenyewaanService::buatPembayaranAwal(
-                    $form->getKey()
-                );
-
-                $penyewaan = Penyewaan::with([
-                    'detailPaket.paket',
-                    'detailBarang.barang'
-                ])->find($form->getKey());
-
                 if ($form->isCreating()) {
+                    PenyewaanService::buatPembayaranAwal($form->getKey());
+                }
 
-                    $judulTelegram = "📅 PENYEWAAN BARU";
+                $penyewaan = Penyewaan::find($form->getKey());
+
+                $penyewaan->load([
+                    'detailPaket.paket',
+                    'detailBarang.barang',
+                    'penugasan.pegawai',
+                ]);
+
+                // GOOGLE CALENDAR PENYEWAAN
+                $emails = Administrator::whereHas('roles', function ($q) {
+                    $q->whereIn('slug', ['admin', 'pemilik']);
+                })
+                    ->whereNotNull('email')
+                    ->pluck('email')
+                    ->toArray();
+
+                $calendar = new GoogleCalendarService();
+
+                $judulGoogle = $form->isCreating()
+                    ? 'Penyewaan Baru - ' . $penyewaan->nama_penyewa
+                    : 'Ralat Penyewaan - ' . $penyewaan->nama_penyewa;
+
+                if ($penyewaan->google_event_id) {
+
+                    $calendar->updateEvent(
+                        $penyewaan->google_event_id,
+                        $judulGoogle,
+                        $penyewaan->lokasi,
+                        $penyewaan->keterangan ?? '-',
+                        $penyewaan->tanggal_mulai,
+                        $penyewaan->tanggal_selesai,
+                        $emails
+                    );
                 } else {
 
-                    $judulTelegram = "⚠️ RALAT PENYEWAAN";
+                    $event = $calendar->createEvent(
+                        $judulGoogle,
+                        $penyewaan->lokasi,
+                        $penyewaan->keterangan ?? '-',
+                        $penyewaan->tanggal_mulai,
+                        $penyewaan->tanggal_selesai,
+                        $emails
+                    );
+
+                    $penyewaan->google_event_id = $event->getId();
+                    $penyewaan->save();
                 }
+
+
+                // UPDATE GOOGLE CALENDAR PENUGASAN
+
+                if ($penyewaan->penugasan) {
+                    $penugasan = $penyewaan->penugasan;
+
+                    $pegawaiEmails = $penugasan->pegawai
+                        ->pluck('email')
+                        ->filter()
+                        ->toArray();
+
+
+                    $namaPegawai = $penugasan->pegawai
+                        ->pluck('name')
+                        ->implode(', ');
+
+
+                    $deskripsiPenugasan =
+                        "Penyewa : {$penyewaan->nama_penyewa}\n" .
+                        "Tim : {$penugasan->tim}\n" .
+                        "Lokasi : {$penyewaan->lokasi}\n" .
+                        "Tanggal : " .
+                        date('d F Y', strtotime($penyewaan->tanggal_mulai)) .
+                        " s/d " .
+                        date('d F Y', strtotime($penyewaan->tanggal_selesai)) .
+                        "\nPegawai : {$namaPegawai}";
+
+
+                    $calendar = new GoogleCalendarService();
+
+
+                    if ($penugasan->google_event_id) {
+
+                        // update event lama
+                        $calendar->updateEvent(
+                            $penugasan->google_event_id,
+                            "Penugasan - {$penyewaan->nama_penyewa}",
+                            $penyewaan->lokasi,
+                            $deskripsiPenugasan,
+                            $penyewaan->tanggal_mulai,
+                            $penyewaan->tanggal_selesai,
+                            $pegawaiEmails
+                        );
+                    } else {
+
+                        // jika belum ada event buat baru
+                        $event = $calendar->createEvent(
+                            "Penugasan - {$penyewaan->nama_penyewa}",
+                            $penyewaan->lokasi,
+                            $deskripsiPenugasan,
+                            $penyewaan->tanggal_mulai,
+                            $penyewaan->tanggal_selesai,
+                            $pegawaiEmails
+                        );
+
+
+                        $penugasan->google_event_id = $event->getId();
+                        $penugasan->save();
+                    }
+                }
+
+                // TELEGRAM
+                $judulTelegram = $form->isCreating()
+                    ? "📅 PENYEWAAN BARU"
+                    : "⚠️ RALAT PENYEWAAN";
+
                 $paket = '';
 
                 foreach ($penyewaan->detailPaket as $detail) {
@@ -339,6 +464,7 @@ class PenyewaanController extends AdminController
                             "• {$detail->paket->nama_paket} x{$detail->jumlah_paket}\n";
                     }
                 }
+
                 $barang = '';
 
                 foreach ($penyewaan->detailBarang as $detail) {
@@ -367,7 +493,7 @@ class PenyewaanController extends AdminController
                 if ($paket != '') {
 
                     $pesan .=
-                        " Paket\n" .
+                        "📦 Paket\n" .
                         $paket .
                         "\n";
                 }
@@ -375,7 +501,7 @@ class PenyewaanController extends AdminController
                 if ($barang != '') {
 
                     $pesan .=
-                        " Barang Satuan\n" .
+                        "📦 Barang Satuan\n" .
                         $barang .
                         "\n";
                 }
@@ -384,12 +510,10 @@ class PenyewaanController extends AdminController
                     "📝 Keterangan\n" .
                     ($penyewaan->keterangan ?: "-") .
                     "\n\n" .
-
                     "💳 Status Pembayaran : {$penyewaan->status_pembayaran}";
 
-                // Admin
                 $admins = Administrator::whereHas('roles', function ($q) {
-                    $q->where('slug', 'admin');
+                    $q->whereIn('slug', ['admin', 'pemilik']);
                 })->get();
 
                 foreach ($admins as $admin) {
@@ -402,20 +526,96 @@ class PenyewaanController extends AdminController
                         );
                     }
                 }
+                // TELEGRAM RALAT PENUGASAN KE PEGAWAI
 
-                // Pemilik
-                $pemiliks = Administrator::whereHas('roles', function ($q) {
-                    $q->where('slug', 'pemilik');
-                })->get();
+                if (
+                    !$form->isCreating() &&
+                    $penyewaan->penugasan
+                ) {
 
-                foreach ($pemiliks as $pemilik) {
+                    $penugasan = $penyewaan->penugasan;
 
-                    if ($pemilik->telegram_chat_id) {
+                    $namaPegawai = $penugasan->pegawai
+                        ->pluck('name')
+                        ->implode(', ');
 
-                        $telegram->sendMessage(
-                            $pemilik->telegram_chat_id,
-                            $pesan
-                        );
+
+                    $paket = '';
+
+                    foreach ($penyewaan->detailPaket as $detail) {
+
+                        if ($detail->paket) {
+
+                            $paket .=
+                                "• {$detail->paket->nama_paket} x{$detail->jumlah_paket}\n";
+                        }
+                    }
+
+
+                    $barang = '';
+
+                    foreach ($penyewaan->detailBarang as $detail) {
+
+                        if ($detail->barang) {
+
+                            $barang .=
+                                "• {$detail->barang->nama_barang} x{$detail->jumlah_barang}\n";
+                        }
+                    }
+
+
+                    $pesanRalat =
+                        "⚠️ RALAT PENUGASAN\n\n" .
+
+                        " Penyewa : {$penyewaan->nama_penyewa}\n" .
+                        " Tim : {$penugasan->tim}\n" .
+                        " Lokasi : {$penyewaan->lokasi}\n" .
+                        " Tanggal : " .
+                        date('d-m-Y', strtotime($penyewaan->tanggal_mulai)) .
+                        " s/d " .
+                        date('d-m-Y', strtotime($penyewaan->tanggal_selesai)) .
+                        "\n\n";
+
+
+                    if ($paket != '') {
+
+                        $pesanRalat .=
+                            "📦 Paket\n" .
+                            $paket .
+                            "\n";
+                    }
+
+
+                    if ($barang != '') {
+
+                        $pesanRalat .=
+                            "📦 Barang Satuan\n" .
+                            $barang .
+                            "\n";
+                    }
+
+
+                    $pesanRalat .=
+                        "📝 Keterangan\n" .
+                        ($penyewaan->keterangan ?: '-') .
+                        "\n\n" .
+
+                        "👷 Pegawai Bertugas\n" .
+                        $namaPegawai;
+
+
+                    $telegram = new TelegramService();
+
+
+                    foreach ($penugasan->pegawai as $pegawai) {
+
+                        if ($pegawai->telegram_chat_id) {
+
+                            $telegram->sendMessage(
+                                $pegawai->telegram_chat_id,
+                                $pesanRalat
+                            );
+                        }
                     }
                 }
                 return $form->response()
@@ -458,6 +658,8 @@ class PenyewaanController extends AdminController
 
     public function cetak($id)
     {
+        $this->authorizePrint();
+
         $penyewaan = Penyewaan::with([
             'detailBarang.barang',
             'detailPaket.paket.detail.barang',
@@ -474,6 +676,7 @@ class PenyewaanController extends AdminController
             'Bukti-Penyewaan-' . $penyewaan->id . '.pdf'
         );
     }
+    
     public function cancel($id)
     {
         $this->authorizeManage();
@@ -493,7 +696,21 @@ class PenyewaanController extends AdminController
         $penyewaan->update([
             'status_penyewaan' => 'dibatalkan'
         ]);
+        if ($penyewaan->status_penyewaan == 'dibatalkan') {
 
+            $penugasan = Penugasan::where(
+                'penyewaan_id',
+                $penyewaan->id
+            )->first();
+
+            if ($penugasan && $penugasan->google_event_id) {
+
+                app(GoogleCalendarService::class)
+                    ->deleteEvent($penugasan->google_event_id);
+                $penugasan->google_event_id = null;
+                $penugasan->save();
+            }
+        }
         admin_success(
             'Berhasil',
             'Penyewaan berhasil dibatalkan.'

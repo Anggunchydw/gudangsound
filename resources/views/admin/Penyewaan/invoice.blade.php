@@ -9,9 +9,8 @@
             font-family: DejaVu Sans;
             font-size: 11px;
             line-height: 1.6;
-            color: #333;
+            color: #374151;
             position: relative;
-
         }
 
         table {
@@ -26,13 +25,19 @@
         }
 
         th {
-            background: #f5f5f5;
+            background: #EDF7EE;
+            color: #2E7D32;
             font-weight: bold;
             text-align: center;
+            border: 1px solid #D7EAD9;
+        }
+
+        td {
+            border-color: #D7EAD9;
         }
 
         .border {
-            border: 1px solid #ddd;
+            border: 1px solid #D7EAD9;
         }
 
         .title {
@@ -40,7 +45,13 @@
             font-weight: bold;
             text-align: center;
             letter-spacing: 1px;
-            color: #222;
+            color: #2E7D32;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #2E7D32;
         }
 
         .text-right {
@@ -54,61 +65,81 @@
         hr {
             margin: 18px 0;
             border: 0;
-            border-top: 1px solid #bbb;
+            border-top: 2px solid #D7EAD9;
         }
 
-        h2 {
-            margin: 0;
-            font-size: 24px;
-            color: #222;
-        }
+        /* ======================
+       STATUS
+    ======================= */
 
         .badge {
             display: inline-block;
             padding: 6px 14px;
-            border: 1px solid #ff9800;
-            color: #ff9800;
+            background: #FFF8E6;
+            border: 1px solid #F59E0B;
+            color: #B45309;
             font-weight: bold;
-            border-radius: 3px;
+            border-radius: 4px;
         }
 
         .badge-success {
             display: inline-block;
             padding: 6px 14px;
-            border: 1px solid #28a745;
-            color: #28a745;
+            background: #EDF7EE;
+            border: 1px solid #2E7D32;
+            color: #2E7D32;
             font-weight: bold;
-            border-radius: 3px;
+            border-radius: 4px;
         }
 
+        /* ======================
+       WARNA NOMINAL
+    ======================= */
+
         .green {
-            color: #28a745;
+            color: #2E7D32;
             font-weight: bold;
         }
 
         .red {
-            color: #dc3545;
+            color: #DC2626;
             font-weight: bold;
         }
 
+        /* ======================
+       INFORMASI
+    ======================= */
+
         .company-info {
             font-size: 11px;
-            color: #444;
+            color: #4B5563;
         }
 
         .invoice-info {
             font-size: 11px;
+            color: #4B5563;
         }
 
         .section-title {
             font-size: 13px;
             font-weight: bold;
             margin-bottom: 6px;
-            color: #222;
+            color: #2E7D32;
+            border-left: 4px solid #2E7D32;
+            padding-left: 8px;
+        }
+
+        .total-table {
+            border: 1px solid #D7EAD9;
         }
 
         .total-table td {
-            padding: 6px;
+            padding: 8px;
+            border-bottom: 1px solid #E5F1E6;
+        }
+
+        .total-table tr:last-child td {
+            border-bottom: none;
         }
 
         .signature {
@@ -116,10 +147,27 @@
             line-height: 1.8;
         }
 
+        /* ======================
+       TABEL BARANG
+    ======================= */
+
+        table[border="1"] {
+            border: 1px solid #D7EAD9;
+        }
+
+        table[border="1"] td,
+        table[border="1"] th {
+            border: 1px solid #D7EAD9;
+        }
+
+        table[border="1"] tbody tr:nth-child(even) {
+            background: #FAFCFA;
+        }
+
         .watermark {
             position: fixed;
             z-index: -1000;
-            opacity: 0.05;
+            opacity: .05;
         }
 
         .watermark img {
@@ -131,28 +179,28 @@
 
 <body>
     <div class="watermark" style="top:3%; left:-5%;">
-    <img src="{{ public_path('images/logo pdf.png') }}">
-</div>
+        <img src="{{ public_path('images/logo pdf.png') }}">
+    </div>
 
-<div class="watermark" style="top:3%; left:55%;">
-    <img src="{{ public_path('images/logo pdf.png') }}">
-</div>
+    <div class="watermark" style="top:3%; left:55%;">
+        <img src="{{ public_path('images/logo pdf.png') }}">
+    </div>
 
-<div class="watermark" style="top:33%; left:20%;">
-    <img src="{{ public_path('images/logo pdf.png') }}">
-</div>
+    <div class="watermark" style="top:33%; left:20%;">
+        <img src="{{ public_path('images/logo pdf.png') }}">
+    </div>
 
-<div class="watermark" style="top:60%; left:-5%;">
-    <img src="{{ public_path('images/logo pdf.png') }}">
-</div>
+    <div class="watermark" style="top:60%; left:-5%;">
+        <img src="{{ public_path('images/logo pdf.png') }}">
+    </div>
 
-<div class="watermark" style="top:60%; left:55%;">
-    <img src="{{ public_path('images/logo pdf.png') }}">
-</div>
+    <div class="watermark" style="top:60%; left:55%;">
+        <img src="{{ public_path('images/logo pdf.png') }}">
+    </div>
 
-<div class="watermark" style="top:87%; left:20%;">
-    <img src="{{ public_path('images/logo pdf.png') }}">
-</div>
+    <div class="watermark" style="top:87%; left:20%;">
+        <img src="{{ public_path('images/logo pdf.png') }}">
+    </div>
     {{-- HEADER --}}
     <table>
         <tr>

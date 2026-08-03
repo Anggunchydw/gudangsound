@@ -113,12 +113,8 @@ class PenyewaanService
             $paketIds[] = $item['paket_id'];
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | DP
-        |--------------------------------------------------------------------------
-        */
 
+        // DP
         if ($uangMuka < 0) {
 
             throw new \Exception(
@@ -138,12 +134,7 @@ class PenyewaanService
             ? 'Lunas'
             : 'DP';
 
-        /*
-        |--------------------------------------------------------------------------
-        | Validasi stok
-        |--------------------------------------------------------------------------
-        */
-
+        // VALIDASI STOK
         InventoryService::checkAvailability(
 
             $form->tanggal_mulai,
@@ -168,8 +159,7 @@ class PenyewaanService
         PemasukanService::simpan(
             $penyewaan,
             $penyewaan->uang_muka,
-            $penyewaan->status_pembayaran,
-            'Pembayaran awal'
+            $penyewaan->status_pembayaran
         );
     }
 }

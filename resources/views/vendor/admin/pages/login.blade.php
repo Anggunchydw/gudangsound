@@ -1,6 +1,9 @@
 <style>
     body {
-        background: #edf2f7;
+        background:
+            radial-gradient(circle at top, #244B2A 0%, transparent 35%),
+
+
     }
 
     .content {
@@ -15,54 +18,63 @@
         padding: 10px;
     }
 
-    .card,
+    .card {
+        background: #ffffff;
+        border: none;
+        border-radius: 20px;
+
+        box-shadow:
+            0 0 0 1px rgba(155, 234, 58, .15),
+
+    }
+
     .card-body {
         border-radius: 16px;
     }
 
     .login-card-body {
-        padding: 36px;
+        padding: 18px 32px 32px;
+        background: #fff;
     }
 
     .form-group .control-label {
         text-align: left;
     }
 
+
     .login-header {
         text-align: center;
-        margin-bottom: 28px;
+        margin: 0 0 14px;
     }
 
     .login-brand {
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 14px;
-        margin-bottom: 10px;
+        margin: 0;
+        padding: 0;
     }
 
     .login-brand img {
-        width: 56px;
-        height: 56px;
-        object-fit: cover;
-        border-radius: 14px;
-        border: .5px solid #e5e7eb;
-        background: #fff;
-        padding: 5px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, .08);
+        display: block;
+        width: 170px;
+        height: auto;
+        margin: 0 auto;
     }
 
+
     .login-brand h2 {
-        margin: 0;
-        font-size: 32px;
+        font-size: 34px;
         font-weight: 700;
-        color: #1f2937;
+        color: #2E7D32;
+        letter-spacing: .5px;
     }
 
     .login-subtitle {
-        color: #9ca3af;
+        margin: 8px 0 0;
+        line-height: 1.45;
+        color: #7B8280;
         font-size: 14px;
-        margin: 0;
     }
 
     .login-btn {
@@ -83,8 +95,9 @@
     }
 
     .password-toggle:hover {
-        color: #0c3d78;
+        color: #2E7D32;
     }
+
 
     .has-icon-left input[type=password],
     .has-icon-left input[type=text] {
@@ -107,8 +120,11 @@
         }
 
         .login-brand img {
-            width: 52px;
-            height: 52px;
+            width: 180px;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: auto;
         }
 
     }
@@ -127,7 +143,7 @@
         }
 
         .login-card-body {
-            padding: 28px 24px;
+            padding: 16px 24px 24px;
         }
 
         .login-brand {
@@ -135,9 +151,8 @@
         }
 
         .login-brand img {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 180px;
+            height: auto;
         }
 
         .login-brand h2 {
@@ -175,7 +190,7 @@
         }
 
         .login-card-body {
-            padding: 22px 18px;
+            padding: 14px 18px 22px;
         }
 
         .login-header {
@@ -183,15 +198,14 @@
         }
 
         .login-brand {
-            gap: 10px;
-            margin-bottom: 8px;
+            margin-bottom: 2px;
         }
 
         .login-brand img {
-            width: 42px;
-            height: 42px;
-            padding: 4px;
-            border-radius: 10px;
+            width: 150px;
+            max-width: 90%;
+            height: auto;
+            margin-bottom: 8px;
         }
 
         .login-brand h2 {
@@ -202,30 +216,66 @@
             font-size: 12px;
             line-height: 1.5;
         }
+    }
 
-        .form-control {
-            font-size: 14px;
-        }
+    /* INPUT */
 
-        .form-control-position i {
-            font-size: 15px;
-        }
+    .form-control {
+        border: 1px solid #D7EAD9;
+        border-radius: 8px;
+    }
 
-        .password-toggle {
-            font-size: 16px;
-            right: 12px;
-        }
+    .form-control:focus {
+        border-color: #2E7D32;
+        box-shadow: 0 0 0 .18rem rgba(46, 125, 50, .15);
+    }
 
-        .login-btn {
-            width: 100%;
-            margin-top: 10px;
-            padding: 10px !important;
-        }
+    .form-control-position i {
+        color: #5F8F65;
+    }
 
-        .vs-checkbox-con {
-            font-size: 13px;
-        }
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6B7280;
+        font-size: 18px;
+    }
 
+    .password-toggle:hover {
+        color: #2E7D32;
+    }
+
+    .btn-primary {
+        background: #2E7D32 !important;
+        border-color: #2E7D32 !important;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: .2s;
+    }
+
+    .btn-primary:hover {
+        background: #256A29 !important;
+        border-color: #256A29 !important;
+    }
+
+    .login-btn {
+        padding: 10px 32px !important;
+    }
+
+    .vs-checkbox-con input:checked~.vs-checkbox {
+        background: #2E7D32 !important;
+        border-color: #2E7D32 !important;
+    }
+
+    a {
+        color: #2E7D32;
+    }
+
+    a:hover {
+        color: #256A29;
     }
 
     @media (max-width:360px) {
@@ -235,7 +285,7 @@
         }
 
         .login-card-body {
-            padding: 18px 14px;
+            padding: 12px 14px 18px;
         }
 
         .login-brand {
@@ -244,8 +294,9 @@
         }
 
         .login-brand img {
-            width: 40px;
-            height: 40px;
+            width: 135px;
+            max-width: 95%;
+            height: auto;
         }
 
         .login-brand h2 {
@@ -276,9 +327,9 @@
 
                     <div class="login-brand">
 
-                        <img src="{{ asset('images/logo-hsb.jpg') }}" alt="HSB Audio">
+                        <img src="{{ asset('images/LOGO HSB.png') }}" alt="HSB Audio">
 
-                        <h2>HSB Audio</h2>
+
 
                     </div>
 

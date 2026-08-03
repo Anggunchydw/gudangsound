@@ -44,6 +44,18 @@
 
 }
 
+.btn-payment{
+    background:#F59E0B;
+    border-color:#F59E0B;
+    color:#fff !important;
+}
+
+.btn-payment:hover{
+    background:#D97706;
+    border-color:#D97706;
+    color:#fff !important;
+}
+
 .table thead th{
 
     background:#f8fafc;
@@ -163,7 +175,21 @@
 
 }
 
+.btn-print{
 
+    background:#045f08;
+    border:1px solid #2E7D32;
+    color:#fff;
+
+}
+
+.btn-print:hover{
+
+    background:#256329;
+    border-color:#256329;
+    color:#fff;
+
+}
 .sisa-label{
 
     font-size:14px;
@@ -275,10 +301,6 @@
     font-weight:500;
     word-break:break-word;
 
-}
-.penyewaan-detail .info-lokasi{
-
-    grid-column:1 / -1;
 }
 
 @media (max-width:1024px){

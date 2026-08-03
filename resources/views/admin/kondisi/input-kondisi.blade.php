@@ -1,9 +1,5 @@
 <div class="kondisi-wrapper box">
 
-    <div class="box-header">
-        <h3>Input Kondisi Barang</h3>
-    </div>
-
     <div class="box-body">
 
         {{-- Informasi Penyewaan --}}
@@ -44,7 +40,7 @@
 
                         <tr>
                             <th class="barang-col">Barang</th>
-                            <th class="qty-col">Qty</th>
+                            <th class="qty-col">Jumlah</th>
                             <th class="kondisi-col">Kondisi Sebelum</th>
                             <th class="kondisi-col">Kondisi Sesudah</th>
                             <th class="jumlah-col">Jumlah Rusak / Hilang</th>
@@ -173,13 +169,17 @@
 
             if (kondisi === 'baik') {
 
+                if (parseInt(input.value) !== 0) {
+
+                    Dcat.success('Jumlah barang bermasalah otomatis diubah menjadi 0.');
+                }
+
                 input.value = 0;
                 input.readOnly = true;
 
             } else {
 
                 input.readOnly = false;
-
             }
         }
 

@@ -42,4 +42,5 @@ class Penugasan extends Model
             'penugasan_id'
         );
     }
+    
 }

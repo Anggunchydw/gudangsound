@@ -11,7 +11,7 @@ class JadwalAcaraController extends AdminController
 {
     public function index(Content $content)
     {
-        
+
         // Load FullCalendar
         Admin::css('https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/main.min.css');
         Admin::js('https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js');
@@ -135,8 +135,8 @@ class JadwalAcaraController extends AdminController
             ->map(function ($item) {
 
                 $color = $item->status_pembayaran == 'Lunas'
-                    ? '#16a34a'
-                    : '#f59e0b';
+                    ? '#388E3C'
+                    : '#F59E0B';
 
                 $paket = [];
 
@@ -168,11 +168,11 @@ class JadwalAcaraController extends AdminController
 
                 $pegawai = [];
 
-                foreach ($item->penugasan as $penugasan) {
+                if ($item->penugasan) {
 
-                    foreach ($penugasan->pegawai as $user) {
+                    foreach ($item->penugasan->pegawai as $pegawaiUser) {
 
-                        $pegawai[] = $user->name;
+                        $pegawai[] = $pegawaiUser->name;
                     }
                 }
 

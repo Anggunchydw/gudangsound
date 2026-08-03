@@ -1,0 +1,135 @@
+
+/* Link pada tabel */
+.table a:not(.btn),
+.grid-table a:not(.btn){
+    color:#374151 !important;
+}
+
+.table a:not(.btn):hover,
+.grid-table a:not(.btn):hover{
+    color:#2E7D32 !important;
+}
+/* Tombol utama */
+.btn-primary,
+.btn-primary:focus,
+.btn-primary:active{
+    background:#2E7D32 !important;
+    border-color:#2E7D32 !important;
+    color:#fff !important;
+}
+
+.btn-primary:hover{
+    background:#256A29 !important;
+    border-color:#256A29 !important;
+}
+
+.table tbody tr:hover{
+    background:#F3FAF4;
+}
+.form-control:focus{
+    border-color:#2E7D32;
+    box-shadow:0 0 0 .15rem rgba(46,125,50,.15);
+}
+.sidebar .nav-item.active{
+    background:#EDF7EE;
+    border-left:4px solid #2E7D32;
+}
+
+.sidebar .nav-item.active>a{
+    color:#2E7D32!important;
+    font-weight:600;
+}
+
+.sidebar .nav-item>a:hover{
+    color:#2E7D32;
+}
+.pagination .page-item.active .page-link{
+    background:#2E7D32;
+    border-color:#2E7D32;
+}
+
+.page-link{
+    color:#2E7D32;
+}
+
+.page-link:hover{
+    color:#388E3C;
+}
+.badge-info{
+    background:#E8F5E9;
+    color:#2E7D32;
+}
+.card-header{
+    border-left:none;
+    border-bottom:2px solid #E8F5E9;
+}
+/* ===========================
+   SIDEBAR
+=========================== */
+
+.main-sidebar .nav-sidebar .nav-link{
+    color:#4B5563 !important;
+    transition:.2s;
+}
+
+/* Hover */
+.main-sidebar .nav-sidebar .nav-link:hover{
+    color:#fff !important;
+    background:#2E7D32 !important;
+}
+
+/* Menu aktif */
+.main-sidebar .nav-sidebar .nav-item>.nav-link.active{
+    background:#2E7D32 !important;
+    color:#fff !important;
+    font-weight:600;
+}
+
+/* Icon */
+.main-sidebar .nav-sidebar .nav-link:hover i{
+    color:#fff !important;
+}
+
+.main-sidebar .nav-sidebar .nav-link.active i{
+    color:#fff !important;
+}
+/* Header tabel */
+.table thead th,
+.grid-table thead th{
+    background:#EDF7EE !important;
+    color:#2E7D32 !important;
+    border-color:#D7EAD9 !important;
+    font-weight:600;
+}
+/* Logo sidebar */
+.main-sidebar .brand-link .brand-text{
+    color:#2E7D32 !important;
+    font-weight:700;
+}
+
+/* Jika menggunakan logo teks */
+.main-sidebar .logo-lg,
+.main-sidebar .logo-mini{
+    color:#2E7D32 !important;
+}
+
+/* Hover */
+.main-sidebar .brand-link:hover .brand-text{
+    color:#256A29 !important;
+}
+.main-sidebar{
+    background:#F5FAF6 !important;
+    border-right:1px solid #E3ECE4;
+}
+
+/* Logo */
+.main-sidebar .brand-link{
+    background:#F5FAF6 !important;
+    border-bottom:1px solid #E3ECE4;
+}
+
+/* Nama aplikasi */
+.main-sidebar .brand-text{
+    color:#2E7D32 !important;
+    font-weight:700;
+}

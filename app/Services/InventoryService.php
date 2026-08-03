@@ -55,8 +55,22 @@ class InventoryService
 
         foreach ($detailPaket as $paketItem) {
 
-            $detail = DetailPaket::where('paket_id', $paketItem['paket_id'])->get();
+            $paket = \App\Models\Paket::find($paketItem['paket_id']);
 
+            if (!$paket) {
+                throw new \Exception(
+                    "Paket tidak ditemukan."
+                );
+            }
+
+            if ($paket->status != 'aktif') {
+                throw new \Exception(
+                    "Paket {$paket->nama_paket} sudah tidak aktif."
+                );
+            }
+
+            $detail = DetailPaket::where('paket_id', $paketItem['paket_id'])->get();
+            
             // Validasi paket kosong
             if ($detail->isEmpty()) {
 

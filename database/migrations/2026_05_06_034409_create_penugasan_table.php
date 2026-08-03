@@ -17,7 +17,7 @@ return new class extends Migration
 
             $table->unsignedBigInteger('penyewaan_id');
 
-            $table->string('tim');
+            $table->string('tim')->nullable();
 
             $table->timestamps();
 
@@ -25,6 +25,7 @@ return new class extends Migration
                 ->references('id')
                 ->on('penyewaan')
                 ->onDelete('cascade');
+            $table->string('google_event_id')->nullable();
         });
     }
 

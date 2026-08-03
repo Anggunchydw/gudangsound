@@ -164,10 +164,16 @@ class KondisiBarangController extends AdminController
     {
         foreach ($request->barang as $item) {
 
-            $jumlahBarang      = (int) $item['jumlah_barang'];
-            $jumlahBermasalah  = (int) $item['jumlah_bermasalah'];
+            $jumlahBarang = (int) $item['jumlah_barang'];
+            $jumlahBermasalah = (int) $item['jumlah_bermasalah'];
             $kondisiBaru = $item['kondisi_sesudah'] ?? null;
 
+            // Jika kondisi baik, paksa jumlah menjadi 0
+            if ($kondisiBaru == 'baik') {
+                $jumlahBermasalah = 0;
+            }
+
+            // Jika rusak/hilang wajib mengisi jumlah
             if (
                 in_array($kondisiBaru, ['rusak', 'hilang']) &&
                 $jumlahBermasalah <= 0
@@ -177,19 +183,22 @@ class KondisiBarangController extends AdminController
                     'Masukkan jumlah barang yang rusak atau hilang.'
                 );
 
-                return back();
+                return redirect()->to(
+                    admin_url('kondisi-barang/' . $penugasan->id . '/input')
+                )->withInput();
             }
 
-            if (
-                $kondisiBaru == 'baik' &&
-                $jumlahBermasalah > 0
-            ) {
+            // Tidak boleh melebihi jumlah barang
+            if ($jumlahBermasalah > $jumlahBarang) {
+
                 admin_error(
                     'Gagal',
-                    'Jika kondisi sesudah baik maka jumlah barang bermasalah harus 0.'
+                    'Jumlah barang rusak/hilang tidak boleh melebihi jumlah barang yang dibawa.'
                 );
 
-                return back();
+                return redirect()->to(
+                    admin_url('kondisi-barang/' . $penugasan->id . '/input')
+                )->withInput();
             }
 
             if ($jumlahBermasalah > $jumlahBarang) {
@@ -199,7 +208,9 @@ class KondisiBarangController extends AdminController
                     'Jumlah barang rusak/hilang tidak boleh melebihi jumlah barang yang dibawa.'
                 );
 
-                return back();
+                return redirect()->to(
+                    admin_url('kondisi-barang/' . $penugasan->id . '/input')
+                )->withInput();
             }
 
             $barang = Barang::findOrFail($item['barang_id']);

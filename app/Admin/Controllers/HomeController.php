@@ -12,8 +12,11 @@ use Dcat\Admin\Layout\Content;
 
 class HomeController extends Controller
 {
+
     public function index(Content $content)
-    {Admin::css(asset('css/dashboard.css'));
+    {
+        Admin::css(asset('css/dashboard.css'));
+        Admin::css('/css/pemasukan.css');
         $user = Admin::user();
 
         if (
@@ -24,6 +27,9 @@ class HomeController extends Controller
         }
 
         $totalPenyewaan = Penyewaan::count();
+        $totalPenyewaan = Penyewaan::whereMonth('tanggal_mulai', now()->month)
+            ->whereYear('tanggal_mulai', now()->year)
+            ->count();
 
         $stokBarang = Barang::all()->sum(function ($barang) {
             return $barang->getStokHariIniAttribute();

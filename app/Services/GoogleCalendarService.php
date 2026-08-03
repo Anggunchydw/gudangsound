@@ -2,9 +2,12 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
 use Google\Client;
 use Google\Service\Calendar;
 use Google\Service\Calendar\Event;
+use Google\Service\Calendar\EventDateTime;
+use Google\Service\Calendar\EventReminders;
 
 class GoogleCalendarService
 {
@@ -26,6 +29,7 @@ class GoogleCalendarService
         );
 
         $this->client->setAccessType('offline');
+        $this->client->setPrompt('consent');
 
         $tokenPath = storage_path('app/google/token.json');
 
@@ -46,17 +50,28 @@ class GoogleCalendarService
                 $token['refresh_token']
             );
 
+            $newToken = $this->client->getAccessToken();
+
+            if (
+                empty($newToken['refresh_token']) &&
+                !empty($token['refresh_token'])
+            ) {
+                $newToken['refresh_token'] = $token['refresh_token'];
+            }
+
             file_put_contents(
                 $tokenPath,
-                json_encode($this->client->getAccessToken())
+                json_encode($newToken)
             );
         }
 
         $this->service = new Calendar($this->client);
     }
 
+    /**
+     * CREATE EVENT
+     */
     public function createEvent(
-
         $judul,
         $lokasi,
         $deskripsi,
@@ -68,37 +83,28 @@ class GoogleCalendarService
         $attendees = [];
 
         foreach ($emails as $email) {
-
             $attendees[] = [
                 'email' => $email,
             ];
         }
 
-        $event = new \Google\Service\Calendar\Event([
+        $event = new Event([
 
             'summary' => $judul,
 
             'location' => $lokasi,
 
             'description' => $deskripsi,
+
             'start' => [
-                'dateTime' => $tanggalMulai,
-                'timeZone' => 'Asia/Jakarta',
+                'date' => $tanggalMulai,
             ],
 
             'end' => [
-                'dateTime' => $tanggalSelesai,
-                'timeZone' => 'Asia/Jakarta',
+                'date' => Carbon::parse($tanggalSelesai)
+                    ->addDay()
+                    ->toDateString(),
             ],
-            // 'start' => [
-            //     'date' => $tanggalMulai,
-            // ],
-
-            // 'end' => [
-            //     'date' => \Carbon\Carbon::parse($tanggalSelesai)
-            //         ->addDay()
-            //         ->toDateString(),
-            // ],
 
             'attendees' => $attendees,
 
@@ -108,20 +114,16 @@ class GoogleCalendarService
 
                 'overrides' => [
 
-                    // Email 2 hari sebelum acara
                     [
                         'method' => 'email',
-                        'minutes' => 5, //2880
+                        'minutes' => 2880,
                     ],
 
-                    // Notifikasi Google 2 hari
                     [
                         'method' => 'popup',
-                        'minutes' => 5,
+                        'minutes' => 2880,
                     ],
-
                 ],
-
             ],
 
         ]);
@@ -135,6 +137,96 @@ class GoogleCalendarService
                     'sendUpdates' => 'all'
                 ]
             );
+    }
+
+    /**
+     * UPDATE EVENT
+     */
+    public function updateEvent(
+        $eventId,
+        $judul,
+        $lokasi,
+        $deskripsi,
+        $tanggalMulai,
+        $tanggalSelesai,
+        array $emails = []
+    ) {
+
+        $event = $this->service
+            ->events
+            ->get('primary', $eventId);
+
+        $event->setSummary($judul);
+
+        $event->setLocation($lokasi);
+
+        $event->setDescription($deskripsi);
+
+        // START
+        $start = new EventDateTime();
+        $start->setDate($tanggalMulai);
+
+        // END
+        $end = new EventDateTime();
+        $end->setDate(
+            Carbon::parse($tanggalSelesai)
+                ->addDay()
+                ->toDateString()
+        );
+
+        $event->setStart($start);
+        $event->setEnd($end);
+
+        // ATTENDEES
+        $attendees = [];
+
+        foreach ($emails as $email) {
+
+            $attendees[] = [
+                'email' => $email,
+            ];
+        }
+
+        $event->setAttendees($attendees);
+
+        // REMINDER
+        $reminders = new EventReminders();
+
+        $reminders->setUseDefault(false);
+
+        $reminders->setOverrides([
+            [
+                'method' => 'email',
+                'minutes' => 2880,
+            ],
+            [
+                'method' => 'popup',
+                'minutes' => 2880,
+            ],
+        ]);
+
+        $event->setReminders($reminders);
+
+        return $this->service
+            ->events
+            ->update(
+                'primary',
+                $eventId,
+                $event,
+                [
+                    'sendUpdates' => 'all'
+                ]
+            );
+    }
+
+    /**
+     * DELETE EVENT
+     */
+    public function deleteEvent($eventId)
+    {
+        return $this->service
+            ->events
+            ->delete('primary', $eventId);
     }
 
     public function service()

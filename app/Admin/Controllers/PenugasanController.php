@@ -10,6 +10,7 @@ use Dcat\Admin\Form;
 use Dcat\Admin\Grid;
 use Dcat\Admin\Models\Role;
 use Dcat\Admin\Show;
+use Carbon\Carbon;
 use App\Services\GoogleCalendarService;
 use App\Services\TelegramService;
 use Dcat\Admin\Http\Controllers\AdminController;
@@ -68,6 +69,7 @@ class PenugasanController extends AdminController
                 $grid->disableCreateButton();
                 $grid->disableActions();
             }
+            $grid->disableRowSelector();
             $grid->actions(function (Grid\Displayers\Actions $actions) {
                 $actions->disableView();
             });
@@ -137,11 +139,13 @@ class PenugasanController extends AdminController
                         ->get()
                         ->mapWithKeys(function ($item) {
 
+                            $tanggal = Carbon::parse($item->tanggal_mulai);
+
                             $label = '';
 
-                            if ($item->tanggal_mulai < today()) {
+                            if ($tanggal->isPast() && !$tanggal->isToday()) {
                                 $label = '⚠ TERLEWAT | ';
-                            } elseif ($item->tanggal_mulai == today()) {
+                            } elseif ($tanggal->isToday()) {
                                 $label = '🔥 HARI INI | ';
                             }
 
@@ -150,7 +154,7 @@ class PenugasanController extends AdminController
                                 $label .
                                     $item->nama_penyewa .
                                     ' | ' .
-                                    date('d-m-Y', strtotime($item->tanggal_mulai)) .
+                                    $tanggal->format('d-m-Y') .
                                     ' | ' .
                                     $item->lokasi,
                             ];
@@ -158,8 +162,7 @@ class PenugasanController extends AdminController
                 })
                 ->required();
 
-            $form->text('tim', 'Nama Tim')
-                ->required();
+            $form->text('tim', 'Nama Tim');
 
             $pegawaiRole = Role::where('slug', 'pegawai')->first();
 
@@ -202,30 +205,10 @@ class PenugasanController extends AdminController
                     ->pluck('name')
                     ->implode(', ');
 
-                $emailsPegawai = $penugasan->pegawai
+                $emails = $penugasan->pegawai
                     ->pluck('email')
                     ->filter()
                     ->toArray();
-
-                $emailsPemilik = Administrator::whereHas('roles', function ($q) {
-                    $q->where('slug', 'pemilik');
-                })
-                    ->pluck('email')
-                    ->filter()
-                    ->toArray();
-
-                $emailsAdmin = Administrator::whereHas('roles', function ($q) {
-                    $q->where('slug', 'admin');
-                })
-                    ->pluck('email')
-                    ->filter()
-                    ->toArray();
-
-                $emails = array_unique(array_merge(
-                    $emailsPegawai,
-                    $emailsPemilik,
-                    $emailsAdmin
-                ));
 
                 $deskripsi =
                     "Penyewa : {$penugasan->penyewaan->nama_penyewa}\n" .
@@ -251,30 +234,33 @@ class PenugasanController extends AdminController
 
                 // 3. GOOGLE CALENDAR
                 $google = new GoogleCalendarService();
+                if ($penugasan->google_event_id) {
 
-                // MODE TEST
-                $google->createEvent(
-                    $judulGoogle,
-                    $penugasan->penyewaan->lokasi,
-                    $deskripsi,
-                    now()->addMinutes(10)->format('Y-m-d\TH:i:s'),
-                    now()->addHours(2)->format('Y-m-d\TH:i:s'),
-                    $emails
-                );
+                    // Edit event lama
+                    $google->updateEvent(
+                        $penugasan->google_event_id,
+                        $judulGoogle,
+                        $penugasan->penyewaan->lokasi,
+                        $deskripsi,
+                        $penugasan->penyewaan->tanggal_mulai,
+                        $penugasan->penyewaan->tanggal_selesai,
+                        $emails
+                    );
+                } else {
 
+                    // Buat event baru
+                    $event = $google->createEvent(
+                        $judulGoogle,
+                        $penugasan->penyewaan->lokasi,
+                        $deskripsi,
+                        $penugasan->penyewaan->tanggal_mulai,
+                        $penugasan->penyewaan->tanggal_selesai,
+                        $emails
+                    );
 
-                // MODE PRODUKSI
-                /*
-                $google->createEvent(
-                    $judulGoogle,
-                    $penugasan->penyewaan->lokasi,
-                    $deskripsi,
-                    $penugasan->penyewaan->tanggal_mulai,
-                    $penugasan->penyewaan->tanggal_selesai,
-                    $emails
-                );
-                */
-
+                    $penugasan->google_event_id = $event->getId();
+                    $penugasan->save();
+                }
                 // 4. PERSIAPAN PESAN TELEGRAM
                 $paket = '';
 
@@ -301,10 +287,10 @@ class PenugasanController extends AdminController
                 $pesan =
                     $judulTelegram . "\n\n" .
 
-                    "👤 Penyewa : {$penugasan->penyewaan->nama_penyewa}\n" .
-                    "👥 Tim : {$penugasan->tim}\n" .
-                    "📍 Lokasi : {$penugasan->penyewaan->lokasi}\n" .
-                    "📅 Tanggal : " .
+                    " Penyewa : {$penugasan->penyewaan->nama_penyewa}\n" .
+                    " Tim : {$penugasan->tim}\n" .
+                    " Lokasi : {$penugasan->penyewaan->lokasi}\n" .
+                    " Tanggal : " .
                     date('d-m-Y', strtotime($penugasan->penyewaan->tanggal_mulai)) .
                     " s/d " .
                     date('d-m-Y', strtotime($penugasan->penyewaan->tanggal_selesai)) .
@@ -318,7 +304,7 @@ class PenugasanController extends AdminController
 
                 if ($barang != '') {
 
-                    $pesan .= "🎵 Barang Satuan\n";
+                    $pesan .= "📦 Barang Satuan\n";
                     $pesan .= $barang . "\n";
                 }
 
@@ -340,38 +326,6 @@ class PenugasanController extends AdminController
 
                         $telegram->sendMessage(
                             $pegawai->telegram_chat_id,
-                            $pesan
-                        );
-                    }
-                }
-
-                // Admin
-                $admins = Administrator::whereHas('roles', function ($q) {
-                    $q->where('slug', 'admin');
-                })->get();
-
-                foreach ($admins as $admin) {
-
-                    if (!empty($admin->telegram_chat_id)) {
-
-                        $telegram->sendMessage(
-                            $admin->telegram_chat_id,
-                            $pesan
-                        );
-                    }
-                }
-
-                // Pemilik
-                $pemiliks = Administrator::whereHas('roles', function ($q) {
-                    $q->where('slug', 'pemilik');
-                })->get();
-
-                foreach ($pemiliks as $pemilik) {
-
-                    if (!empty($pemilik->telegram_chat_id)) {
-
-                        $telegram->sendMessage(
-                            $pemilik->telegram_chat_id,
                             $pesan
                         );
                     }

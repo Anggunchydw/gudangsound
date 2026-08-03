@@ -23,7 +23,15 @@ class PaketController extends AdminController
             $grid->column('id')->sortable();
             $grid->column('nama_paket');
             $grid->column('deskripsi');
+            $grid->column('status')
+                ->display(function ($value) {
 
+                    if ($value == 'aktif') {
+                        return "<span class='status-aktif'>Aktif</span>";
+                    }
+
+                    return "<span class='status-nonaktif'>Nonaktif</span>";
+                });
             $grid->column('detail', 'Jumlah Barang')
                 ->display(function ($detail) {
                     return collect($detail)->sum('jumlah') . ' Barang';
@@ -79,6 +87,14 @@ class PaketController extends AdminController
                 $form->text('nama_paket', 'Nama Paket')
                     ->required();
 
+                $form->select('status', 'Status')
+                    ->options([
+                        'aktif' => 'Aktif',
+                        'nonaktif' => 'Nonaktif',
+                    ])
+                    ->default('aktif')
+                    ->required();
+
                 $form->textarea('deskripsi', 'Deskripsi')
                     ->rows(4);
 
@@ -96,7 +112,6 @@ class PaketController extends AdminController
                         ->default(1)
                         ->rules('required|integer|min:1');
                 })->useTable();
-
                 $form->saving(function (Form $form) {
 
                     $detail = collect(request()->input('detail', []))
@@ -143,6 +158,11 @@ class PaketController extends AdminController
                         if (!$barang) {
                             return $form->response()->error(
                                 'Barang tidak ditemukan.'
+                            );
+                        }
+                        if ($barang->status != 'aktif') {
+                            return $form->response()->error(
+                                "Barang {$barang->nama_barang} sudah nonaktif sehingga tidak dapat dimasukkan ke dalam paket."
                             );
                         }
 

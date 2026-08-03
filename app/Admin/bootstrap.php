@@ -25,7 +25,6 @@ use Dcat\Admin\Show;
  *
  */
 
-// Admin::css('/css/jadwal-acara.css');
-// Admin::css('/css/dashboard.css');
-Admin::css('/css/pemasukan.css');
+
+Admin::css(asset('css/tema-hsb.css'));
 

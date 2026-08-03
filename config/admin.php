@@ -22,8 +22,8 @@ return [
     | `img` tag, eg '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo' => '<img src="/vendor/dcat-admin/images/logo.png" width="35"> &nbsp;HSB Audio',
-    // 'logo' => '<img src="/images/logo-hsb.jpg" width="35"> &nbsp;HSB Audio',
+    'logo' => '<img src="/images/logo pdf.png" width="55"> &nbsp;HSB Audio',
+    // 'logo' => '<img src="/images/logo pdf.png" width="35"> &nbsp;HSB Audio',
     /*
     |--------------------------------------------------------------------------
     | dcat-admin mini logo
@@ -34,7 +34,7 @@ return [
     | '<img src="http://logo-url" alt="Admin logo">'.
     |
     */
-    'logo-mini' => '<img src="/vendor/dcat-admin/images/logo.png">',
+    'logo-mini' => '<img src="/images/logo pdf.png">',
 
     /*
     |--------------------------------------------------------------------------
@@ -200,7 +200,7 @@ return [
     |--------------------------------------------------------------------------
     */
     'helpers' => [
-        'enable' => true,
+        'enable' => false,
     ],
 
     /*

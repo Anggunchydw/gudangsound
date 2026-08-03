@@ -1,6 +1,4 @@
-/* ==========================
-   DASHBOARD
-========================== */
+/* DASHBOARD */
 
 .dashboard-toolbar{
     display:flex;
@@ -22,9 +20,7 @@
     white-space:nowrap;
 }
 
-/* ==========================
-   CARD
-========================== */
+/* CARD */
 
 .dashboard-card{
     background:#fff;
@@ -103,9 +99,7 @@
     color:#16a34a;
 }
 
-/* ==========================
-   TABLE
-========================== */
+/* TABLE */
 
 .dashboard-table-wrapper{
     width:100%;
@@ -147,9 +141,6 @@
     white-space:nowrap;
 }
 
-/* ==========================
-   RESPONSIVE
-========================== */
 
 /* Laptop */
 @media (max-width:992px){

@@ -11,7 +11,6 @@ use App\Admin\Controllers\PengeluaranController;
 use App\Admin\Controllers\RekapKeuanganController;
 use App\Admin\Controllers\PenggunaController;
 use App\Admin\Controllers\PenugasanController;
-use App\Admin\Controllers\KondisiBarangController;
 
 Admin::routes();
 
@@ -31,19 +30,19 @@ Route::group([
     $router->resource('penugasan', PenugasanController::class);
 
     // Google Calendar OAuth
-    // $router->get(
-    //     'google/login',
-    //     'GoogleAuthController@login'
-    // );
+    $router->get(
+        'google/login',
+        'GoogleAuthController@login'
+    );
 
-    // $router->get(
-    //     'google/callback',
-    //     'GoogleAuthController@callback'
-    // );
-    // $router->get(
-    //     'google/test',
-    //     'GoogleAuthController@testCalendar'
-    // );
+    $router->get(
+        'google/callback',
+        'GoogleAuthController@callback'
+    );
+    $router->get(
+        'google/test',
+        'GoogleAuthController@testCalendar'
+    );
 
     Route::get(
         'penyewaan/{id}/cancel',
@@ -69,11 +68,8 @@ Route::group([
         [RekapKeuanganController::class, 'cetak']
     );
     $router->get('Jadwal-Acara', 'JadwalAcaraController@index');
+    $router->get('Jadwal-Acara/events', 'JadwalAcaraController@events');
 
-    $router->get(
-        'Jadwal-Acara/events',
-        'JadwalAcaraController@events'
-    );
     $router->get(
         'kondisi-barang',
         'KondisiBarangController@index'

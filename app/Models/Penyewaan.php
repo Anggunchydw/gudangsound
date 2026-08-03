@@ -78,6 +78,7 @@ class Penyewaan extends Model
     }
     public function penugasan()
     {
-        return $this->hasMany(Penugasan::class);
+        return $this->hasOne(Penugasan::class);
     }
+
 }

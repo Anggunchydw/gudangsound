@@ -28,6 +28,7 @@ return new class extends Migration
                 'selesai',
                 'dibatalkan'
             ]);
+            $table->string('google_event_id')->nullable();
             $table->timestamps();
         });
     }

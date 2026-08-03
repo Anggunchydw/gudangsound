@@ -8,32 +8,37 @@
         body {
             font-family: DejaVu Sans;
             font-size: 12px;
-            color: #333;
+            color: #374151;
             margin: 30px;
         }
 
         .header {
             text-align: center;
             margin-bottom: 25px;
+            border-bottom: 2px solid #2E7D32;
+            padding-bottom: 12px;
         }
 
         .header h2 {
             margin: 0;
-            color: #27426e;
+            color: #2E7D32;
             font-size: 22px;
+            font-weight: bold;
+            letter-spacing: 1px;
         }
 
         .header p {
             margin: 5px 0;
-            color: #666;
+            color: #6B7280;
             font-size: 13px;
         }
 
         .periode {
             margin-bottom: 20px;
-            padding: 10px;
-            background: #f7f9fc;
-            border-left: 4px solid #27426e;
+            padding: 10px 14px;
+            background: #EDF7EE;
+            border-left: 5px solid #2E7D32;
+            color: #374151;
         }
 
         table {
@@ -41,8 +46,12 @@
             border-collapse: collapse;
         }
 
+        .laporan {
+            border: 1px solid #D7EAD9;
+        }
+
         .laporan th {
-            background: #27426e;
+            background: #2E7D32;
             color: white;
             padding: 10px;
             font-size: 12px;
@@ -51,7 +60,11 @@
 
         .laporan td {
             padding: 9px;
-            border-bottom: 1px solid #dddddd;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .laporan tbody tr:nth-child(even) {
+            background: #FAFCFA;
         }
 
         .text-right {
@@ -59,12 +72,12 @@
         }
 
         .masuk {
-            color: #198754;
+            color: #2E7D32;
             font-weight: bold;
         }
 
         .keluar {
-            color: #dc3545;
+            color: #DC2626;
             font-weight: bold;
         }
 
@@ -72,16 +85,24 @@
             margin-top: 30px;
             width: 45%;
             float: right;
-            border: 1px solid #ddd;
+            border: 1px solid #D7EAD9;
         }
 
         .summary td {
             padding: 10px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .summary tr:nth-child(1) {
+            background: #EDF7EE;
+        }
+
+        .summary tr:nth-child(2) {
+            background: #F8FAF8;
         }
 
         .summary tr:last-child {
-            background: #27426e;
+            background: #2E7D32;
             color: white;
             font-weight: bold;
         }
@@ -93,7 +114,9 @@
             right: 0;
             text-align: center;
             font-size: 10px;
-            color: #888;
+            color: #6B7280;
+            border-top: 1px solid #D7EAD9;
+            padding-top: 5px;
         }
     </style>
 

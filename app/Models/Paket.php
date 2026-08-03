@@ -14,6 +14,7 @@ class Paket extends Model
     protected $fillable = [
         'nama_paket',
         'deskripsi',
+        'status',
     ];
 
     public function detail()
@@ -23,25 +24,28 @@ class Paket extends Model
     public static function getPaketAktif()
     {
         return self::with('detail.barang')
+            ->where('status', 'aktif')
             ->get()
             ->filter(function ($paket) {
-                return $paket->is_active;
+
+                // paket tanpa barang tidak ditampilkan
+                if ($paket->detail->isEmpty()) {
+                    return false;
+                }
+
+                foreach ($paket->detail as $detail) {
+
+                    if (!$detail->barang) {
+                        return false;
+                    }
+
+                    if ($detail->barang->status != 'aktif') {
+                        return false;
+                    }
+                }
+
+                return true;
             })
             ->pluck('nama_paket', 'id');
-    }
-    public function getIsActiveAttribute()
-    {
-        foreach ($this->detail as $detail) {
-
-            if (!$detail->barang) {
-                return false;
-            }
-
-            if ($detail->barang->status != 'aktif') {
-                return false;
-            }
-        }
-
-        return true;
     }
 }

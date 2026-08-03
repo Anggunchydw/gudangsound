@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('nama_paket', 100);
             $table->string('deskripsi', 100)->nullable();
+            $table->enum('status', ['aktif', 'nonaktif'])
+                ->default('aktif');
             $table->timestamps();
         });
     }

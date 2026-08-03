@@ -1,7 +1,7 @@
 @php
 
     \Dcat\Admin\Admin::css(asset('css/penyewaan.css'));
-
+    $user = \Dcat\Admin\Admin::user();
     $user = auth('admin')->user();
     $canManage = $user->isRole('administrator') || $user->isRole('pemilik');
 
@@ -11,19 +11,23 @@
 <div class="mb-3">
 
     <a href="{{ admin_url('penyewaan') }}" class="btn btn-secondary">
-        <i class="feather icon-arrow-left"></i> Kembali
+        <i class="feather icon-arrow-left"></i>
+        Kembali
     </a>
 
-    <a href="{{ admin_url('penyewaan/' . $penyewaan->id . '/cetak') }}" target="_blank" class="btn btn-primary">
-        <i class="feather icon-printer"></i> Cetak Bukti
-    </a>
+    @if ($user->isRole('administrator') || $user->isRole('pemilik'))
+        <a href="{{ admin_url("penyewaan/$penyewaan->id/cetak") }}" class="btn btn-print">
+            <i class="feather icon-printer"></i>
+            Cetak Bukti Penyewaan
+        </a>
+    @endif
 
 </div>
 
 <div class="penyewaan-detail">
     <div class="row">
 
-        {{-- ================= KIRI ================== --}}
+        {{-- KIRI --}}
         <div class="col-lg-8">
 
             <div class="card mb-3">
@@ -60,16 +64,14 @@
                             </div>
                         </div>
 
-                        <div class="info-item info-lokasi">
+                        <div class="info-item">
                             <div class="info-label">Lokasi</div>
-                            <div class="info-value">
-                                {{ $penyewaan->lokasi }}
-                            </div>
+                            <div class="info-value">{{ $penyewaan->lokasi }}</div>
                         </div>
+
                         <div class="info-item">
                             <div class="info-label">Keterangan</div>
-                            <div class="info-value">{{ $penyewaan->keterangan }}
-                            </div>
+                            <div class="info-value">{{ $penyewaan->keterangan }}</div>
                         </div>
 
                     </div>
@@ -153,7 +155,7 @@
         </div>
 
 
-        {{-- ================= KANAN ================== --}}
+        {{-- KANAN --}}
         <div class="col-lg-4">
 
             <div class="card mb-3">

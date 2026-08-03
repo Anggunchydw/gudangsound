@@ -1,6 +1,6 @@
-/* ==========================================
-   LAYOUT
-========================================== */
+
+   /* LAYOUT */
+
 
 .jadwal-header{
     display:flex;
@@ -45,7 +45,7 @@
     margin:0 0 10px;
     font-size:15px;
     font-weight:600;
-    color:#1f2937;
+    color:#2E7D32
 }
 
 /* ==========================================
@@ -59,17 +59,18 @@
 }
 
 .summary-grid>div{
-    background:#f8fafc;
+    background: #F4FBF5;
     border-radius:8px;
     text-align:center;
     padding:10px;
+    border:1px solid #D7EAD9;
 }
 
 .summary-grid h2{
     margin:0;
     font-size:24px;
     font-weight:700;
-    color:#27426e;
+    color:#2E7D32;
 }
 
 .summary-grid span{
@@ -79,9 +80,7 @@
     color:#94a3b8;
 }
 
-/* ==========================================
-   AGENDA
-========================================== */
+   /* AGENDA */
 
 .agenda-list{
     max-height:200px;
@@ -123,21 +122,22 @@
     align-items:center;
 
     border-radius:8px;
-    background:#f3f6fb;
+    background:#EDF7EE;
+    border:1px solid #D7EAD9;
 }
 
 .agenda-date-box .day{
     font-size:19px;
     font-weight:700;
     line-height:1;
-    color:#1f2937;
+    color:#2E7D32;
 }
 
 .agenda-date-box .month{
     margin-top:3px;
     font-size:10px;
     font-weight:600;
-    color:#94a3b8;
+    color:#5F8F65;
 }
 
 .agenda-info{
@@ -176,17 +176,16 @@
     padding:4px 10px;
 }
 
-/* ==========================================
-   FULLCALENDAR
-========================================== */
+/* FULLCALENDAR */
 
 #calendar{
+  
     width:100%;
 }
 
 .fc{
     background:#fff;
-    border:1px solid #dfe3e8;
+    border:1px solid #D7EAD9;
     border-radius:10px;
     padding:15px;
 }
@@ -194,6 +193,7 @@
 .fc-scrollgrid{
     border-radius:8px;
     overflow:hidden;
+    border-color:#D7EAD9 !important;
 }
 
 .fc-toolbar{
@@ -203,48 +203,52 @@
 .fc-toolbar-title{
     font-size:24px!important;
     font-weight:600;
-    color:#303133;
+    color:#2E7D32;
 }
 
 .fc .fc-button{
-    background:#f5f7fa!important;
-    border:1px solid #dcdfe6!important;
-    color:#606266!important;
+    background:#EDF7EE !important;
+    border:1px solid #D7EAD9 !important;
+    color:#2E7D32 !important;
     box-shadow:none!important;
     padding:.45rem .8rem!important;
 }
 
 .fc .fc-button:hover{
-    background:#e7edf7!important;
-    border-color:#27426e!important;
-    color:#27426e!important;
+    background:#DDEFDFFF !important;
+    border-color:#2E7D32 !important;
+    color:#2E7D32 !important;
 }
 
 .fc .fc-button-primary.fc-button-active,
 .fc .fc-button-primary:focus,
 .fc .fc-button-primary:not(:disabled):active{
-    background:#27426e!important;
-    border-color:#27426e!important;
-    color:#fff!important;
+    background:#2E7D32 !important;
+    border-color:#2E7D32 !important;
+    color:#fff !important;
 }
 
 .fc-col-header-cell{
-    background:#f5f7fa;
+    background:#EDF7EE;
 }
 
 .fc-col-header-cell-cushion{
     text-decoration:none!important;
-    color:#606266!important;
+    color:#2E7D32 !important;
     font-weight:600;
 }
 
 .fc-theme-standard td,
 .fc-theme-standard th{
-    border:1px solid #ebeef5;
+    border-color:#E6F1E7;
 }
 
 .fc-day-today{
-    background:#cfdef5!important;
+    background:#EAF6EC !important;
+}
+
+.fc-daygrid-day:hover{
+    background:#F8FCF8;
 }
 
 .fc-event{
@@ -261,9 +265,7 @@
     text-overflow:ellipsis;
 }
 
-/* ==========================================
-   MODAL
-========================================== */
+/* MODAL */
 
 .modal-content{
     border:none;
@@ -292,7 +294,7 @@
 
 .event-title p{
     margin-top:6px;
-    color:#94a3b8;
+    color:#6B8F70;
 }
 
 .event-close{
@@ -305,7 +307,7 @@
 }
 
 .event-close:hover{
-    color:#27426e;
+    color:#2E7D32;
 }
 
 .modal-body hr{
@@ -324,7 +326,7 @@
 
 .detail-icon{
     width:24px;
-    color:#94a3b8;
+    color:#7AA57E;
 }
 
 .detail-content{
@@ -361,9 +363,7 @@
     color:#c2410c;
 }
 
-/* ==========================================
-   RESPONSIVE
-========================================== */
+/* RESPONSIVE */
 
 /* Laptop */
 
