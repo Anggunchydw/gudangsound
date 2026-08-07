@@ -12,7 +12,7 @@ use App\Admin\Controllers\RekapKeuanganController;
 use App\Admin\Controllers\PenggunaController;
 use App\Admin\Controllers\PenugasanController;
 
-Admin::routes();
+Admin::routes(); //otomatis buat route /admin
 
 Route::group([
     'prefix'     => config('admin.route.prefix'),

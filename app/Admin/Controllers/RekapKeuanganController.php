@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Admin\Controllers;
+
 use Dcat\Admin\Admin;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\Pemasukan;
@@ -13,14 +14,11 @@ class RekapKeuanganController extends Controller
 {
     public function index(Content $content, Request $request)
     {
-         Admin::css(asset('css/rekap-keuangan.css'));
+        Admin::css(asset('css/rekap-keuangan.css'));
 
         $mulai  = $request->get('mulai');
         $sampai = $request->get('sampai');
-
-        // ==========================
         // DATA PEMASUKAN
-        // ==========================
         $pemasukan = Pemasukan::when($mulai, function ($q) use ($mulai) {
             $q->whereDate('tanggal_masuk', '>=', $mulai);
         })
@@ -29,9 +27,7 @@ class RekapKeuanganController extends Controller
             })
             ->get();
 
-        // ==========================
         // DATA PENGELUARAN
-        // ==========================
         $pengeluaran = Pengeluaran::when($mulai, function ($q) use ($mulai) {
             $q->whereDate('tanggal_pengeluaran', '>=', $mulai);
         })
@@ -40,9 +36,6 @@ class RekapKeuanganController extends Controller
             })
             ->get();
 
-        // ==========================
-        // GABUNGKAN
-        // ==========================
         $data = [];
 
         foreach ($pemasukan as $item) {
@@ -92,10 +85,6 @@ class RekapKeuanganController extends Controller
         $mulai  = $request->mulai;
         $sampai = $request->sampai;
 
-        // ==========================
-        // DATA PEMASUKAN
-        // ==========================
-
         $pemasukan = Pemasukan::when($mulai, function ($q) use ($mulai) {
             $q->whereDate('tanggal_masuk', '>=', $mulai);
         })
@@ -103,10 +92,6 @@ class RekapKeuanganController extends Controller
                 $q->whereDate('tanggal_masuk', '<=', $sampai);
             })
             ->get();
-
-        // ==========================
-        // DATA PENGELUARAN
-        // ==========================
 
         $pengeluaran = Pengeluaran::when($mulai, function ($q) use ($mulai) {
             $q->whereDate('tanggal_pengeluaran', '>=', $mulai);

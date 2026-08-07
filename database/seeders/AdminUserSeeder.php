@@ -10,6 +10,7 @@ class AdminUserSeeder extends Seeder
 {
     public function run()
     {
+        // Administrator
         $admin = Administrator::firstOrCreate(
             ['username' => 'admin'],
             [
@@ -19,10 +20,22 @@ class AdminUserSeeder extends Seeder
             ]
         );
 
-        $role = Role::where('slug', 'administrator')->first();
-
-        if ($role) {
+        if ($role = Role::where('slug', 'administrator')->first()) {
             $admin->roles()->sync([$role->id]);
+        }
+
+        // Pemilik
+        $pemilik = Administrator::firstOrCreate(
+            ['username' => 'pemilik'],
+            [
+                'name' => 'Pemilik',
+                'email' => 'pemilik@gmail.com',
+                'password' => bcrypt('pemilik'),
+            ]
+        );
+
+        if ($role = Role::where('slug', 'pemilik')->first()) {
+            $pemilik->roles()->sync([$role->id]);
         }
     }
 }

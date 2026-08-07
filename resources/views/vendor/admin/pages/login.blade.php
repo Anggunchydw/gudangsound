@@ -385,12 +385,10 @@
                             class="form-control {{ $errors->has('password') ? 'is-invalid' : '' }}" name="password"
                             placeholder="{{ trans('admin.password') }}" required autocomplete="current-password">
 
-                        {{-- icon kiri --}}
                         <div class="form-control-position">
                             <i class="feather icon-lock"></i>
                         </div>
 
-                        {{-- icon mata --}}
                         <span class="password-toggle" id="togglePassword">
                             <i class="feather icon-eye"></i>
                         </span>

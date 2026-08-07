@@ -676,7 +676,7 @@ class PenyewaanController extends AdminController
             'Bukti-Penyewaan-' . $penyewaan->id . '.pdf'
         );
     }
-    
+
     public function cancel($id)
     {
         $this->authorizeManage();

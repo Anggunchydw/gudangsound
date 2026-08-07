@@ -1,7 +1,6 @@
 
    /* LAYOUT */
 
-
 .jadwal-header{
     display:flex;
     justify-content:flex-end;
@@ -25,9 +24,7 @@
     flex-shrink:0;
 }
 
-/* ==========================================
-   SIDEBAR
-========================================== */
+/* sidebar */
 
 .sidebar-card{
     background:#fff;
@@ -48,9 +45,7 @@
     color:#2E7D32
 }
 
-/* ==========================================
-   RINGKASAN
-========================================== */
+/* rekap keuangan */
 
 .summary-grid{
     display:grid;
@@ -179,7 +174,7 @@
 /* FULLCALENDAR */
 
 #calendar{
-  
+
     width:100%;
 }
 
@@ -362,10 +357,6 @@
     background:#ffedd5;
     color:#c2410c;
 }
-
-/* RESPONSIVE */
-
-/* Laptop */
 
 @media (max-width:1200px){
 

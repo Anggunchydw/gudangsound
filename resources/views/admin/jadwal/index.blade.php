@@ -17,22 +17,15 @@
 </div>
 
 <div class="jadwal-wrapper">
-
-    {{-- =======================
-        KALENDER
-    ======================== --}}
+{{-- kalender --}}
     <div class="calendar-section">
 
         <div id="calendar"></div>
 
     </div>
-
-    {{-- =======================
-        SIDEBAR
-    ======================== --}}
+{{-- sidebar --}}
     <div class="sidebar-section">
 
-        {{-- Ringkasan --}}
         <div class="sidebar-card">
 
             <h5>Ringkasan Bulan Ini</h5>
@@ -198,9 +191,7 @@
 
 </div>
 
-{{-- =======================
-    MODAL DETAIL
-======================== --}}
+{{-- modal detail --}}
 <div class="modal fade" id="eventModal" tabindex="-1">
 
     <div class="modal-dialog modal-dialog-centered">

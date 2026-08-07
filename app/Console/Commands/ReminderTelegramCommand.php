@@ -9,19 +9,10 @@ use App\Services\TelegramService;
 
 class ReminderTelegramCommand extends Command
 {
-    /**
-     * Nama command
-     */
     protected $signature = 'telegram:reminder';
 
-    /**
-     * Deskripsi
-     */
     protected $description = 'Mengirim reminder Telegram H-2 penyewaan dan penugasan';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
         $telegram = new TelegramService();
@@ -38,12 +29,6 @@ class ReminderTelegramCommand extends Command
 
         foreach ($penyewaans as $penyewaan) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | REMINDER PENYEWAAN
-            |--------------------------------------------------------------------------
-            */
-
             $pesanPenyewaan =
                 "⏰ PENGINGAT PENYEWAAN\n\n" .
 
@@ -57,10 +42,6 @@ class ReminderTelegramCommand extends Command
                 date('d-m-Y', strtotime($penyewaan->tanggal_selesai)) .
 
                 "\n\nSilakan membuka Sistem Administrasi HSB Audio untuk melihat detail terbaru.";
-
-            // ==========================
-            // ADMIN
-            // ==========================
 
             $admins = Administrator::whereHas('roles', function ($q) {
                 $q->where('slug', 'admin');
@@ -77,10 +58,6 @@ class ReminderTelegramCommand extends Command
                 }
             }
 
-            // ==========================
-            // PEMILIK
-            // ==========================
-
             $pemiliks = Administrator::whereHas('roles', function ($q) {
                 $q->where('slug', 'pemilik');
             })->get();
@@ -96,13 +73,10 @@ class ReminderTelegramCommand extends Command
                 }
             }
 
-            /*
-            |--------------------------------------------------------------------------
-            | REMINDER PENUGASAN
-            |--------------------------------------------------------------------------
-            */
+        // reminder penugasan H-2
+            $penugasan = $penyewaan->penugasan;
 
-            foreach ($penyewaan->penugasan as $penugasan) {
+            if ($penugasan) {
 
                 $pesanPenugasan =
                     "⏰ PENGINGAT PENUGASAN\n\n" .

@@ -6,11 +6,10 @@
 
     <style>
         body {
-            font-family: DejaVu Sans;
-            font-size: 11px;
+            font-family: "Times New Roman", serif;
+            font-size: 12px;
+            color: #222;
             line-height: 1.6;
-            color: #374151;
-            position: relative;
         }
 
         table {
@@ -20,38 +19,46 @@
 
         th,
         td {
-            padding: 8px;
+            padding: 7px 8px;
             vertical-align: top;
-        }
-
-        th {
-            background: #EDF7EE;
-            color: #2E7D32;
-            font-weight: bold;
-            text-align: center;
-            border: 1px solid #D7EAD9;
-        }
-
-        td {
-            border-color: #D7EAD9;
-        }
-
-        .border {
-            border: 1px solid #D7EAD9;
-        }
-
-        .title {
-            font-size: 22px;
-            font-weight: bold;
-            text-align: center;
-            letter-spacing: 1px;
-            color: #2E7D32;
         }
 
         h2 {
             margin: 0;
-            font-size: 24px;
-            color: #2E7D32;
+            font-size: 22px;
+            font-weight: bold;
+            color: #1F5F2C;
+        }
+
+        .title {
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: right;
+            color: #1F5F2C;
+        }
+
+        .company-info,
+        .invoice-info {
+            font-size: 11px;
+            color: #555;
+        }
+
+        hr {
+            border: none;
+            border-top: 2px solid #2E7D32;
+            margin: 18px 0;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: bold;
+            color: #1F5F2C;
+            text-transform: uppercase;
+            border-left: 4px solid #2E7D32;
+            padding-left: 8px;
+            margin-bottom: 8px;
         }
 
         .text-right {
@@ -62,117 +69,114 @@
             text-align: center;
         }
 
-        hr {
-            margin: 18px 0;
-            border: 0;
-            border-top: 2px solid #D7EAD9;
-        }
-
-        /* ======================
-       STATUS
-    ======================= */
-
-        .badge {
-            display: inline-block;
-            padding: 6px 14px;
-            background: #FFF8E6;
-            border: 1px solid #F59E0B;
-            color: #B45309;
-            font-weight: bold;
-            border-radius: 4px;
-        }
-
-        .badge-success {
-            display: inline-block;
-            padding: 6px 14px;
-            background: #EDF7EE;
-            border: 1px solid #2E7D32;
-            color: #2E7D32;
-            font-weight: bold;
-            border-radius: 4px;
-        }
-
-        /* ======================
-       WARNA NOMINAL
-    ======================= */
-
-        .green {
-            color: #2E7D32;
-            font-weight: bold;
-        }
-
-        .red {
-            color: #DC2626;
-            font-weight: bold;
-        }
-
-        /* ======================
-       INFORMASI
-    ======================= */
-
-        .company-info {
-            font-size: 11px;
-            color: #4B5563;
-        }
-
-        .invoice-info {
-            font-size: 11px;
-            color: #4B5563;
-        }
-
-        .section-title {
-            font-size: 13px;
-            font-weight: bold;
-            margin-bottom: 6px;
-            color: #2E7D32;
-            border-left: 4px solid #2E7D32;
-            padding-left: 8px;
-        }
-
-        .total-table {
-            border: 1px solid #D7EAD9;
-        }
-
-        .total-table td {
-            padding: 8px;
-            border-bottom: 1px solid #E5F1E6;
-        }
-
-        .total-table tr:last-child td {
-            border-bottom: none;
-        }
-
-        .signature {
-            text-align: center;
-            line-height: 1.8;
-        }
-
-        /* ======================
-       TABEL BARANG
-    ======================= */
-
         table[border="1"] {
-            border: 1px solid #D7EAD9;
+            border: 1px solid #b8d8bc;
         }
 
-        table[border="1"] td,
         table[border="1"] th {
-            border: 1px solid #D7EAD9;
+
+            background: #EAF5EC;
+            color: #1F5F2C;
+            border: 1px solid #b8d8bc;
+            font-weight: bold;
+
+        }
+
+        table[border="1"] td {
+
+            border: 1px solid #d6e9d8;
+
         }
 
         table[border="1"] tbody tr:nth-child(even) {
+
             background: #FAFCFA;
+
+        }
+
+        .badge {
+
+            display: inline-block;
+            padding: 6px 14px;
+            border: 1px solid #D97706;
+            background: #FFF7E6;
+            color: #B45309;
+            font-weight: bold;
+
+        }
+
+        .badge-success {
+
+            display: inline-block;
+            padding: 6px 14px;
+            border: 1px solid #2E7D32;
+            background: #EDF7EE;
+            color: #1F5F2C;
+            font-weight: bold;
+
+        }
+
+        .total-table {
+
+            border: 1px solid #b8d8bc;
+
+        }
+
+        .total-table td {
+
+            border-bottom: 1px solid #dbeadf;
+
+        }
+
+        .total-table tr:last-child td {
+
+            border-top: 2px solid #2E7D32;
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 13px;
+
+        }
+
+        .green {
+
+            color: #2E7D32;
+            font-weight: bold;
+
+        }
+
+        .red {
+
+            color: #C62828;
+            font-weight: bold;
+
+        }
+
+        .signature {
+
+            text-align: center;
+            line-height: 2;
+
+        }
+
+        .signature strong {
+
+            text-decoration: underline;
+
         }
 
         .watermark {
+
             position: fixed;
+            opacity: .035;
             z-index: -1000;
-            opacity: .05;
+
         }
 
         .watermark img {
+
             width: 220px;
-            transform: rotate(-35deg);
+            transform: rotate(-30deg);
+
         }
     </style>
 </head>

@@ -196,7 +196,6 @@ class PengeluaranController extends AdminController
                         $form->penyewaan_id
                     )->sum('jumlah');
 
-                    // Total pengeluaran sebelumnya (saat edit tidak menghitung dirinya sendiri)
                     $totalPengeluaran = PengeluaranModel::where(
                         'penyewaan_id',
                         $form->penyewaan_id

@@ -608,12 +608,6 @@ class AdminTablesSeeder extends Seeder
                     "updated_at" => "2026-07-15 18:32:30"
                 ],
                 [
-                    "role_id" => 2,
-                    "menu_id" => 18,
-                    "created_at" => "2026-07-17 06:33:57",
-                    "updated_at" => "2026-07-17 06:33:57"
-                ],
-                [
                     "role_id" => 3,
                     "menu_id" => 10,
                     "created_at" => "2026-07-15 18:31:14",

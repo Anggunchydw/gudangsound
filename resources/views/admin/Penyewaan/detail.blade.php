@@ -16,7 +16,9 @@
     </a>
 
     @if ($user->isRole('administrator') || $user->isRole('pemilik'))
-        <a href="{{ admin_url("penyewaan/$penyewaan->id/cetak") }}" class="btn btn-print">
+        <a href="{{ admin_url("penyewaan/$penyewaan->id/cetak") }}" class="btn btn-print" target="_blank"
+            rel="noopener noreferrer" data-pjax="0">
+
             <i class="feather icon-printer"></i>
             Cetak Bukti Penyewaan
         </a>

@@ -55,6 +55,10 @@ class PenggunaController extends AdminController
     protected function form()
     {
         return Form::make(new Administrator(), function (Form $form) {
+            $form->disableDeleteButton();
+            $form->disableEditingCheck();
+            $form->disableCreatingCheck();
+            $form->disableViewCheck();
 
             $form->editing(function (Form $form) {
 
@@ -93,7 +97,7 @@ class PenggunaController extends AdminController
                     abort(403);
                 }
 
-                // Tidak boleh memberikan role Administrator
+                // Tidak memberikan role Administrator
                 if (! $currentUser->isRole('administrator')) {
 
                     $adminRoleId = Role::where('slug', 'administrator')->value('id');

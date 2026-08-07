@@ -16,6 +16,7 @@ class PaketController extends AdminController
 
     protected function grid()
     {
+        Admin::css(asset('css/paket.css'));
         return Grid::make(new Paket(), function (Grid $grid) {
 
             $grid->model()->with(['detail.barang']);

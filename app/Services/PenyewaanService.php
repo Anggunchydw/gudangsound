@@ -41,8 +41,6 @@ class PenyewaanService
         $detailPaket = request()->input('detailPaket', []);
 
         // Validasi tanggal
-
-
         if ($form->tanggal_selesai < $form->tanggal_mulai) {
 
             throw new \Exception(
@@ -51,8 +49,6 @@ class PenyewaanService
         }
 
         // Minimal memilih barang / paket
-
-
         $detailBarang = collect(request()->input('detailBarang', []))
             ->filter(function ($item) {
                 return !empty($item['barang_id']) && empty($item['_remove_']);
@@ -73,8 +69,6 @@ class PenyewaanService
         }
 
         //Barang tidak boleh dobel
-
-
         $barangIds = [];
 
         foreach ($detailBarang as $item) {
@@ -94,7 +88,6 @@ class PenyewaanService
         }
 
         // Paket tidak boleh dobel
-
         $paketIds = [];
 
         foreach ($detailPaket as $item) {

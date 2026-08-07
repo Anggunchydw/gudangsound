@@ -68,9 +68,6 @@ class GoogleCalendarService
         $this->service = new Calendar($this->client);
     }
 
-    /**
-     * CREATE EVENT
-     */
     public function createEvent(
         $judul,
         $lokasi,
@@ -139,9 +136,6 @@ class GoogleCalendarService
             );
     }
 
-    /**
-     * UPDATE EVENT
-     */
     public function updateEvent(
         $eventId,
         $judul,

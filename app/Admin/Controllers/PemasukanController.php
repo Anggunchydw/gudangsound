@@ -73,13 +73,6 @@ class PemasukanController extends AdminController
         });
     }
 
-    /**
-     * Make a show builder.
-     *
-     * @param mixed $id
-     *
-     * @return Show
-     */
     protected function detail($id)
     {
         return Show::make($id, new Pemasukan(), function (Show $show) {
@@ -87,11 +80,7 @@ class PemasukanController extends AdminController
         });
     }
 
-    /**
-     * Make a form builder.
-     *
-     * @return Form
-     */
+
     protected function form()
     {
         return Form::make(new Pemasukan(), function (Form $form) {

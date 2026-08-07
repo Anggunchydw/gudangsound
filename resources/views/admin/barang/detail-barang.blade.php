@@ -1,8 +1,5 @@
 <div class="detail-wrapper">
 
-    {{-- =======================
-        INFORMASI BARANG
-    ======================== --}}
     <div class="detail-card">
 
         <div class="detail-header">
@@ -13,7 +10,7 @@
 
             <div class="barang-info-grid">
 
-                {{-- KOLOM KIRI --}}
+                {{-- Kolom kiri --}}
                 <div class="barang-info-column">
 
                     <div class="barang-info-item">
@@ -58,7 +55,7 @@
 
                 </div>
 
-                {{-- KOLOM KANAN --}}
+                {{-- Kolom kanan --}}
                 <div class="barang-info-column">
 
                     <div class="barang-info-item">
@@ -116,9 +113,6 @@
         </div>
 
     </div>
-
-
-    {{-- RIWAYAT KONDISI --}}
 
 
     <div class="detail-card">

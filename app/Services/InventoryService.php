@@ -9,9 +9,9 @@ use Carbon\Carbon;
 
 class InventoryService
 {
-    /**
-     * Mengecek apakah stok masih tersedia pada rentang tanggal tertentu.
-     */
+
+     // Mengecek apakah stok masih tersedia pada rentang tanggal tertentu.
+
     public static function checkAvailability(
         $tanggalMulai,
         $tanggalSelesai,
@@ -70,7 +70,7 @@ class InventoryService
             }
 
             $detail = DetailPaket::where('paket_id', $paketItem['paket_id'])->get();
-            
+
             // Validasi paket kosong
             if ($detail->isEmpty()) {
 

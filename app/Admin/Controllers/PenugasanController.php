@@ -17,9 +17,7 @@ use Dcat\Admin\Http\Controllers\AdminController;
 
 class PenugasanController extends AdminController
 {
-    /**
-     * Hanya Administrator & Admin Operasional
-     */
+
     protected function authorizeManage()
     {
         $user = Admin::user();
@@ -82,9 +80,6 @@ class PenugasanController extends AdminController
         });
     }
 
-    /**
-     * DETAIL
-     */
     protected function detail($id)
     {
         return Show::make($id, new Penugasan(), function (Show $show) {
@@ -99,9 +94,6 @@ class PenugasanController extends AdminController
         });
     }
 
-    /**
-     * FORM
-     */
     protected function form()
     {
         // hanya admin & administrator
@@ -120,7 +112,6 @@ class PenugasanController extends AdminController
 
                     $query = Penyewaan::where('status_penyewaan', '<>', 'dibatalkan');
 
-                    // Jika edit, tampilkan juga penyewaan yang sedang dipakai
                     if ($form->isEditing()) {
 
                         $current = $form->model()->penyewaan_id;
