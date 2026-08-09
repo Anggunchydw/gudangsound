@@ -24,7 +24,8 @@ class GoogleAuthController extends AdminController
             storage_path('app/google/client_secret.json')
         );
         $client->setRedirectUri(
-            'http://127.0.0.1:8000/admin/google/callback'
+                env('GOOGLE_REDIRECT_URI')
+            //'http://127.0.0.1:8000/admin/google/callback'
         );
 
         $client->setAccessType('offline');
@@ -53,7 +54,8 @@ class GoogleAuthController extends AdminController
             storage_path('app/google/client_secret.json')
         );
         $client->setRedirectUri(
-            'http://127.0.0.1:8000/admin/google/callback'
+             env('GOOGLE_REDIRECT_URI')
+            //'http://127.0.0.1:8000/admin/google/callback'
         );
         $client->setAccessType('offline');
 
