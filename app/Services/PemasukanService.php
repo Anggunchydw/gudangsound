@@ -14,33 +14,18 @@ class PemasukanService
         $keterangan = null
     ) {
 
-        // Jika tidak dikirim, tentukan otomatis
         if (!$keterangan) {
             $keterangan = $jenis == 'DP'
                 ? 'Pembayaran DP'
                 : 'Pelunasan';
         }
 
-        $pemasukan = Pemasukan::where('penyewaan_id', $penyewaan->id)
-            ->where('jenis_pembayaran', $jenis)
-            ->first();
-
-        if (!$pemasukan) {
-
-            Pemasukan::create([
-                'penyewaan_id'     => $penyewaan->id,
-                'tanggal_masuk'    => now(),
-                'jumlah'           => $jumlah,
-                'jenis_pembayaran' => $jenis,
-                'keterangan'       => $keterangan,
-            ]);
-
-        } else {
-
-            $pemasukan->update([
-                'jumlah'      => $jumlah,
-                'keterangan'  => $keterangan,
-            ]);
-        }
+        Pemasukan::create([
+            'penyewaan_id'     => $penyewaan->id,
+            'tanggal_masuk'    => now(),
+            'jumlah'           => $jumlah,
+            'jenis_pembayaran' => $jenis,
+            'keterangan'       => $keterangan,
+        ]);
     }
 }

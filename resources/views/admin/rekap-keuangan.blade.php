@@ -1,59 +1,113 @@
 <div class="box box-primary">
 
-    <div class="box-body">
+    <div class="rekap-keuangan">
 
-        <form method="GET">
+        {{-- HEADER LAPORAN --}}
+        <div class="rekap-header">
 
-            <div class="row rekap-filter">
 
-                <div class="col-md-3">
-                    <input type="date" name="mulai" value="{{ $mulai }}" class="form-control">
+
+            <h2>Laporan Rekap Keuangan</h2>
+
+        </div>
+
+
+        {{-- FILTER --}}
+        <div class="rekap-filter-card">
+
+            <form method="GET">
+
+                <div class="filter-row">
+
+                    <div class="filter-group">
+
+                        <label>Mulai</label>
+
+                        <input type="date" name="mulai" value="{{ $mulai }}" class="form-control">
+
+                    </div>
+
+
+                    <div class="filter-group">
+
+                        <label>Sampai</label>
+
+                        <input type="date" name="sampai" value="{{ $sampai }}" class="form-control">
+
+                    </div>
+
+
+                    <div class="filter-action">
+
+                        <button type="submit" class="btn-filter">
+
+                            <i class="feather icon-filter"></i>
+
+                            Lihat Periode
+
+                        </button>
+
+                    </div>
+
+
+                    <div class="filter-print">
+
+                        <a href="{{ url('admin/rekap-keuangan/cetak?mulai=' . $mulai . '&sampai=' . $sampai) }}"
+                            target="_blank" class="btn-print">
+
+                            <i class="feather icon-printer"></i>
+
+                            Cetak Laporan
+
+                        </a>
+
+                    </div>
+
                 </div>
 
-                <div class="col-md-3">
-                    <input type="date" name="sampai" value="{{ $sampai }}" class="form-control">
-                </div>
+            </form>
 
-                <div class="col-md-2">
+        </div>
 
-                    <button class="btn btn-primary">
-                        <i class="feather icon-filter"></i>
-                        Lihat Periode
-                    </button>
 
-                </div>
+        {{-- PERIODE --}}
+        @if ($mulai || $sampai)
+            <div class="periode-info">
 
-                <div class="col-md-4 text-right">
+                <strong>Periode:</strong>
 
-                    <a href="{{ url('admin/rekap-keuangan/cetak?mulai=' . $mulai . '&sampai=' . $sampai) }}" target="_blank"
-                        class="btn btn-primary">
+                {{ $mulai ? date('d-m-Y', strtotime($mulai)) : '-' }}
 
-                        <i class="feather icon-printer"></i>
+                <span>s/d</span>
 
-                        Cetak Laporan
-
-                    </a>
-
-                </div>
+                {{ $sampai ? date('d-m-Y', strtotime($sampai)) : '-' }}
 
             </div>
+        @endif
 
-        </form>
 
-
+        {{-- TABEL LAPORAN --}}
         <div class="rekap-table-wrapper">
 
-            <table class="table table-hover rekap-table">
+            <table class="rekap-table">
 
                 <thead>
 
                     <tr>
 
-                        <th width="150">Tanggal</th>
-                        <th width="150">Tipe</th>
+                        <th width="15%">Tanggal</th>
+
+                        <th width="15%">Tipe</th>
+
                         <th>Keterangan</th>
-                        <th width="180">Masuk</th>
-                        <th width="180">Keluar</th>
+
+                        <th width="20%" class="text-right">
+                            Masuk
+                        </th>
+
+                        <th width="20%" class="text-right">
+                            Keluar
+                        </th>
 
                     </tr>
 
@@ -68,37 +122,32 @@
                                 {{ date('d-m-Y', strtotime($item['tanggal'])) }}
                             </td>
 
+
                             <td>
 
                                 @if ($item['tipe'] == 'Pemasukan')
                                     <span class="badge-pemasukan">
-
                                         Pemasukan
-
                                     </span>
                                 @else
                                     <span class="badge-pengeluaran">
-
                                         Pengeluaran
-
                                     </span>
                                 @endif
 
                             </td>
 
+
                             <td>
-
                                 {{ $item['keterangan'] }}
-
                             </td>
 
-                            <td>
+
+                            <td class="text-right">
 
                                 @if ($item['masuk'] > 0)
-                                    <span class="text-masuk">
-
+                                    <span class="nominal-masuk">
                                         Rp {{ number_format($item['masuk'], 0, ',', '.') }}
-
                                     </span>
                                 @else
                                     -
@@ -106,13 +155,12 @@
 
                             </td>
 
-                            <td>
+
+                            <td class="text-right">
 
                                 @if ($item['keluar'] > 0)
-                                    <span class="text-keluar">
-
+                                    <span class="nominal-keluar">
                                         Rp {{ number_format($item['keluar'], 0, ',', '.') }}
-
                                     </span>
                                 @else
                                     -
@@ -126,9 +174,9 @@
 
                         <tr>
 
-                            <td colspan="5" class="text-center">
+                            <td colspan="5" class="empty-data">
 
-                                Tidak ada data
+                                Tidak ada data pada periode yang dipilih.
 
                             </td>
 
@@ -141,73 +189,55 @@
 
         </div>
 
-    </div>
 
-    <div class="box-footer">
+        {{-- RINGKASAN --}}
+        <div class="summary-wrapper">
 
-        <table class="table rekap-footer">
+            <table class="summary-table">
 
-            <tr>
+                <tr>
 
-                <td width="250">
+                    <td>Total Pemasukan</td>
 
-                    Total Pemasukan
-
-                </td>
-
-                <td>
-
-                    <span class="text-masuk">
+                    <td class="text-right nominal-masuk">
 
                         Rp {{ number_format($totalMasuk, 0, ',', '.') }}
 
-                    </span>
+                    </td>
 
-                </td>
+                </tr>
 
-            </tr>
 
-            <tr>
+                <tr>
 
-                <td>
+                    <td>Total Pengeluaran</td>
 
-                    Total Pengeluaran
-
-                </td>
-
-                <td>
-
-                    <span class="text-keluar">
+                    <td class="text-right nominal-keluar">
 
                         Rp {{ number_format($totalKeluar, 0, ',', '.') }}
 
-                    </span>
+                    </td>
 
-                </td>
+                </tr>
 
-            </tr>
 
-            <tr>
+                <tr class="saldo-row">
 
-                <td>
+                    <td>
+                        Saldo Bersih
+                    </td>
 
-                    <strong>Saldo Bersih</strong>
-
-                </td>
-
-                <td>
-
-                    <span class="text-saldo">
+                    <td class="text-right">
 
                         Rp {{ number_format($totalMasuk - $totalKeluar, 0, ',', '.') }}
 
-                    </span>
+                    </td>
 
-                </td>
+                </tr>
 
-            </tr>
+            </table>
 
-        </table>
+        </div>
 
     </div>
 

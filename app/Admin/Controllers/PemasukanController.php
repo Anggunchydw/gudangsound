@@ -2,7 +2,7 @@
 
 namespace App\Admin\Controllers;
 
-use APP\Models\Pemasukan as PemasukanModel;
+use App\Models\Pemasukan as PemasukanModel;
 use App\Admin\Repositories\Pemasukan;
 use Dcat\Admin\Form;
 use Dcat\Admin\Grid;

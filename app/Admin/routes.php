@@ -27,6 +27,10 @@ Route::group([
     $router->resource('pemasukan', PemasukanController::class);
     $router->resource('pengeluaran', PengeluaranController::class);
     $router->resource('pengguna', PenggunaController::class);
+    $router->get(
+    'penugasan/get-pegawai-tersedia',
+    'PenugasanController@pegawaiTersedia'
+);
     $router->resource('penugasan', PenugasanController::class);
 
     // Google Calendar OAuth
@@ -84,4 +88,6 @@ Route::group([
         'kondisi-barang/{penugasan}/simpan',
         'KondisiBarangController@simpan'
     );
+
+
 });

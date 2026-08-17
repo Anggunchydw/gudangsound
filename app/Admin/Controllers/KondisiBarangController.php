@@ -80,6 +80,15 @@ class KondisiBarangController extends AdminController
 
     public function input(Penugasan $penugasan, Content $content)
     {
+        $user = Admin::user();
+
+        // Pegawai hanya boleh mengakses penugasan yang menjadi tanggung jawabnya
+        if (
+            $user->isRole('pegawai') &&
+            !$penugasan->pegawai()->where('admin_users.id', $user->id)->exists()
+        ) {
+            abort(403);
+        }
         Admin::css(asset('css/kondisi-barang.css'));
         $penugasan->load([
             'penyewaan.detailBarang.barang',
@@ -162,6 +171,16 @@ class KondisiBarangController extends AdminController
 
     public function simpan(Request $request, Penugasan $penugasan)
     {
+        $user = Admin::user();
+
+        // Pegawai hanya boleh menyimpan kondisi barang
+        // pada penugasan yang menjadi tanggung jawabnya
+        if (
+            $user->isRole('pegawai') &&
+            !$penugasan->pegawai()->where('admin_users.id', $user->id)->exists()
+        ) {
+            abort(403);
+        }
         foreach ($request->barang as $item) {
 
             $jumlahBarang = (int) $item['jumlah_barang'];

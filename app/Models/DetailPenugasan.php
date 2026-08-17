@@ -19,8 +19,8 @@ class DetailPenugasan extends Model
         return $this->belongsTo(Administrator::class, 'user_id');
     }
 
-    public function penugasan()
-    {
-        return $this->belongsTo(Penugasan::class);
-    }
+   public function penugasan()
+{
+    return $this->belongsTo(Penugasan::class, 'penugasan_id');
+}
 }

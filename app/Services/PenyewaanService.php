@@ -28,13 +28,20 @@ class PenyewaanService
 
         $totalHarga = (float) str_replace(',', '', $form->total_harga);
 
-        $uangMuka = (float) str_replace(
-            ',',
-            '',
-            request('uang_muka')
-        );
+        if ($form->isCreating()) {
 
-        $form->uang_muka = $uangMuka;
+            $uangMuka = (float) str_replace(
+                ',',
+                '',
+                request('uang_muka')
+            );
+
+            $form->uang_muka = $uangMuka;
+        } else {
+
+            // Saat edit, uang muka tidak boleh diubah.
+            $uangMuka = (float) $penyewaan->uang_muka;
+        }
 
         $detailBarang = request()->input('detailBarang', []);
 
@@ -121,6 +128,18 @@ class PenyewaanService
                 'Uang muka (DP) tidak boleh melebihi total harga.'
             );
         }
+        if ($penyewaan->exists && $uangMuka != $penyewaan->uang_muka) {
+
+            throw new \Exception(
+                'Uang muka tidak dapat diubah. Gunakan menu Tambah Pembayaran untuk menambah pembayaran.'
+            );
+        }
+        if ($totalHarga < $uangMuka) {
+
+            throw new \Exception(
+                'Total harga tidak boleh lebih kecil dari total pembayaran yang sudah diterima.'
+            );
+        }
 
         $form->status_pembayaran =
             $uangMuka >= $totalHarga
@@ -131,13 +150,9 @@ class PenyewaanService
         InventoryService::checkAvailability(
 
             $form->tanggal_mulai,
-
             $form->tanggal_selesai,
-
             $detailBarang,
-
             $detailPaket,
-
             $form->model()->id
         );
     }

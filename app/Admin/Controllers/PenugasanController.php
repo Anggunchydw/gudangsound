@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use App\Services\GoogleCalendarService;
 use App\Services\TelegramService;
 use Dcat\Admin\Http\Controllers\AdminController;
+use App\Models\DetailPenugasan;
 
 class PenugasanController extends AdminController
 {
@@ -52,6 +53,10 @@ class PenugasanController extends AdminController
                     return $this->pegawai()
                         ->pluck('name')
                         ->implode(', ');
+                });
+            $grid->column('penyewaan.tanggal_mulai', 'Tanggal Acara')
+                ->display(function ($value) {
+                    return Carbon::parse($value)->format('d-m-Y');
                 });
             $grid->column('created_at', 'Tanggal Penugasan')
                 ->display(function ($value) {
@@ -158,11 +163,17 @@ class PenugasanController extends AdminController
             $pegawaiRole = Role::where('slug', 'pegawai')->first();
 
             $form->checkbox('pegawai', 'Pegawai')
-                ->options(
-                    Administrator::whereHas('roles', function ($q) use ($pegawaiRole) {
+                ->options(function () use ($pegawaiRole) {
+
+                    if (!$pegawaiRole) {
+                        return [];
+                    }
+
+                    return Administrator::whereHas('roles', function ($q) use ($pegawaiRole) {
                         $q->where('admin_roles.id', $pegawaiRole->id);
-                    })->pluck('name', 'id')
-                )
+                    })
+                        ->pluck('name', 'id');
+                })
                 ->customFormat(function () use ($form) {
 
                     if (!$form->model()) {
@@ -175,11 +186,91 @@ class PenugasanController extends AdminController
                         ->toArray();
                 })
                 ->required();
+            $form->saving(function (Form $form) {
+
+                // Ambil pegawai yang dipilih
+                $pegawai = array_filter((array) $form->input('pegawai'));
+
+                $penyewaanId = $form->input('penyewaan_id');
+
+                // Jika penyewaan atau pegawai belum dipilih,
+                // biarkan validasi form yang menangani
+                if (!$penyewaanId || empty($pegawai)) {
+                    return;
+                }
+
+                $penyewaan = Penyewaan::find($penyewaanId);
+
+                if (!$penyewaan) {
+                    return;
+                }
+
+                $tanggalMulai = Carbon::parse($penyewaan->tanggal_mulai);
+                $tanggalSelesai = Carbon::parse($penyewaan->tanggal_selesai);
+
+                // Cari pegawai yang sudah mempunyai penugasan
+                // pada tanggal yang beririsan
+                $pegawaiTerpakai = DetailPenugasan::whereIn('user_id', $pegawai)
+                    ->whereHas('penugasan', function ($q) use (
+                        $tanggalMulai,
+                        $tanggalSelesai,
+                        $form
+                    ) {
+
+                        // Jika EDIT, abaikan penugasan yang sedang diedit
+                        if ($form->isEditing()) {
+                            $q->where('id', '<>', $form->getKey());
+                        }
+
+                        $q->whereHas('penyewaan', function ($q) use (
+                            $tanggalMulai,
+                            $tanggalSelesai
+                        ) {
+
+                            // Cek apakah tanggal saling beririsan
+                            $q->where(
+                                'tanggal_mulai',
+                                '<=',
+                                $tanggalSelesai->format('Y-m-d')
+                            )
+                                ->where(
+                                    'tanggal_selesai',
+                                    '>=',
+                                    $tanggalMulai->format('Y-m-d')
+                                )
+                                ->where(
+                                    'status_penyewaan',
+                                    '<>',
+                                    'dibatalkan'
+                                );
+                        });
+                    })
+                    ->with('pegawai')
+                    ->get();
+
+                // Jika ada pegawai yang bentrok
+                if ($pegawaiTerpakai->isNotEmpty()) {
+
+                    $namaPegawaiBentrok = $pegawaiTerpakai
+                        ->map(function ($detail) {
+                            return optional($detail->pegawai)->name;
+                        })
+                        ->filter()
+                        ->unique()
+                        ->implode(', ');
+
+                    return $form->response()->error(
+                        'Pegawai tidak dapat ditugaskan. ' .
+                            'Pegawai berikut sudah memiliki penugasan pada tanggal yang beririsan: ' .
+                            $namaPegawaiBentrok
+                    );
+                }
+            });
 
             $form->saved(function (Form $form) {
 
                 // 1. SIMPAN PEGAWAI
-                $pegawai = array_filter(request('pegawai', []));
+                $pegawai = array_filter((array) request('pegawai'));
 
                 $penugasan = Penugasan::find($form->getKey());
 
@@ -322,6 +413,149 @@ class PenugasanController extends AdminController
                     }
                 }
             });
+            Admin::script(<<<'JS'
+
+function loadPegawaiTersedia() {
+
+    var penyewaanId = $('select[name="penyewaan_id"]').val();
+
+    if (!penyewaanId) {
+        return;
+    }
+
+    var penugasanId = $('input[name="id"]').val() || '';
+
+    $.ajax({
+        url: '/admin/penugasan/get-pegawai-tersedia',
+        type: 'GET',
+
+        data: {
+            penyewaan_id: penyewaanId,
+            penugasan_id: penugasanId
+        },
+
+        success: function(response) {
+
+            var formGroup = $('input[name="pegawai[]"]')
+                .first()
+                .closest('.form-group');
+
+            if (!formGroup.length) {
+                return;
+            }
+
+            var html = '';
+
+            if (response.length === 0) {
+
+                html = `
+                    <div style="color:#999; padding:8px 0;">
+                        Tidak ada pegawai yang tersedia pada tanggal tersebut.
+                    </div>
+                `;
+
+            } else {
+
+                response.forEach(function(pegawai) {
+
+                    html += `
+                        <label style="display:block; margin-bottom:8px;">
+                            <input type="checkbox"
+                                   name="pegawai[]"
+                                   value="${pegawai.id}">
+                            ${pegawai.name}
+                        </label>
+                    `;
+
+                });
+            }
+
+            formGroup.find('.checkbox').first().html(html);
+        }
+    });
+}
+
+$(document).on(
+    'change',
+    'select[name="penyewaan_id"]',
+    function () {
+
+        loadPegawaiTersedia();
+
+    }
+);
+
+JS);
         });
+    }
+    public function pegawaiTersedia()
+    {
+        $penyewaanId = request('penyewaan_id');
+        $penugasanId = request('penugasan_id');
+
+        if (!$penyewaanId) {
+            return response()->json([]);
+        }
+
+        $penyewaan = Penyewaan::find($penyewaanId);
+
+        if (!$penyewaan) {
+            return response()->json([]);
+        }
+
+        $tanggalMulai = Carbon::parse($penyewaan->tanggal_mulai);
+        $tanggalSelesai = Carbon::parse($penyewaan->tanggal_selesai);
+
+        $pegawaiTerpakai = DetailPenugasan::whereHas(
+            'penugasan',
+            function ($q) use (
+                $tanggalMulai,
+                $tanggalSelesai,
+                $penugasanId
+            ) {
+
+                if ($penugasanId) {
+                    $q->where('id', '<>', $penugasanId);
+                }
+
+                $q->whereHas('penyewaan', function ($q) use (
+                    $tanggalMulai,
+                    $tanggalSelesai
+                ) {
+
+                    $q->where(
+                        'tanggal_mulai',
+                        '<=',
+                        $tanggalSelesai->format('Y-m-d')
+                    )
+                        ->where(
+                            'tanggal_selesai',
+                            '>=',
+                            $tanggalMulai->format('Y-m-d')
+                        )
+                        ->where(
+                            'status_penyewaan',
+                            '<>',
+                            'dibatalkan'
+                        );
+                });
+            }
+        )
+            ->pluck('user_id')
+            ->unique();
+
+        $pegawaiRole = Role::where('slug', 'pegawai')->first();
+
+        if (!$pegawaiRole) {
+            return response()->json([]);
+        }
+
+        $pegawai = Administrator::whereHas('roles', function ($q) use ($pegawaiRole) {
+            $q->where('admin_roles.id', $pegawaiRole->id);
+        })
+            ->whereNotIn('id', $pegawaiTerpakai)
+            ->get(['id', 'name']);
+
+        return response()->json($pegawai);
     }
 }

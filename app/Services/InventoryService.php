@@ -5,13 +5,15 @@ namespace App\Services;
 use App\Models\Barang;
 use App\Models\Penyewaan;
 use App\Models\DetailPaket;
+use App\Models\Paket;
 use Carbon\Carbon;
 
 class InventoryService
 {
-
-     // Mengecek apakah stok masih tersedia pada rentang tanggal tertentu.
-
+    /**
+     * Mengecek apakah stok barang tersedia
+     * berdasarkan seluruh barang satuan dan isi paket.
+     */
     public static function checkAvailability(
         $tanggalMulai,
         $tanggalSelesai,
@@ -20,19 +22,142 @@ class InventoryService
         $penyewaanId = null
     ) {
 
-        // Barang satuan
+        $kebutuhanBarang = [];
+
+        //2. BARANG SATUAN
+
         foreach ($detailBarang as $item) {
+
+            if (
+                empty($item['barang_id']) ||
+                empty($item['jumlah_barang'])
+            ) {
+                continue;
+            }
 
             $barang = Barang::find($item['barang_id']);
 
             if (!$barang) {
-                continue;
+                throw new \Exception(
+                    'Barang yang dipilih tidak ditemukan.'
+                );
             }
-            if ($item['jumlah_barang'] < 1) {
+
+            $jumlah = (int) $item['jumlah_barang'];
+
+            if ($jumlah < 1) {
 
                 throw new \Exception(
                     "Jumlah {$barang->nama_barang} minimal 1."
                 );
+            }
+
+            if ($barang->status != 'aktif') {
+
+                throw new \Exception(
+                    "Barang {$barang->nama_barang} sudah tidak aktif."
+                );
+            }
+
+            if (!isset($kebutuhanBarang[$barang->id])) {
+                $kebutuhanBarang[$barang->id] = 0;
+            }
+
+            $kebutuhanBarang[$barang->id] += $jumlah;
+        }
+
+
+        // 3. PAKET
+
+        foreach ($detailPaket as $paketItem) {
+
+            if (
+                empty($paketItem['paket_id']) ||
+                empty($paketItem['jumlah_paket'])
+            ) {
+                continue;
+            }
+
+            $paket = Paket::find($paketItem['paket_id']);
+
+            if (!$paket) {
+
+                throw new \Exception(
+                    'Paket yang dipilih tidak ditemukan.'
+                );
+            }
+
+            if ($paket->status != 'aktif') {
+
+                throw new \Exception(
+                    "Paket {$paket->nama_paket} sudah tidak aktif."
+                );
+            }
+
+            $jumlahPaket = (int) $paketItem['jumlah_paket'];
+
+            if ($jumlahPaket < 1) {
+
+                throw new \Exception(
+                    "Jumlah paket {$paket->nama_paket} minimal 1."
+                );
+            }
+
+            $detail = DetailPaket::where(
+                'paket_id',
+                $paket->id
+            )->get();
+
+            //Paket kosong
+
+            if ($detail->isEmpty()) {
+
+                throw new \Exception(
+                    "Paket {$paket->nama_paket} tidak memiliki barang."
+                );
+            }
+
+            // Masukkan isi paket ke kebutuhan barang
+
+            foreach ($detail as $barangPaket) {
+
+                $barang = Barang::find($barangPaket->barang_id);
+
+                if (!$barang) {
+
+                    throw new \Exception(
+                        'Terdapat barang pada paket yang sudah tidak ditemukan.'
+                    );
+                }
+
+                if ($barang->status != 'aktif') {
+
+                    throw new \Exception(
+                        "Barang {$barang->nama_barang} sudah tidak aktif sehingga paket tidak dapat disewakan."
+                    );
+                }
+
+                $dibutuhkan =
+                    (int) $barangPaket->jumlah *
+                    $jumlahPaket;
+
+                if (!isset($kebutuhanBarang[$barang->id])) {
+                    $kebutuhanBarang[$barang->id] = 0;
+                }
+
+                $kebutuhanBarang[$barang->id] += $dibutuhkan;
+            }
+        }
+
+        // 4. CEK STOK SETELAH SEMUA KEBUTUHAN DIGABUNG
+
+
+        foreach ($kebutuhanBarang as $barangId => $jumlahDibutuhkan) {
+
+            $barang = Barang::find($barangId);
+
+            if (!$barang) {
+                continue;
             }
 
             $dipakai = self::jumlahBarangDipakai(
@@ -42,86 +167,22 @@ class InventoryService
                 $penyewaanId
             );
 
-            $tersisa = $barang->jumlah_total - $dipakai;
+            $stokTersedia = $barang->jumlah_total - $dipakai;
 
-            if ($item['jumlah_barang'] > $tersisa) {
-
-                throw new \Exception(
-                    "Stok {$barang->nama_barang} tidak mencukupi. Sisa hanya {$tersisa}."
-                );
-            }
-        }
-        // Paket
-
-        foreach ($detailPaket as $paketItem) {
-
-            $paket = \App\Models\Paket::find($paketItem['paket_id']);
-
-            if (!$paket) {
-                throw new \Exception(
-                    "Paket tidak ditemukan."
-                );
-            }
-
-            if ($paket->status != 'aktif') {
-                throw new \Exception(
-                    "Paket {$paket->nama_paket} sudah tidak aktif."
-                );
-            }
-
-            $detail = DetailPaket::where('paket_id', $paketItem['paket_id'])->get();
-
-            // Validasi paket kosong
-            if ($detail->isEmpty()) {
+            if ($jumlahDibutuhkan > $stokTersedia) {
 
                 throw new \Exception(
-                    "Paket yang dipilih tidak memiliki barang."
+                    "Stok {$barang->nama_barang} tidak mencukupi. " .
+                        "Stok tersedia {$stokTersedia}, " .
+                        "sedangkan kebutuhan {$jumlahDibutuhkan}."
                 );
-            }
-
-            foreach ($detail as $barangPaket) {
-
-                $barang = Barang::find($barangPaket->barang_id);
-
-                if (!$barang) {
-                    throw new \Exception(
-                        "Terdapat barang pada paket yang sudah tidak ditemukan."
-                    );
-                }
-
-                if ($barang->status != 'aktif') {
-                    throw new \Exception(
-                        "Barang {$barang->nama_barang} sudah tidak aktif sehingga paket tidak dapat disewakan."
-                    );
-                }
-
-                $dibutuhkan =
-                    $barangPaket->jumlah *
-                    $paketItem['jumlah_paket'];
-
-                $dipakai = self::jumlahBarangDipakai(
-                    $barang->id,
-                    $tanggalMulai,
-                    $tanggalSelesai,
-                    $penyewaanId
-                );
-
-                $tersisa = $barang->jumlah_total - $dipakai;
-
-                if ($dibutuhkan > $tersisa) {
-
-                    throw new \Exception(
-                        "Stok {$barang->nama_barang} tidak cukup untuk paket."
-                    );
-                }
             }
         }
     }
 
-    /**
-     * Menghitung jumlah barang yang sudah dipakai
-     * pada rentang tanggal tertentu.
-     */
+    //Menghitung jumlah barang yang sudah dipakai
+    //pada rentang tanggal tertentu.
+
     private static function jumlahBarangDipakai(
         $barangId,
         $mulai,
@@ -133,27 +194,53 @@ class InventoryService
             'detailBarang',
             'detailPaket.paket.detail'
         ])
-
-            ->where('status_penyewaan', '!=', 'dibatalkan')
-
+            ->where(
+                'status_penyewaan',
+                '!=',
+                'dibatalkan'
+            )
             ->where(function ($q) use ($mulai, $selesai) {
 
-                $q->whereBetween('tanggal_mulai', [$mulai, $selesai])
+                $q->whereBetween(
+                    'tanggal_mulai',
+                    [$mulai, $selesai]
+                )
+                    ->orWhereBetween(
+                        'tanggal_selesai',
+                        [$mulai, $selesai]
+                    )
+                    ->orWhere(function ($q) use (
+                        $mulai,
+                        $selesai
+                    ) {
 
-                    ->orWhereBetween('tanggal_selesai', [$mulai, $selesai])
-
-                    ->orWhere(function ($q) use ($mulai, $selesai) {
-
-                        $q->where('tanggal_mulai', '<=', $mulai)
-
-                            ->where('tanggal_selesai', '>=', $selesai);
+                        $q->where(
+                            'tanggal_mulai',
+                            '<=',
+                            $mulai
+                        )
+                            ->where(
+                                'tanggal_selesai',
+                                '>=',
+                                $selesai
+                            );
                     });
             });
 
-        // jika edit jangan menghitung dirinya sendiri
+        //Jika sedang EDIT penyewaan
+
+        //Penyewaan yang sedang diedit tidak dihitung sebagai
+        //barang yang sudah dipakai.
+
+
+
         if ($penyewaanId) {
 
-            $query->where('id', '!=', $penyewaanId);
+            $query->where(
+                'id',
+                '!=',
+                $penyewaanId
+            );
         }
 
         $penyewaan = $query->get();
@@ -162,23 +249,32 @@ class InventoryService
 
         foreach ($penyewaan as $item) {
 
+            //Barang satuan
+
             foreach ($item->detailBarang as $barang) {
 
                 if ($barang->barang_id == $barangId) {
 
-                    $total += $barang->jumlah_barang;
+                    $total += (int) $barang->jumlah_barang;
                 }
             }
 
+
+            //Barang dari paket
+
             foreach ($item->detailPaket as $paket) {
+
+                if (!$paket->paket) {
+                    continue;
+                }
 
                 foreach ($paket->paket->detail as $isi) {
 
                     if ($isi->barang_id == $barangId) {
 
                         $total +=
-                            $isi->jumlah *
-                            $paket->jumlah_paket;
+                            (int) $isi->jumlah *
+                            (int) $paket->jumlah_paket;
                     }
                 }
             }
@@ -186,6 +282,11 @@ class InventoryService
 
         return $total;
     }
+
+
+
+    //Stok barang yang tersedia hari ini.
+
     public static function getAvailableToday($barangId)
     {
         $barang = Barang::find($barangId);
@@ -202,13 +303,21 @@ class InventoryService
             $hariIni
         );
 
-        return $barang->jumlah_total - $dipakai;
+        $tersedia = $barang->jumlah_total - $dipakai;
+
+        return max(0, $tersedia);
     }
+
+
+
+    // Stok tersedia pada rentang tanggal tertentu.
+
     public static function getAvailableStock(
         $barangId,
         $mulai,
         $selesai
     ) {
+
         $barang = Barang::find($barangId);
 
         if (!$barang) {
@@ -221,6 +330,8 @@ class InventoryService
             $selesai
         );
 
-        return $barang->jumlah_total - $dipakai;
+        $tersedia = $barang->jumlah_total - $dipakai;
+
+        return max(0, $tersedia);
     }
 }

@@ -264,19 +264,31 @@
 
                             <tbody>
 
-                                <tr>
+                                @forelse ($penyewaan->pemasukan as $pembayaran)
+                                    <tr>
 
-                                    <td>{{ $penyewaan->created_at->format('d M Y') }}</td>
+                                        <td>
+                                            {{ \Carbon\Carbon::parse($pembayaran->tanggal_masuk)->format('d M Y') }}
+                                        </td>
 
-                                    <td>{{ $penyewaan->status_pembayaran }}</td>
+                                        <td>
+                                            {{ $pembayaran->jenis_pembayaran }}
+                                        </td>
 
-                                    <td class="text-right">
+                                        <td class="text-right">
+                                            Rp {{ number_format($pembayaran->jumlah, 0, ',', '.') }}
+                                        </td>
 
-                                        Rp {{ number_format($penyewaan->uang_muka, 0, ',', '.') }}
+                                    </tr>
 
-                                    </td>
+                                @empty
 
-                                </tr>
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted">
+                                            Belum ada riwayat pembayaran.
+                                        </td>
+                                    </tr>
+                                @endforelse
 
                             </tbody>
 

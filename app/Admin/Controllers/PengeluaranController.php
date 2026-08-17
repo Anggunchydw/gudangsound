@@ -115,40 +115,15 @@ class PengeluaranController extends AdminController
                         'status_penyewaan',
                         '!=',
                         'dibatalkan'
-                    )->get()
-                        ->map(function ($penyewaan) {
-
-                            $totalPemasukan = Pemasukan::where(
-                                'penyewaan_id',
-                                $penyewaan->id
-                            )->sum('jumlah');
-
-                            $totalPengeluaran = PengeluaranModel::where(
-                                'penyewaan_id',
-                                $penyewaan->id
-                            )->sum('jumlah_pengeluaran');
-
-                            $sisaDana = $totalPemasukan - $totalPengeluaran;
-
-                            if ($sisaDana <= 0) {
-                                return null;
-                            }
-
+                    )
+                        ->get()
+                        ->mapWithKeys(function ($penyewaan) {
                             return [
-                                'id'    => $penyewaan->id,
-                                'label' => $penyewaan->nama_penyewa .
-                                    ' - Sisa Dana: Rp ' .
-                                    number_format($sisaDana, 0, ',', '.')
-                            ];
-                        })
-                        ->filter()
-                        ->mapWithKeys(function ($item) {
-                            return [
-                                $item['id'] => $item['label'],
+                                $penyewaan->id => $penyewaan->nama_penyewa,
                             ];
                         });
                 })
-                ->help('Kosongkan jika bukan berasal dari penyewaan.');
+                ->help('Pilih penyewaan jika pengeluaran berkaitan dengan penyewaan tertentu. Jika tidak, biarkan kosong.');
 
             $form->currency('jumlah_pengeluaran', 'Jumlah')
                 ->symbol('Rp')
@@ -172,67 +147,45 @@ class PengeluaranController extends AdminController
 
             $form->saving(function (Form $form) {
 
-                $jumlah = (float) str_replace(',', '', $form->jumlah_pengeluaran);
+                $jumlah = (float) str_replace(
+                    ',',
+                    '',
+                    $form->jumlah_pengeluaran
+                );
 
                 $form->jumlah_pengeluaran = $jumlah;
 
+                // Validasi tanggal
                 if ($form->tanggal_pengeluaran > now()->toDateString()) {
                     return $form->response()->error(
                         'Tanggal pengeluaran tidak boleh melebihi hari ini.'
                     );
                 }
 
+                // Validasi jumlah
                 if ($jumlah <= 0) {
                     return $form->response()->error(
                         'Jumlah pengeluaran harus lebih dari 0.'
                     );
                 }
 
-                if ($form->penyewaan_id) {
+                //validasi kas global
+                $totalPemasukan = Pemasukan::sum('jumlah');
 
-                    // Total pemasukan penyewaan
-                    $totalPemasukan = Pemasukan::where(
-                        'penyewaan_id',
-                        $form->penyewaan_id
-                    )->sum('jumlah');
+                $totalPengeluaran = PengeluaranModel::where(
+                    'id',
+                    '!=',
+                    $form->getKey()
+                )->sum('jumlah_pengeluaran');
 
-                    $totalPengeluaran = PengeluaranModel::where(
-                        'penyewaan_id',
-                        $form->penyewaan_id
-                    )
-                        ->where('id', '!=', $form->getKey())
-                        ->sum('jumlah_pengeluaran');
+                $sisaKas = $totalPemasukan - $totalPengeluaran;
 
-                    $totalSetelahTambah = $totalPengeluaran + $jumlah;
-
-                    if ($totalSetelahTambah > $totalPemasukan) {
-
-                        $sisa = $totalPemasukan - $totalPengeluaran;
-
-                        return $form->response()->error(
-                            "Pengeluaran melebihi pemasukan penyewaan. " .
-                                "Sisa dana hanya Rp " .
-                                number_format(max($sisa, 0), 0, ',', '.')
-                        );
-                    }
-                } else {
-
-                    $totalPemasukan = Pemasukan::sum('jumlah');
-
-                    $totalPengeluaran = PengeluaranModel::where(
-                        'id',
-                        '!=',
-                        $form->getKey()
-                    )->sum('jumlah_pengeluaran');
-
-                    $sisaKas = $totalPemasukan - $totalPengeluaran;
-
-                    if ($jumlah > $sisaKas) {
-                        return $form->response()->error(
-                            "Kas perusahaan tidak mencukupi. Sisa kas hanya Rp " .
-                                number_format(max($sisaKas, 0), 0, ',', '.')
-                        );
-                    }
+                if ($jumlah > $sisaKas) {
+                    return $form->response()->error(
+                        "Kas perusahaan tidak mencukupi. " .
+                            "Sisa kas hanya Rp " .
+                            number_format(max($sisaKas, 0), 0, ',', '.')
+                    );
                 }
             });
         });

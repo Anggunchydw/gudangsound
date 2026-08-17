@@ -121,12 +121,16 @@ class PenyewaanController extends AdminController
             $grid->actions(function (Grid\Displayers\Actions $actions) use ($canManage) {
                 $actions->disableDelete();
 
-                if ($actions->row->status_pembayaran == 'DP') {
+                if (
+                    $canManage &&
+                    $actions->row->status_pembayaran == 'DP' &&
+                    $actions->row->status_penyewaan != 'dibatalkan'
+                ) {
 
                     $actions->append(
                         '<a href="' . admin_url("penyewaan/{$actions->getKey()}") . '" class="btn btn-sm btn-payment">
-                <i class="feather icon-dollar-sign"></i> Tambah Pembayaran
-            </a>'
+                            <i class="feather icon-dollar-sign"></i> Tambah Pembayaran
+                        </a>'
                     );
                 }
 
@@ -134,7 +138,7 @@ class PenyewaanController extends AdminController
                     return;
                 }
 
-                $status = $actions->row->status_sekarang;
+                $status = $actions->row->status_penyewaan;
 
                 if (in_array($status, ['booking', 'berlangsung'])) {
 
@@ -142,10 +146,10 @@ class PenyewaanController extends AdminController
 
                     $actions->append(
                         "<a class='btn btn-sm btn-danger'
-                href='{$url}'
-                onclick=\"return confirm('Batalkan penyewaan ini?')\">
-                <i class='feather icon-x-circle'></i> Batalkan
-            </a>"
+                        href='{$url}'
+                        onclick=\"return confirm('Batalkan penyewaan ini?')\">
+                        <i class='feather icon-x-circle'></i> Batalkan
+                        </a>"
                     );
                 }
             });
@@ -158,8 +162,11 @@ class PenyewaanController extends AdminController
         $penyewaan = Penyewaan::with([
             'detailBarang.barang',
             'detailPaket.paket.detail.barang',
+            'pemasukan' => function ($query) {
+                $query->orderBy('tanggal_masuk', 'asc')
+                    ->orderBy('id', 'asc');
+            },
         ])->findOrFail($id);
-
         return view(
             'admin.penyewaan.detail',
             compact('penyewaan')
@@ -305,9 +312,18 @@ class PenyewaanController extends AdminController
             $form->currency('total_harga', 'Total Harga')
                 ->symbol('Rp')
                 ->required();
-            $form->currency('uang_muka', 'Uang Muka (DP)')
-                ->symbol('Rp')
-                ->required();
+            if ($form->isCreating()) {
+
+                $form->currency('uang_muka', 'Uang Muka (DP)')
+                    ->symbol('Rp')
+                    ->required();
+            } else {
+
+                $form->display('uang_muka', 'Total Sudah Dibayar')
+                    ->with(function ($value) {
+                        return 'Rp ' . number_format($value, 0, ',', '.');
+                    });
+            }
             $form->html('
             <div class="form-group">
                 <label class="control-label">Sisa Pelunasan</label>
@@ -627,11 +643,24 @@ class PenyewaanController extends AdminController
 
     public function simpanPembayaran(Request $request, $id)
     {
+        $this->authorizeManage();
         $request->validate([
             'nominal' => 'required|numeric|min:1'
         ]);
 
         $penyewaan = Penyewaan::findOrFail($id);
+
+        if ($penyewaan->status_penyewaan == 'dibatalkan') {
+
+            admin_error(
+                'Gagal',
+                'Pembayaran tidak dapat dilakukan karena penyewaan sudah dibatalkan.'
+            );
+
+            return redirect(
+                admin_url("penyewaan/{$penyewaan->id}")
+            );
+        }
 
         try {
 
@@ -683,34 +712,38 @@ class PenyewaanController extends AdminController
 
         $penyewaan = Penyewaan::findOrFail($id);
 
-        if (!in_array($penyewaan->status_sekarang, ['booking', 'berlangsung'])) {
+        // Hanya penyewaan dengan status booking atau berlangsung
+        // yang boleh dibatalkan
+        if (!in_array($penyewaan->status_penyewaan, ['booking', 'berlangsung'])) {
 
             admin_error(
                 'Gagal',
                 'Penyewaan tidak dapat dibatalkan.'
             );
 
-            return back();
+            return redirect(admin_url('penyewaan'));
         }
 
+        // Ubah status penyewaan menjadi dibatalkan
         $penyewaan->update([
             'status_penyewaan' => 'dibatalkan'
         ]);
-        if ($penyewaan->status_penyewaan == 'dibatalkan') {
 
-            $penugasan = Penugasan::where(
-                'penyewaan_id',
-                $penyewaan->id
-            )->first();
+        // Hapus event Google Calendar penugasan
+        $penugasan = Penugasan::where(
+            'penyewaan_id',
+            $penyewaan->id
+        )->first();
 
-            if ($penugasan && $penugasan->google_event_id) {
+        if ($penugasan && $penugasan->google_event_id) {
 
-                app(GoogleCalendarService::class)
-                    ->deleteEvent($penugasan->google_event_id);
-                $penugasan->google_event_id = null;
-                $penugasan->save();
-            }
+            app(GoogleCalendarService::class)
+                ->deleteEvent($penugasan->google_event_id);
+
+            $penugasan->google_event_id = null;
+            $penugasan->save();
         }
+
         admin_success(
             'Berhasil',
             'Penyewaan berhasil dibatalkan.'
