@@ -9,6 +9,7 @@ use Dcat\Admin\Grid;
 use Dcat\Admin\Http\Controllers\AdminController;
 use App\Models\Administrator;
 use Dcat\Admin\Models\Role;
+use Illuminate\Validation\Rules\Password;
 
 class PenggunaController extends AdminController
 {
@@ -136,11 +137,23 @@ class PenggunaController extends AdminController
             $password = $form->password('password', 'Password')
                 ->customFormat(function () {
                     return '';
-                });
-
-            if ($form->isCreating()) {
-                $password->required();
-            }
+                })
+                ->creationRules([
+                    'required',
+                    'string',
+                    Password::min(12)
+                        ->mixedCase()
+                        ->numbers()
+                        ->symbols(),
+                ])
+                ->updateRules([
+                    'nullable',
+                    'string',
+                    Password::min(12)
+                        ->mixedCase()
+                        ->numbers()
+                        ->symbols(),
+                ]);
 
             $currentUser = Admin::user();
 

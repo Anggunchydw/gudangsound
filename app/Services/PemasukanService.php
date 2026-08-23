@@ -19,7 +19,7 @@ class PemasukanService
                 ? 'Pembayaran DP'
                 : 'Pelunasan';
         }
-
+        //menyimpan riwayat pembayaran
         Pemasukan::create([
             'penyewaan_id'     => $penyewaan->id,
             'tanggal_masuk'    => now(),

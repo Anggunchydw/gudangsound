@@ -28,9 +28,9 @@ Route::group([
     $router->resource('pengeluaran', PengeluaranController::class);
     $router->resource('pengguna', PenggunaController::class);
     $router->get(
-    'penugasan/get-pegawai-tersedia',
-    'PenugasanController@pegawaiTersedia'
-);
+        'penugasan/get-pegawai-tersedia',
+        'PenugasanController@pegawaiTersedia'
+    );
     $router->resource('penugasan', PenugasanController::class);
 
     // Google Calendar OAuth
@@ -48,12 +48,12 @@ Route::group([
         'GoogleAuthController@testCalendar'
     );
 
-    Route::get(
+    $router->post(
         'penyewaan/{id}/cancel',
-        [PenyewaanController::class, 'cancel']
+        'PenyewaanController@cancel'
     );
 
-    Route::get(
+    $router->get(
         'penyewaan/{id}/cetak',
         [PenyewaanController::class, 'cetak']
     )->name('admin.penyewaan.cetak');
@@ -88,6 +88,4 @@ Route::group([
         'kondisi-barang/{penugasan}/simpan',
         'KondisiBarangController@simpan'
     );
-
-
 });

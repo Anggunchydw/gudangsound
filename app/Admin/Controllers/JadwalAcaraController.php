@@ -125,7 +125,6 @@ class JadwalAcaraController extends AdminController
         if ($user->isRole('pegawai')) {
 
             $query->whereHas('penugasan.pegawai', function ($q) use ($user) {
-
                 $q->where('admin_users.id', $user->id);
             });
         }
@@ -138,18 +137,17 @@ class JadwalAcaraController extends AdminController
                     ? '#388E3C'
                     : '#F59E0B';
 
-                $paket = [];
+                $paketBarang = [];
 
                 foreach ($item->detailPaket as $detail) {
 
                     if ($detail->paket) {
 
-                        $paket[] =
-                            '• ' .
-                            $detail->paket->nama_paket .
-                            ' (x' .
-                            $detail->jumlah_paket .
-                            ')';
+                        $paketBarang[] = [
+                            'nama' => $detail->paket->nama_paket,
+                            'jumlah' => $detail->jumlah_paket,
+                            'tipe' => 'Paket',
+                        ];
                     }
                 }
 
@@ -157,12 +155,11 @@ class JadwalAcaraController extends AdminController
 
                     if ($detail->barang) {
 
-                        $paket[] =
-                            '• ' .
-                            $detail->barang->nama_barang .
-                            ' (x' .
-                            $detail->jumlah_barang .
-                            ')';
+                        $paketBarang[] = [
+                            'nama' => $detail->barang->nama_barang,
+                            'jumlah' => $detail->jumlah_barang,
+                            'tipe' => 'Barang',
+                        ];
                     }
                 }
 
@@ -172,19 +169,23 @@ class JadwalAcaraController extends AdminController
 
                     foreach ($item->penugasan->pegawai as $pegawaiUser) {
 
-                        $pegawai[] = $pegawaiUser->name;
+                        if ($pegawaiUser->name) {
+                            $pegawai[] = $pegawaiUser->name;
+                        }
                     }
                 }
 
+                $pegawai = array_values(array_unique($pegawai));
+
                 return [
 
-                    'id'    => $item->id,
+                    'id' => $item->id,
 
                     'title' => $item->nama_penyewa,
 
                     'start' => $item->tanggal_mulai,
 
-                    'end'   => date(
+                    'end' => date(
                         'Y-m-d',
                         strtotime($item->tanggal_selesai . ' +1 day')
                     ),
@@ -196,15 +197,19 @@ class JadwalAcaraController extends AdminController
                     'extendedProps' => [
 
                         'lokasi' => $item->lokasi,
+
                         'keterangan' => $item->keterangan,
+
                         'status' => $item->status_pembayaran,
+
                         'mulai' => $item->tanggal_mulai,
+
                         'selesai' => $item->tanggal_selesai,
-                        'paket' => implode('<br>', $paket),
-                        'pegawai' => implode(', ', array_unique($pegawai)),
 
+                        'paket_barang' => $paketBarang,
+
+                        'pegawai' => $pegawai,
                     ],
-
                 ];
             });
 

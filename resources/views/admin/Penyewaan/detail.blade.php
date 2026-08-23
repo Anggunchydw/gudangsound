@@ -205,7 +205,7 @@
                         </strong>
 
                     </div>
-
+                    {{-- @if ($penyewaan->status_pembayaran != 'Lunas') --}}
                     @if ($canManage && $penyewaan->status_pembayaran != 'Lunas')
                         <hr>
 

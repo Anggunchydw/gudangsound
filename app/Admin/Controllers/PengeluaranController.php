@@ -100,94 +100,118 @@ class PengeluaranController extends AdminController
      */
     protected function form()
     {
-        return Form::make(new Pengeluaran(), function (Form $form) {
-            $form->disableDeleteButton();
-            $form->disableViewButton();
-            $form->disableEditingCheck();
-            $form->disableCreatingCheck();
-            $form->disableViewCheck();
-            $form->display('id');
+        return Form::make(
+            new Pengeluaran(),
+            function (Form $form) {
+                $form->disableDeleteButton();
+                $form->disableViewButton();
+                $form->disableEditingCheck();
+                $form->disableCreatingCheck();
+                $form->disableViewCheck();
+                $form->display('id');
 
-            $form->select('penyewaan_id', 'Penyewaan (Opsional)')
-                ->options(function () {
+                $form->select('penyewaan_id', 'Penyewaan (Opsional)')
+                    ->options(function () {
 
-                    return Penyewaan::where(
-                        'status_penyewaan',
-                        '!=',
-                        'dibatalkan'
-                    )
-                        ->get()
-                        ->mapWithKeys(function ($penyewaan) {
-                            return [
-                                $penyewaan->id => $penyewaan->nama_penyewa,
-                            ];
-                        });
-                })
-                ->help('Pilih penyewaan jika pengeluaran berkaitan dengan penyewaan tertentu. Jika tidak, biarkan kosong.');
+                        return Penyewaan::where(
+                            'status_penyewaan',
+                            '!=',
+                            'dibatalkan'
+                        )
+                            ->get()
+                            ->mapWithKeys(function ($penyewaan) {
+                                return [
+                                    $penyewaan->id => $penyewaan->nama_penyewa,
+                                ];
+                            });
+                    })
+                    ->help('Pilih penyewaan jika pengeluaran berkaitan dengan penyewaan tertentu. Jika tidak, biarkan kosong.');
 
-            $form->currency('jumlah_pengeluaran', 'Jumlah')
-                ->symbol('Rp')
-                ->required();
+                $form->currency('jumlah_pengeluaran', 'Jumlah')
+                    ->symbol('Rp')
+                    ->required();
 
-            $form->date('tanggal_pengeluaran')
-                ->default(now())
-                ->required();
+                $form->date('tanggal_pengeluaran')
+                    ->default(now())
+                    ->required();
 
-            $form->select('kategori')
-                ->options([
-                    'transport'   => 'Transport',
-                    'perbaikan'   => 'Perbaikan',
-                    'gaji'        => 'Gaji',
-                    'operasional' => 'Operasional',
-                    'lainnya'     => 'Lainnya',
-                ])
-                ->required();
+                $form->select('kategori')
+                    ->options([
+                        'transport'   => 'Transport',
+                        'perbaikan'   => 'Perbaikan',
+                        'gaji'        => 'Gaji',
+                        'operasional' => 'Operasional',
+                        'lainnya'     => 'Lainnya',
+                    ])
+                    ->required();
 
-            $form->textarea('keterangan');
+                $form->textarea('keterangan');
 
-            $form->saving(function (Form $form) {
+                $form->saving(function (Form $form) {
 
-                $jumlah = (float) str_replace(
-                    ',',
-                    '',
-                    $form->jumlah_pengeluaran
-                );
+                    $rawJumlah = request('jumlah_pengeluaran', $form->jumlah_pengeluaran);
+                    $jumlah = (float) preg_replace('/[^0-9.]/', '', str_replace(',', '', (string) $rawJumlah));
+                    $form->jumlah_pengeluaran = $jumlah;
 
-                $form->jumlah_pengeluaran = $jumlah;
+                    $pengeluaranId = $form->getKey();
+                    $penyewaanId = request('penyewaan_id', $form->input('penyewaan_id'));
 
-                // Validasi tanggal
-                if ($form->tanggal_pengeluaran > now()->toDateString()) {
-                    return $form->response()->error(
-                        'Tanggal pengeluaran tidak boleh melebihi hari ini.'
-                    );
-                }
+                    // 2. Validasi Tanggal
+                    if ($form->tanggal_pengeluaran > now()->toDateString()) {
+                        return $form->response()->error('Tanggal pengeluaran tidak boleh melebihi hari ini.');
+                    }
 
-                // Validasi jumlah
-                if ($jumlah <= 0) {
-                    return $form->response()->error(
-                        'Jumlah pengeluaran harus lebih dari 0.'
-                    );
-                }
+                    // 3. Validasi Jumlah
+                    if ($jumlah <= 0) {
+                        return $form->response()->error('Jumlah pengeluaran harus lebih dari 0.');
+                    }
 
-                //validasi kas global
-                $totalPemasukan = Pemasukan::sum('jumlah');
+                    // Validasi Dana Penyewaan Spesifik (Jika Terkait Penyewaan)
+                    if (!empty($penyewaanId)) {
+                        $penyewaan = Penyewaan::find($penyewaanId);
 
-                $totalPengeluaran = PengeluaranModel::where(
-                    'id',
-                    '!=',
-                    $form->getKey()
-                )->sum('jumlah_pengeluaran');
+                        if (!$penyewaan) {
+                            return $form->response()->error('Penyewaan yang dipilih tidak ditemukan.');
+                        }
 
-                $sisaKas = $totalPemasukan - $totalPengeluaran;
+                        if ($penyewaan->status_penyewaan === 'dibatalkan') {
+                            return $form->response()->error('Pengeluaran tidak dapat dikaitkan dengan penyewaan yang dibatalkan.');
+                        }
 
-                if ($jumlah > $sisaKas) {
-                    return $form->response()->error(
-                        "Kas perusahaan tidak mencukupi. " .
-                            "Sisa kas hanya Rp " .
-                            number_format(max($sisaKas, 0), 0, ',', '.')
-                    );
-                }
-            });
-        });
+                        // Hitung total pemasukan yang sudah masuk untuk penyewaan ini
+                        $totalMasukPenyewaan = (float) Pemasukan::where('penyewaan_id', $penyewaan->id)->sum('jumlah');
+
+                        // Hitung pengeluaran lain untuk penyewaan ini (abaikan record saat ini jika sedang edit)
+                        $totalKeluarPenyewaan = (float) PengeluaranModel::where('penyewaan_id', $penyewaan->id)
+                            ->when($pengeluaranId, fn($q) => $q->where('id', '!=', $pengeluaranId))
+                            ->sum('jumlah_pengeluaran');
+
+                        $sisaDanaPenyewaan = $totalMasukPenyewaan - $totalKeluarPenyewaan;
+
+                        if ($jumlah > $sisaDanaPenyewaan) {
+                            return $form->response()->error(
+                                "Dana penyewaan tidak mencukupi. Sisa dana penyewaan hanya Rp " .
+                                    number_format(max(0, $sisaDanaPenyewaan), 0, ',', '.') .
+                                    " (Pengeluaran diajukan: Rp " . number_format($jumlah, 0, ',', '.') . ")"
+                            );
+                        }
+                    }
+
+                    // 5. CONSTRAINT 2: Validasi Kas Global Perusahaan
+                    $totalKasMasuk = (float) Pemasukan::sum('jumlah');
+                    $totalKasKeluar = (float) PengeluaranModel::when($pengeluaranId, fn($q) => $q->where('id', '!=', $pengeluaranId))
+                        ->sum('jumlah_pengeluaran');
+
+                    $sisaKasGlobal = $totalKasMasuk - $totalKasKeluar;
+
+                    if ($jumlah > $sisaKasGlobal) {
+                        return $form->response()->error(
+                            "Kas operasional utama tidak mencukupi. Sisa kas global hanya Rp " .
+                                number_format(max(0, $sisaKasGlobal), 0, ',', '.')
+                        );
+                    }
+                });
+            }
+        );
     }
 }

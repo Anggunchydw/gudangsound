@@ -42,6 +42,13 @@ class PenugasanController extends AdminController
                 'pegawai'
             ]);
 
+            //Filter data berdasarkan role
+            if ($user->isRole('pegawai')) {
+                $grid->model()->whereHas('pegawai', function ($q) use ($user) {
+                    $q->where('admin_users.id', $user->id);
+                });
+            }
+
             $grid->column('id')->sortable();
 
             $grid->column('penyewaan.nama_penyewa', 'Nama Penyewa');
@@ -54,40 +61,59 @@ class PenugasanController extends AdminController
                         ->pluck('name')
                         ->implode(', ');
                 });
+
             $grid->column('penyewaan.tanggal_mulai', 'Tanggal Acara')
                 ->display(function ($value) {
                     return Carbon::parse($value)->format('d-m-Y');
                 });
+
             $grid->column('created_at', 'Tanggal Penugasan')
                 ->display(function ($value) {
                     return date('d-m-Y', strtotime($value));
                 });
 
-            // Pegawai hanya melihat
-            if (
-                ! $user->isRole('administrator') &&
-                ! $user->isRole('admin')
-            ) {
-
+            // Pegawai hanya dapat melihat data
+            if ($user->isRole('pegawai')) {
                 $grid->disableCreateButton();
                 $grid->disableActions();
             }
+
             $grid->disableRowSelector();
+
             $grid->actions(function (Grid\Displayers\Actions $actions) {
                 $actions->disableView();
             });
+
             $grid->filter(function (Grid\Filter $filter) {
 
-                $filter->like('penyewaan.nama_penyewa', 'Nama Penyewa');
+                $filter->like(
+                    'penyewaan.nama_penyewa',
+                    'Nama Penyewa'
+                );
 
-                $filter->like('tim', 'Nama Tim');
+                $filter->like(
+                    'tim',
+                    'Nama Tim'
+                );
             });
         });
     }
 
     protected function detail($id)
     {
-        return Show::make($id, new Penugasan(), function (Show $show) {
+        $user = Admin::user();
+
+        $query = Penugasan::query();
+
+        if ($user->isRole('pegawai')) {
+            $query->whereHas('pegawai', function ($q) use ($user) {
+                $q->where('admin_users.id', $user->id);
+            });
+        }
+
+        $penugasan = $query->findOrFail($id);
+
+        return Show::make($penugasan->id, new Penugasan(), function (Show $show) {
 
             $show->field('id');
 
@@ -522,7 +548,7 @@ JS);
                     $tanggalMulai,
                     $tanggalSelesai
                 ) {
-
+                    // Cek apakah tanggal saling beririsan
                     $q->where(
                         'tanggal_mulai',
                         '<=',
@@ -549,10 +575,11 @@ JS);
         if (!$pegawaiRole) {
             return response()->json([]);
         }
-
+        // Ambil pegawai yang memiliki role pegawai
         $pegawai = Administrator::whereHas('roles', function ($q) use ($pegawaiRole) {
             $q->where('admin_roles.id', $pegawaiRole->id);
         })
+            // Hanya ambil pegawai yang tidak sedang memiliki penugasan pada tanggal tersebut
             ->whereNotIn('id', $pegawaiTerpakai)
             ->get(['id', 'name']);
 

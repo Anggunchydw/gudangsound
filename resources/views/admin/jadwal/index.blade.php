@@ -17,13 +17,13 @@
 </div>
 
 <div class="jadwal-wrapper">
-{{-- kalender --}}
+    {{-- kalender --}}
     <div class="calendar-section">
 
         <div id="calendar"></div>
 
     </div>
-{{-- sidebar --}}
+    {{-- sidebar --}}
     <div class="sidebar-section">
 
         <div class="sidebar-card">
@@ -336,13 +336,19 @@
         let calendar = new FullCalendar.Calendar(calendarEl, {
 
             locale: 'id',
+
             initialView: 'dayGridMonth',
+
             contentHeight: 'auto',
+
             expandRows: true,
+
             handleWindowResize: true,
+
             windowResize: function() {
                 calendar.updateSize();
             },
+
             events: "{{ admin_url('Jadwal-Acara/events') }}",
 
             headerToolbar: {
@@ -384,14 +390,66 @@
 
                 }
 
-                $('#m-lokasi').text(data.extendedProps.lokasi);
+                $('#m-lokasi').text(
+                    data.extendedProps.lokasi || '-'
+                );
+
                 $('#m-keterangan').text(
                     data.extendedProps.keterangan || '-'
                 );
-                $('#m-paket').html(
-                    data.extendedProps.paket ?? '-'
-                );
-                $('#m-pegawai').html(data.extendedProps.pegawai || '-');
+
+                let paketContainer = $('#m-paket');
+
+                paketContainer.empty();
+
+                let paketBarang =
+                    data.extendedProps.paket_barang || [];
+
+                if (paketBarang.length === 0) {
+
+                    paketContainer.text('-');
+
+                } else {
+
+                    paketBarang.forEach(function(item) {
+
+                        let row = $('<div>');
+
+                        row.text(
+                            '• ' +
+                            item.nama +
+                            ' (x' +
+                            item.jumlah +
+                            ')'
+                        );
+
+                        paketContainer.append(row);
+                    });
+                }
+
+                let pegawaiContainer = $('#m-pegawai');
+
+                pegawaiContainer.empty();
+
+                let pegawai =
+                    data.extendedProps.pegawai || [];
+
+                if (pegawai.length === 0) {
+
+                    pegawaiContainer.text('-');
+
+                } else {
+
+                    pegawai.forEach(function(nama) {
+
+                        let row = $('<div>');
+
+                        row.text(nama);
+
+                        pegawaiContainer.append(row);
+                    });
+                }
+
                 $('#eventModal').modal('show');
 
             }

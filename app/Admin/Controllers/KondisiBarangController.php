@@ -3,6 +3,8 @@
 namespace App\Admin\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use App\Models\Penugasan;
 use Dcat\Admin\Layout\Content;
 use App\Models\KondisiBarang;
@@ -12,7 +14,6 @@ use Dcat\Admin\Http\Controllers\AdminController;
 
 class KondisiBarangController extends AdminController
 {
-
     public function index(Content $content)
     {
         $pegawai = auth('admin')->user();
@@ -29,7 +30,7 @@ class KondisiBarangController extends AdminController
 
         foreach ($penugasan as $item) {
 
-            // hitung jumlah barang yang seharusnya diinput
+            // Hitung jumlah jenis barang yang seharusnya diinput
             $barang = [];
 
             foreach ($item->penyewaan->detailBarang as $detail) {
@@ -44,6 +45,7 @@ class KondisiBarangController extends AdminController
                 }
 
                 foreach ($paket->paket->detail as $detail) {
+
                     $barang[$detail->barang_id] = true;
                 }
             }
@@ -62,7 +64,10 @@ class KondisiBarangController extends AdminController
             if ($totalInput == 0) {
 
                 $item->status_input = 'belum';
-            } elseif ($totalInput < $totalBarang || $belumLengkap > 0) {
+            } elseif (
+                $totalInput < $totalBarang ||
+                $belumLengkap > 0
+            ) {
 
                 $item->status_input = 'belum_lengkap';
             } else {
@@ -70,6 +75,7 @@ class KondisiBarangController extends AdminController
                 $item->status_input = 'lengkap';
             }
         }
+
         return $content
             ->title('Kondisi Barang')
             ->body(view(
@@ -85,11 +91,15 @@ class KondisiBarangController extends AdminController
         // Pegawai hanya boleh mengakses penugasan yang menjadi tanggung jawabnya
         if (
             $user->isRole('pegawai') &&
-            !$penugasan->pegawai()->where('admin_users.id', $user->id)->exists()
+            !$penugasan->pegawai()
+                ->where('admin_users.id', $user->id)
+                ->exists()
         ) {
             abort(403);
         }
+
         Admin::css(asset('css/kondisi-barang.css'));
+
         $penugasan->load([
             'penyewaan.detailBarang.barang',
             'penyewaan.detailPaket.paket.detail.barang',
@@ -98,6 +108,7 @@ class KondisiBarangController extends AdminController
 
         $barang = [];
 
+        // Barang yang dipilih langsung
         foreach ($penugasan->penyewaan->detailBarang as $detail) {
 
             if (!$detail->barang) {
@@ -114,9 +125,11 @@ class KondisiBarangController extends AdminController
                 ];
             }
 
-            $barang[$id]['jumlah'] += $detail->jumlah_barang;
+            $barang[$id]['jumlah'] +=
+                (int) $detail->jumlah_barang;
         }
 
+        // Barang yang berasal dari paket
         foreach ($penugasan->penyewaan->detailPaket as $paket) {
 
             if (!$paket->paket) {
@@ -140,20 +153,29 @@ class KondisiBarangController extends AdminController
                 }
 
                 $barang[$id]['jumlah'] +=
-                    $detail->jumlah * $paket->jumlah_paket;
+                    (int) $detail->jumlah *
+                    (int) $paket->jumlah_paket;
             }
         }
 
-        $kondisi = $penugasan->kondisiBarang->keyBy('barang_id');
+        $kondisi = $penugasan->kondisiBarang
+            ->keyBy('barang_id');
 
         foreach ($barang as &$item) {
 
             $data = $kondisi->get($item['id']);
 
-            $item['kondisi_sebelum'] = $data->kondisi_sebelum ?? null;
-            $item['kondisi_sesudah'] = $data->kondisi_sesudah ?? null;
-            $item['jumlah_bermasalah'] = $data->jumlah_bermasalah ?? 0;
-            $item['catatan'] = $data->catatan ?? null;
+            $item['kondisi_sebelum'] =
+                $data->kondisi_sebelum ?? null;
+
+            $item['kondisi_sesudah'] =
+                $data->kondisi_sesudah ?? null;
+
+            $item['jumlah_bermasalah'] =
+                $data->jumlah_bermasalah ?? 0;
+
+            $item['catatan'] =
+                $data->catatan ?? null;
         }
 
         unset($item);
@@ -173,121 +195,365 @@ class KondisiBarangController extends AdminController
     {
         $user = Admin::user();
 
-        // Pegawai hanya boleh menyimpan kondisi barang
-        // pada penugasan yang menjadi tanggung jawabnya
         if (
             $user->isRole('pegawai') &&
-            !$penugasan->pegawai()->where('admin_users.id', $user->id)->exists()
+            !$penugasan->pegawai()
+                ->where('admin_users.id', $user->id)
+                ->exists()
         ) {
             abort(403);
         }
-        foreach ($request->barang as $item) {
 
-            $jumlahBarang = (int) $item['jumlah_barang'];
-            $jumlahBermasalah = (int) $item['jumlah_bermasalah'];
-            $kondisiBaru = $item['kondisi_sesudah'] ?? null;
+        $penugasan->load([
+            'penyewaan.detailBarang',
+            'penyewaan.detailPaket.paket.detail',
+        ]);
 
-            // Jika kondisi baik, paksa jumlah menjadi 0
-            if ($kondisiBaru == 'baik') {
-                $jumlahBermasalah = 0;
+        $barangPenugasan = [];
+
+        // Barang yang dipilih langsung
+        foreach ($penugasan->penyewaan->detailBarang as $detail) {
+
+            $barangId = (int) $detail->barang_id;
+
+            $barangPenugasan[$barangId] =
+                ($barangPenugasan[$barangId] ?? 0)
+                + (int) $detail->jumlah_barang;
+        }
+
+        // Barang yang berasal dari paket
+        foreach ($penugasan->penyewaan->detailPaket as $paket) {
+
+            if (!$paket->paket) {
+                continue;
             }
 
-            // Jika rusak/hilang wajib mengisi jumlah
-            if (
-                in_array($kondisiBaru, ['rusak', 'hilang']) &&
-                $jumlahBermasalah <= 0
-            ) {
-                admin_error(
-                    'Gagal',
-                    'Masukkan jumlah barang yang rusak atau hilang.'
-                );
+            foreach ($paket->paket->detail as $detail) {
 
-                return redirect()->to(
-                    admin_url('kondisi-barang/' . $penugasan->id . '/input')
-                )->withInput();
+                $barangId = (int) $detail->barang_id;
+
+                $jumlah =
+                    (int) $detail->jumlah *
+                    (int) $paket->jumlah_paket;
+
+                $barangPenugasan[$barangId] =
+                    ($barangPenugasan[$barangId] ?? 0)
+                    + $jumlah;
             }
+        }
 
-            // Tidak boleh melebihi jumlah barang
-            if ($jumlahBermasalah > $jumlahBarang) {
-
-                admin_error(
-                    'Gagal',
-                    'Jumlah barang rusak/hilang tidak boleh melebihi jumlah barang yang dibawa.'
-                );
-
-                return redirect()->to(
-                    admin_url('kondisi-barang/' . $penugasan->id . '/input')
-                )->withInput();
-            }
-
-            if ($jumlahBermasalah > $jumlahBarang) {
-
-                admin_error(
-                    'Gagal',
-                    'Jumlah barang rusak/hilang tidak boleh melebihi jumlah barang yang dibawa.'
-                );
-
-                return redirect()->to(
-                    admin_url('kondisi-barang/' . $penugasan->id . '/input')
-                )->withInput();
-            }
-
-            $barang = Barang::findOrFail($item['barang_id']);
-
-            $dataLama = KondisiBarang::where(
-                'penugasan_id',
-                $penugasan->id
-            )
-                ->where(
-                    'barang_id',
-                    $item['barang_id']
-                )
-                ->first();
-
-            $kondisiLama = $dataLama->kondisi_sesudah ?? null;
-            $jumlahLama  = (int) ($dataLama->jumlah_bermasalah ?? 0);
-
-            if ($kondisiBaru == 'baik') {
-
-                if (in_array($kondisiLama, ['rusak', 'hilang'])) {
-
-                    $barang->increment(
-                        'jumlah_total',
-                        $jumlahLama
-                    );
-                }
-            } else {
-
-                $selisih = $jumlahBermasalah - $jumlahLama;
-
-                if ($selisih > 0) {
-
-                    $barang->decrement(
-                        'jumlah_total',
-                        $selisih
-                    );
-                } elseif ($selisih < 0) {
-
-                    $barang->increment(
-                        'jumlah_total',
-                        abs($selisih)
-                    );
-                }
-            }
-
-            KondisiBarang::updateOrCreate(
-                [
-                    'penugasan_id' => $penugasan->id,
-                    'barang_id'    => $item['barang_id'],
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'barang' => [
+                    'required',
+                    'array',
                 ],
-                [
-                    'jumlah_barang'      => $jumlahBarang,
-                    'jumlah_bermasalah'  => $jumlahBermasalah,
-                    'kondisi_sebelum'    => $item['kondisi_sebelum'] ?? null,
-                    'kondisi_sesudah'    => $kondisiBaru,
-                    'catatan'            => $item['catatan'] ?? null,
-                ]
+
+                'barang.*.barang_id' => [
+                    'required',
+                    'integer',
+                    'exists:barang,id',
+                    'distinct',
+                ],
+
+                'barang.*.kondisi_sebelum' => [
+                    'nullable',
+                    'in:baik,rusak,hilang',
+                ],
+
+                'barang.*.kondisi_sesudah' => [
+                    'required',
+                    'in:baik,rusak,hilang',
+                ],
+
+                'barang.*.jumlah_bermasalah' => [
+                    'required',
+                    'integer',
+                    'min:0',
+                ],
+
+                'barang.*.catatan' => [
+                    'nullable',
+                    'string',
+                    'max:1000',
+                ],
+            ],
+            [
+                'barang.required' =>
+                'Data kondisi barang wajib diisi.',
+
+                'barang.array' =>
+                'Format data barang tidak valid.',
+
+                'barang.*.barang_id.required' =>
+                'ID barang wajib diisi.',
+
+                'barang.*.barang_id.integer' =>
+                'ID barang tidak valid.',
+
+                'barang.*.barang_id.exists' =>
+                'Barang tidak ditemukan.',
+
+                'barang.*.barang_id.distinct' =>
+                'Barang tidak boleh diproses lebih dari satu kali.',
+
+                'barang.*.kondisi_sebelum.in' =>
+                'Kondisi sebelum tidak valid.',
+
+                'barang.*.kondisi_sesudah.required' =>
+                'Kondisi sesudah wajib dipilih.',
+
+                'barang.*.kondisi_sesudah.in' =>
+                'Kondisi barang tidak valid.',
+
+                'barang.*.jumlah_bermasalah.required' =>
+                'Jumlah barang bermasalah wajib diisi.',
+
+                'barang.*.jumlah_bermasalah.integer' =>
+                'Jumlah barang bermasalah harus berupa angka.',
+
+                'barang.*.jumlah_bermasalah.min' =>
+                'Jumlah barang bermasalah tidak boleh kurang dari 0.',
+
+                'barang.*.catatan.string' =>
+                'Catatan harus berupa teks.',
+
+                'barang.*.catatan.max' =>
+                'Catatan terlalu panjang.',
+            ]
+        );
+
+        if ($validator->fails()) {
+
+            admin_error(
+                'Gagal',
+                $validator->errors()->first()
             );
+
+            return redirect()->to(
+                admin_url(
+                    'kondisi-barang/' .
+                        $penugasan->id .
+                        '/input'
+                )
+            )->withInput();
+        }
+
+        $validated = $validator->validated();
+
+        // Validasi barang terhadap penugasan
+        foreach ($validated['barang'] as $item) {
+
+            $barangId = (int) $item['barang_id'];
+
+            if (!isset($barangPenugasan[$barangId])) {
+
+                abort(
+                    422,
+                    'Barang tidak termasuk dalam penugasan.'
+                );
+            }
+        }
+
+        try {
+
+            DB::transaction(function () use (
+                $validated,
+                $barangPenugasan,
+                $penugasan
+            ) {
+
+                foreach ($validated['barang'] as $item) {
+
+                    $barangId = (int) $item['barang_id'];
+
+                    $jumlahBarang =
+                        (int) $barangPenugasan[$barangId];
+
+                    $jumlahBermasalah =
+                        (int) $item['jumlah_bermasalah'];
+
+                    $kondisiBaru =
+                        $item['kondisi_sesudah'];
+
+
+                    if ($kondisiBaru === 'baik') {
+
+                        $jumlahBermasalah = 0;
+                    }
+
+                    if (
+                        in_array(
+                            $kondisiBaru,
+                            ['rusak', 'hilang']
+                        ) &&
+                        $jumlahBermasalah <= 0
+                    ) {
+
+                        throw new \RuntimeException(
+                            'Masukkan jumlah barang yang rusak atau hilang.'
+                        );
+                    }
+
+                    //Jumlah bermasalah tidak boleh melebihi
+                    // jumlah barang yang sebenarnya dibawa
+                    if ($jumlahBermasalah > $jumlahBarang) {
+
+                        throw new \RuntimeException(
+                            'Jumlah barang rusak/hilang tidak boleh melebihi jumlah barang yang dibawa.'
+                        );
+                    }
+
+                    //Kunci row barang sebelum perubahan stok
+                    $barang = Barang::where(
+                        'id',
+                        $barangId
+                    )
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (!$barang) {
+
+                        throw new \RuntimeException(
+                            'Barang tidak ditemukan.'
+                        );
+                    }
+
+                    //Ambil kondisi lama dan kunci row
+                    $dataLama = KondisiBarang::where(
+                        'penugasan_id',
+                        $penugasan->id
+                    )
+                        ->where(
+                            'barang_id',
+                            $barangId
+                        )
+                        ->lockForUpdate()
+                        ->first();
+
+                    $kondisiLama =
+                        $dataLama->kondisi_sesudah ?? null;
+
+                    $jumlahLama =
+                        (int) (
+                            $dataLama->jumlah_bermasalah ?? 0
+                        );
+
+                    //Update stok
+                    // Kondisi berubah menjadi baik
+                    if ($kondisiBaru === 'baik') {
+
+                        if (
+                            in_array(
+                                $kondisiLama,
+                                ['rusak', 'hilang']
+                            )
+                        ) {
+
+                            $barang->increment(
+                                'jumlah_total',
+                                $jumlahLama
+                            );
+                        }
+                    }
+
+                    // Kondisi rusak atau hilang
+                    else {
+
+                        $selisih =
+                            $jumlahBermasalah -
+                            $jumlahLama;
+
+                        // Barang bermasalah bertambah
+                        if ($selisih > 0) {
+
+                            //Cek stok setelah row dikunci
+                            if (
+                                $barang->jumlah_total <
+                                $selisih
+                            ) {
+
+                                throw new \RuntimeException(
+                                    'Stok barang tidak mencukupi.'
+                                );
+                            }
+
+                            $barang->decrement(
+                                'jumlah_total',
+                                $selisih
+                            );
+                        }
+
+                        // Barang bermasalah berkurang
+                        elseif ($selisih < 0) {
+
+                            $barang->increment(
+                                'jumlah_total',
+                                abs($selisih)
+                            );
+                        }
+                    }
+
+                    //Simpan kondisi barang
+                    KondisiBarang::updateOrCreate(
+                        [
+                            'penugasan_id' =>
+                            $penugasan->id,
+
+                            'barang_id' =>
+                            $barangId,
+                        ],
+                        [
+                            //Nilai jumlah_barang berasal dari database
+                            'jumlah_barang' =>
+                            $jumlahBarang,
+
+                            'jumlah_bermasalah' =>
+                            $jumlahBermasalah,
+
+                            'kondisi_sebelum' =>
+                            $item['kondisi_sebelum'] ?? null,
+
+                            'kondisi_sesudah' =>
+                            $kondisiBaru,
+
+                            'catatan' =>
+                            $item['catatan'] ?? null,
+                        ]
+                    );
+                }
+            });
+        } catch (\RuntimeException $e) {
+            //Error validasi/proses
+            admin_error(
+                'Gagal',
+                $e->getMessage()
+            );
+
+            return redirect()->to(
+                admin_url(
+                    'kondisi-barang/' .
+                        $penugasan->id .
+                        '/input'
+                )
+            )->withInput();
+        } catch (\Throwable $e) {
+
+            report($e);
+
+            admin_error(
+                'Gagal',
+                'Terjadi kesalahan saat menyimpan data kondisi barang.'
+            );
+
+            return redirect()->to(
+                admin_url(
+                    'kondisi-barang/' .
+                        $penugasan->id .
+                        '/input'
+                )
+            )->withInput();
         }
 
         admin_success(
@@ -295,6 +561,8 @@ class KondisiBarangController extends AdminController
             'Data kondisi barang berhasil disimpan.'
         );
 
-        return redirect(admin_url('kondisi-barang'));
+        return redirect(
+            admin_url('kondisi-barang')
+        );
     }
 }

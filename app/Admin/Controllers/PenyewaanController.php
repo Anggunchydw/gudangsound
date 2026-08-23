@@ -124,6 +124,7 @@ class PenyewaanController extends AdminController
                 if (
                     $canManage &&
                     $actions->row->status_pembayaran == 'DP' &&
+                    //hanya tampil jika penyewaan bukan dibatalkan
                     $actions->row->status_penyewaan != 'dibatalkan'
                 ) {
 
@@ -145,11 +146,14 @@ class PenyewaanController extends AdminController
                     $url = admin_url("penyewaan/{$actions->getKey()}/cancel");
 
                     $actions->append(
-                        "<a class='btn btn-sm btn-danger'
-                        href='{$url}'
-                        onclick=\"return confirm('Batalkan penyewaan ini?')\">
-                        <i class='feather icon-x-circle'></i> Batalkan
-                        </a>"
+                        "<form action='{$url}' method='POST' style='display:inline-block; margin-left:5px;'>
+                            " . csrf_field() . "
+                            <button type='submit'
+                                class='btn btn-sm btn-danger'
+                                onclick=\"return confirm('Batalkan penyewaan ini?')\">
+                                <i class='feather icon-x-circle'></i> Batalkan
+                            </button>
+                        </form>"
                     );
                 }
             });
@@ -340,9 +344,10 @@ class PenyewaanController extends AdminController
             $form->saving(function (Form $form) {
 
                 try {
-
                     PenyewaanService::validate($form);
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
+
+                    PenyewaanService::rollbackTransaction();
 
                     return $form->response()->error(
                         $e->getMessage()
@@ -352,11 +357,19 @@ class PenyewaanController extends AdminController
 
             $form->saved(function (Form $form) {
 
+                PenyewaanService::commitTransaction();
+
                 if ($form->isCreating()) {
-                    PenyewaanService::buatPembayaranAwal($form->getKey());
+
+                    PenyewaanService::buatPembayaranAwal(
+                        $form->getKey()
+                    );
                 }
 
-                $penyewaan = Penyewaan::find($form->getKey());
+
+                $penyewaan = Penyewaan::find(
+                    $form->getKey()
+                );
 
                 $penyewaan->load([
                     'detailPaket.paket',
@@ -643,6 +656,7 @@ class PenyewaanController extends AdminController
 
     public function simpanPembayaran(Request $request, $id)
     {
+        //hanya pemilik yg boleh menambah pembayaran
         $this->authorizeManage();
         $request->validate([
             'nominal' => 'required|numeric|min:1'

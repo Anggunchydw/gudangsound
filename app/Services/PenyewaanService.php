@@ -3,159 +3,254 @@
 namespace App\Services;
 
 use Dcat\Admin\Form;
-use App\Services\InventoryService;
 use App\Models\Penyewaan;
+use App\Services\InventoryService;
 use App\Services\PemasukanService;
+use Illuminate\Support\Facades\DB;
 
-class PenyewaanService
+    class PenyewaanService
 {
+
+    protected static bool $transactionStarted = false;
+
     public static function validate(Form $form)
     {
-        $penyewaan = $form->model();
 
-        // Tidak boleh edit selesai / batal
-        if ($penyewaan->exists) {
+        if (!DB::transactionLevel()) {
 
-            $status = $penyewaan->status_sekarang;
+            DB::beginTransaction();
 
-            if (in_array($status, ['selesai', 'dibatalkan'])) {
-
-                throw new \Exception(
-                    "Penyewaan dengan status {$status} tidak dapat diedit."
-                );
-            }
+            self::$transactionStarted = true;
         }
 
-        $totalHarga = (float) str_replace(',', '', $form->total_harga);
 
-        if ($form->isCreating()) {
+        try {
 
-            $uangMuka = (float) str_replace(
+            $penyewaan = $form->model();
+
+            if ($penyewaan->exists) {
+
+                $status = $penyewaan->status_sekarang;
+
+                if (in_array($status, [
+                    'selesai',
+                    'dibatalkan'
+                ])) {
+
+                    throw new \Exception(
+                        "Penyewaan dengan status {$status} tidak dapat diedit."
+                    );
+                }
+            }
+
+            $totalHarga = (float) str_replace(
                 ',',
                 '',
-                request('uang_muka')
+                $form->total_harga
             );
 
-            $form->uang_muka = $uangMuka;
-        } else {
+            if ($form->isCreating()) {
 
-            // Saat edit, uang muka tidak boleh diubah.
-            $uangMuka = (float) $penyewaan->uang_muka;
-        }
+                $uangMuka = (float) str_replace(
+                    ',',
+                    '',
+                    request('uang_muka')
+                );
 
-        $detailBarang = request()->input('detailBarang', []);
+                $form->uang_muka = $uangMuka;
+            } else {
 
-        $detailPaket = request()->input('detailPaket', []);
-
-        // Validasi tanggal
-        if ($form->tanggal_selesai < $form->tanggal_mulai) {
-
-            throw new \Exception(
-                'Tanggal selesai tidak boleh sebelum tanggal mulai.'
-            );
-        }
-
-        // Minimal memilih barang / paket
-        $detailBarang = collect(request()->input('detailBarang', []))
-            ->filter(function ($item) {
-                return !empty($item['barang_id']) && empty($item['_remove_']);
-            })
-            ->values()
-            ->all();
-
-        $detailPaket = collect(request()->input('detailPaket', []))
-            ->filter(function ($item) {
-                return !empty($item['paket_id']) && empty($item['_remove_']);
-            })
-            ->values()
-            ->all();
-        if (empty($detailBarang) && empty($detailPaket)) {
-            throw new \Exception(
-                'Minimal pilih satu paket atau satu barang.'
-            );
-        }
-
-        //Barang tidak boleh dobel
-        $barangIds = [];
-
-        foreach ($detailBarang as $item) {
-
-            if (empty($item['barang_id'])) {
-                continue;
+                $uangMuka = (float) $penyewaan->uang_muka;
             }
 
-            if (in_array($item['barang_id'], $barangIds)) {
+            if (
+                $form->tanggal_selesai <
+                $form->tanggal_mulai
+            ) {
 
                 throw new \Exception(
-                    'Barang yang sama tidak boleh dipilih lebih dari satu kali.'
+                    'Tanggal selesai tidak boleh sebelum tanggal mulai.'
                 );
             }
 
-            $barangIds[] = $item['barang_id'];
-        }
+            $detailBarang = collect(
+                request()->input(
+                    'detailBarang',
+                    []
+                )
+            )
+                ->filter(function ($item) {
 
-        // Paket tidak boleh dobel
-        $paketIds = [];
+                    return
+                        !empty($item['barang_id']) &&
+                        empty($item['_remove_']);
+                })
+                ->values()
+                ->all();
 
-        foreach ($detailPaket as $item) {
+            $detailPaket = collect(
+                request()->input(
+                    'detailPaket',
+                    []
+                )
+            )
+                ->filter(function ($item) {
 
-            if (empty($item['paket_id'])) {
-                continue;
-            }
+                    return
+                        !empty($item['paket_id']) &&
+                        empty($item['_remove_']);
+                })
+                ->values()
+                ->all();
 
-            if (in_array($item['paket_id'], $paketIds)) {
+            if (
+                empty($detailBarang) &&
+                empty($detailPaket)
+            ) {
 
                 throw new \Exception(
-                    'Paket yang sama tidak boleh dipilih lebih dari satu kali.'
+                    'Minimal pilih satu paket atau satu barang.'
                 );
             }
 
-            $paketIds[] = $item['paket_id'];
-        }
+            $barangIds = [];
+
+            foreach ($detailBarang as $item) {
+
+                if (empty($item['barang_id'])) {
+                    continue;
+                }
+
+                if (
+                    in_array(
+                        $item['barang_id'],
+                        $barangIds
+                    )
+                ) {
+
+                    throw new \Exception(
+                        'Barang yang sama tidak boleh dipilih lebih dari satu kali.'
+                    );
+                }
+
+                $barangIds[] = $item['barang_id'];
+            }
+
+            $paketIds = [];
+
+            foreach ($detailPaket as $item) {
+
+                if (empty($item['paket_id'])) {
+                    continue;
+                }
+
+                if (
+                    in_array(
+                        $item['paket_id'],
+                        $paketIds
+                    )
+                ) {
+
+                    throw new \Exception(
+                        'Paket yang sama tidak boleh dipilih lebih dari satu kali.'
+                    );
+                }
+
+                $paketIds[] = $item['paket_id'];
+            }
+
+            if ($uangMuka < 0) {
+
+                throw new \Exception(
+                    'Uang muka (DP) tidak boleh bernilai negatif.'
+                );
+            }
+
+            if ($uangMuka > $totalHarga) {
+
+                throw new \Exception(
+                    'Uang muka (DP) tidak boleh melebihi total harga.'
+                );
+            }
+
+            if (
+                $penyewaan->exists &&
+                $uangMuka != $penyewaan->uang_muka
+            ) {
+
+                throw new \Exception(
+                    'Uang muka tidak dapat diubah. ' .
+                        'Gunakan menu Tambah Pembayaran untuk menambah pembayaran.'
+                );
+            }
+
+            if ($totalHarga < $uangMuka) {
+
+                throw new \Exception(
+                    'Total harga tidak boleh lebih kecil dari total pembayaran yang sudah diterima.'
+                );
+            }
 
 
-        // DP
-        if ($uangMuka < 0) {
+            $form->status_pembayaran =
+                $uangMuka >= $totalHarga
+                ? 'Lunas'
+                : 'DP';
 
-            throw new \Exception(
-                'Uang muka (DP) tidak boleh bernilai negatif.'
+
+            InventoryService::checkAvailability(
+
+                $form->tanggal_mulai,
+                $form->tanggal_selesai,
+
+                $detailBarang,
+                $detailPaket,
+
+                $penyewaan->id
             );
+        } catch (\Throwable $e) {
+
+            if (
+                self::$transactionStarted &&
+                DB::transactionLevel() > 0
+            ) {
+
+                DB::rollBack();
+
+                self::$transactionStarted = false;
+            }
+
+            throw $e;
         }
-
-        if ($uangMuka > $totalHarga) {
-
-            throw new \Exception(
-                'Uang muka (DP) tidak boleh melebihi total harga.'
-            );
-        }
-        if ($penyewaan->exists && $uangMuka != $penyewaan->uang_muka) {
-
-            throw new \Exception(
-                'Uang muka tidak dapat diubah. Gunakan menu Tambah Pembayaran untuk menambah pembayaran.'
-            );
-        }
-        if ($totalHarga < $uangMuka) {
-
-            throw new \Exception(
-                'Total harga tidak boleh lebih kecil dari total pembayaran yang sudah diterima.'
-            );
-        }
-
-        $form->status_pembayaran =
-            $uangMuka >= $totalHarga
-            ? 'Lunas'
-            : 'DP';
-
-        // VALIDASI STOK
-        InventoryService::checkAvailability(
-
-            $form->tanggal_mulai,
-            $form->tanggal_selesai,
-            $detailBarang,
-            $detailPaket,
-            $form->model()->id
-        );
     }
+
+    public static function commitTransaction()
+    {
+        if (
+            self::$transactionStarted &&
+            DB::transactionLevel() > 0
+        ) {
+
+            DB::commit();
+
+            self::$transactionStarted = false;
+        }
+    }
+
+    public static function rollbackTransaction()
+    {
+        if (
+            self::$transactionStarted &&
+            DB::transactionLevel() > 0
+        ) {
+
+            DB::rollBack();
+
+            self::$transactionStarted = false;
+        }
+    }
+
+
     public static function buatPembayaranAwal($id)
     {
         $penyewaan = Penyewaan::findOrFail($id);
