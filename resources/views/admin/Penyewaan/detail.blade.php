@@ -1,47 +1,36 @@
 @php
-
     \Dcat\Admin\Admin::css(asset('css/penyewaan.css'));
-    $user = \Dcat\Admin\Admin::user();
     $user = auth('admin')->user();
     $canManage = $user->isRole('administrator') || $user->isRole('pemilik');
-
     $sisa = $penyewaan->total_harga - $penyewaan->uang_muka;
 @endphp
 
 <div class="mb-3">
-
     <a href="{{ admin_url('penyewaan') }}" class="btn btn-secondary">
         <i class="feather icon-arrow-left"></i>
         Kembali
     </a>
 
-    @if ($user->isRole('administrator') || $user->isRole('pemilik'))
+    @if ($canManage)
         <a href="{{ admin_url("penyewaan/$penyewaan->id/cetak") }}" class="btn btn-print" target="_blank"
             rel="noopener noreferrer" data-pjax="0">
-
             <i class="feather icon-printer"></i>
             Cetak Bukti Penyewaan
         </a>
     @endif
-
 </div>
 
 <div class="penyewaan-detail">
     <div class="row">
-
-        {{-- KIRI --}}
+        {{-- KIRI: Informasi Utama & Detail Barang --}}
         <div class="col-lg-8">
-
             <div class="card mb-3">
-
                 <div class="card-header">
                     Informasi Penyewaan
                 </div>
 
                 <div class="card-body">
-
                     <div class="info-grid">
-
                         <div class="info-item">
                             <div class="info-label">Nama Penyewa</div>
                             <div class="info-value">{{ $penyewaan->nama_penyewa }}</div>
@@ -73,173 +62,136 @@
 
                         <div class="info-item">
                             <div class="info-label">Keterangan</div>
-                            <div class="info-value">{{ $penyewaan->keterangan }}</div>
+                            <div class="info-value">{{ $penyewaan->keterangan ?: '-' }}</div>
                         </div>
 
+                        {{-- Status Sinkronisasi Integrasi Eksternal --}}
+                        <div class="info-item">
+                            <div class="info-label">Status Google Calendar</div>
+                            <div class="info-value">
+                                @if($penyewaan->calendar_sync_status === 'success')
+                                    <span class="badge badge-success"><i class="feather icon-check"></i> Tersinkronisasi</span>
+                                @elseif($penyewaan->calendar_sync_status === 'failed')
+                                    <span class="badge badge-danger"><i class="feather icon-x"></i> Gagal Sinkronisasi</span>
+                                @elseif($penyewaan->calendar_sync_status === 'processing')
+                                    <span class="badge badge-info"><i class="feather icon-loader"></i> Sedang Diproses</span>
+                                @else
+                                    <span class="badge badge-warning"><i class="feather icon-clock"></i> Menunggu Antrean</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">Status Notifikasi Telegram</div>
+                            <div class="info-value">
+                                @if($penyewaan->notification_status === 'success')
+                                    <span class="badge badge-success"><i class="feather icon-check"></i> Terkirim</span>
+                                @elseif($penyewaan->notification_status === 'failed')
+                                    <span class="badge badge-danger"><i class="feather icon-x"></i> Gagal Kirim</span>
+                                @elseif($penyewaan->notification_status === 'processing')
+                                    <span class="badge badge-info"><i class="feather icon-loader"></i> Sedang Diproses</span>
+                                @else
+                                    <span class="badge badge-warning"><i class="feather icon-clock"></i> Menunggu Pengiriman</span>
+                                @endif
+                            </div>
+                        </div>
                     </div>
-
                 </div>
-
             </div>
 
             <div class="card">
-
                 <div class="card-header">
                     Detail Paket & Barang
                 </div>
 
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table ">
-
+                        <table class="table">
                             <thead>
-
                                 <tr>
-
                                     <th width="60">No</th>
-
                                     <th>Nama Barang</th>
-
                                     <th width="180">Asal</th>
-
                                     <th width="100">Jumlah</th>
-
                                 </tr>
-
                             </thead>
-
                             <tbody>
-
                                 @php
                                     $no = 1;
                                 @endphp
 
                                 @foreach ($penyewaan->detailBarang as $barang)
                                     <tr>
-
                                         <td>{{ $no++ }}</td>
-
-                                        <td>{{ $barang->barang->nama_barang }}</td>
-
+                                        <td>{{ optional($barang->barang)->nama_barang }}</td>
                                         <td>Barang Satuan</td>
-
                                         <td>{{ $barang->jumlah_barang }}</td>
-
                                     </tr>
                                 @endforeach
 
-
                                 @foreach ($penyewaan->detailPaket as $paket)
-                                    @foreach ($paket->paket->detail as $detail)
-                                        <tr>
-
-                                            <td>{{ $no++ }}</td>
-
-                                            <td>{{ $detail->barang->nama_barang }}</td>
-
-                                            <td>{{ $paket->paket->nama_paket }}</td>
-
-                                            <td>{{ $detail->jumlah * $paket->jumlah_paket }}</td>
-
-                                        </tr>
-                                    @endforeach
+                                    @if($paket->paket)
+                                        @foreach ($paket->paket->detail as $detail)
+                                            <tr>
+                                                <td>{{ $no++ }}</td>
+                                                <td>{{ optional($detail->barang)->nama_barang }}</td>
+                                                <td>{{ $paket->paket->nama_paket }}</td>
+                                                <td>{{ $detail->jumlah * $paket->jumlah_paket }}</td>
+                                            </tr>
+                                        @endforeach
+                                    @endif
                                 @endforeach
-
                             </tbody>
-
                         </table>
-
                     </div>
-
                 </div>
-
             </div>
         </div>
 
-
-        {{-- KANAN --}}
+        {{-- KANAN: Tagihan & Riwayat Pembayaran --}}
         <div class="col-lg-4">
-
             <div class="card mb-3">
-
                 <div class="card-header">
                     Tagihan & Pembayaran
                 </div>
 
                 <div class="card-body">
-
                     <div class="d-flex justify-content-between mb-3">
-
                         <strong>Total Harga</strong>
-
-                        <strong>
-
-                            Rp {{ number_format($penyewaan->total_harga, 0, ',', '.') }}
-
-                        </strong>
-
+                        <strong>Rp {{ number_format($penyewaan->total_harga, 0, ',', '.') }}</strong>
                     </div>
 
                     <hr>
 
                     <div class="d-flex justify-content-between mb-2 text-success">
-
                         <span>Sudah Dibayar</span>
-
-                        <strong>
-
-                            Rp {{ number_format($penyewaan->uang_muka, 0, ',', '.') }}
-
-                        </strong>
-
+                        <strong>Rp {{ number_format($penyewaan->uang_muka, 0, ',', '.') }}</strong>
                     </div>
 
                     <div class="d-flex justify-content-between text-danger">
-
                         <span>Sisa Tagihan</span>
-
-                        <strong>
-
-                            Rp {{ number_format($sisa, 0, ',', '.') }}
-
-                        </strong>
-
+                        <strong>Rp {{ number_format($sisa, 0, ',', '.') }}</strong>
                     </div>
-                    {{-- @if ($penyewaan->status_pembayaran != 'Lunas') --}}
-                    @if ($canManage && $penyewaan->status_pembayaran != 'Lunas')
+
+                    @if ($canManage && $penyewaan->status_pembayaran != 'Lunas' && $penyewaan->status_penyewaan != 'dibatalkan')
                         <hr>
-
                         <form method="POST" action="{{ admin_url('penyewaan/' . $penyewaan->id . '/pembayaran') }}">
-
                             @csrf
-
                             <div class="form-group">
-
                                 <label>Nominal Pembayaran</label>
-
-                                <input type="number" class="form-control" name="nominal" min="1"
-                                    max="{{ $sisa }}" required>
-
+                                <input type="number" class="form-control" name="nominal" min="1" max="{{ $sisa }}" required>
                             </div>
 
                             <button class="btn btn-primary btn-block">
-
                                 <i class="feather icon-plus-circle"></i>
-
                                 Tambah Pembayaran
-
                             </button>
-
                         </form>
                     @endif
-
                 </div>
-
             </div>
 
-
             <div class="card">
-
                 <div class="card-header">
                     Riwayat Pembayaran
                 </div>
@@ -247,66 +199,36 @@
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-sm">
-
                             <thead>
-
                                 <tr>
-
                                     <th>Tanggal</th>
-
                                     <th>Status</th>
-
                                     <th class="text-right">Nominal</th>
-
                                 </tr>
-
                             </thead>
-
                             <tbody>
-
                                 @forelse ($penyewaan->pemasukan as $pembayaran)
                                     <tr>
-
-                                        <td>
-                                            {{ \Carbon\Carbon::parse($pembayaran->tanggal_masuk)->format('d M Y') }}
-                                        </td>
-
-                                        <td>
-                                            {{ $pembayaran->jenis_pembayaran }}
-                                        </td>
-
-                                        <td class="text-right">
-                                            Rp {{ number_format($pembayaran->jumlah, 0, ',', '.') }}
-                                        </td>
-
+                                        <td>{{ \Carbon\Carbon::parse($pembayaran->tanggal_masuk)->format('d M Y') }}</td>
+                                        <td>{{ $pembayaran->jenis_pembayaran }}</td>
+                                        <td class="text-right">Rp {{ number_format($pembayaran->jumlah, 0, ',', '.') }}</td>
                                     </tr>
-
                                 @empty
-
                                     <tr>
                                         <td colspan="3" class="text-center text-muted">
                                             Belum ada riwayat pembayaran.
                                         </td>
                                     </tr>
                                 @endforelse
-
                             </tbody>
-
                         </table>
 
                         @if ($penyewaan->status_pembayaran != 'Lunas')
-                            <small class="text-muted">
-
-                                Belum ada pelunasan
-
-                            </small>
+                            <small class="text-muted">Belum ada pelunasan</small>
                         @endif
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
     </div>
+</div>

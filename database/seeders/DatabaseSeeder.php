@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             BarangSeeder::class,
             PaketSeeder::class,
+            CashAccountSeeder::class,
         ]);
     }
 

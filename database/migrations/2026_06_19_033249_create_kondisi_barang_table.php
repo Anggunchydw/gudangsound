@@ -9,45 +9,29 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('kondisi_barang', function (Blueprint $table) {
-
             $table->id();
+            $table->unsignedBigInteger('penugasan_id');
+            $table->unsignedBigInteger('barang_id');
 
-            $table->unsignedBigInteger(
-                'detail_penyewaan_barang_id'
-            );
-
-            $table->enum(
-                'kondisi_sebelum',
-                [
-                    'baik',
-                    'rusak',
-                    'hilang'
-                ]
-            )->nullable();
-
-            $table->enum(
-                'kondisi_sesudah',
-                [
-                    'baik',
-                    'rusak',
-                    'hilang'
-                ]
-            )->nullable();
-            $table->unsignedInteger('jumlah_bermasalah')
-                ->default(0);
-
-            $table->string(
-                'catatan',
-                100
-            )->nullable();
+            $table->unsignedInteger('jumlah_barang')->default(1);
+            $table->enum('kondisi_sebelum', ['baik', 'rusak', 'hilang'])->nullable();
+            $table->enum('kondisi_sesudah', ['baik', 'rusak', 'hilang'])->nullable();
+            $table->unsignedInteger('jumlah_bermasalah')->default(0);
+            $table->string('catatan', 1000)->nullable();
 
             $table->timestamps();
 
-            $table->foreign(
-                'detail_penyewaan_barang_id'
-            )
+            // Composite Unique Constraint (Mencegah 1 barang diinput dobel dalam 1 penugasan)
+            $table->unique(['penugasan_id', 'barang_id']);
+
+            $table->foreign('penugasan_id')
                 ->references('id')
-                ->on('detail_penyewaan_barang')
+                ->on('penugasan')
+                ->onDelete('cascade');
+
+            $table->foreign('barang_id')
+                ->references('id')
+                ->on('barang')
                 ->onDelete('cascade');
         });
     }

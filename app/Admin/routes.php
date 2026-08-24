@@ -24,8 +24,10 @@ Route::group([
     $router->resource('barang', BarangController::class);
     $router->resource('paket', PaketController::class);
     $router->resource('penyewaan', PenyewaanController::class);
-    $router->resource('pemasukan', PemasukanController::class);
-    $router->resource('pengeluaran', PengeluaranController::class);
+    // $router->resource('pemasukan', PemasukanController::class);
+    $router->resource('pemasukan', PemasukanController::class)->only(['index', 'show']);
+    //$router->resource('pengeluaran', PengeluaranController::class);
+    $router->resource('pengeluaran', PengeluaranController::class)->only(['index', 'create', 'store', 'show']);
     $router->resource('pengguna', PenggunaController::class);
     $router->get(
         'penugasan/get-pegawai-tersedia',
@@ -43,10 +45,10 @@ Route::group([
         'google/callback',
         'GoogleAuthController@callback'
     );
-    $router->get(
-        'google/test',
-        'GoogleAuthController@testCalendar'
-    );
+    // $router->get(
+    //     'google/test',
+    //     'GoogleAuthController@testCalendar'
+    // );
 
     $router->post(
         'penyewaan/{id}/cancel',

@@ -1,427 +1,286 @@
 .penyewaan-detail .detail-card,
-.penyewaan-detail .card{
-
-    border-radius:12px;
-    border:1px solid #e5e7eb;
-    box-shadow:0 2px 8px rgba(0,0,0,.04);
-    overflow:hidden;
-    background:#fff;
-    margin-bottom:20px;
-
+.penyewaan-detail .card {
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+    overflow: hidden;
+    background: #fff;
+    margin-bottom: 20px;
 }
 
-.penyewaan-detail .card-header{
-
-    background:#fff;
-    border-bottom:1px solid #eee;
-    font-weight:700;
-    font-size:14px;
-    color:#1f2937;
-    padding:16px 20px;
-
+.penyewaan-detail .card-header {
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    font-weight: 700;
+    font-size: 14px;
+    color: #1f2937;
+    padding: 16px 20px;
 }
 
-
-.penyewaan-detail .card-body{
-
-    padding:20px;
-
+.penyewaan-detail .card-body {
+    padding: 20px;
 }
 
-.penyewaan-detail .table{
-
-    width:100%;
-    margin-bottom:0;
-
+.penyewaan-detail .table {
+    width: 100%;
+    margin-bottom: 0;
 }
 
-
-.penyewaan-detail .table-responsive{
-
-    width:100%;
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-
+.penyewaan-detail .table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
-.btn-payment{
-    background:#F59E0B;
-    border-color:#F59E0B;
-    color:#fff !important;
+.btn-payment {
+    background: #F59E0B;
+    border-color: #F59E0B;
+    color: #fff !important;
 }
 
-.btn-payment:hover{
-    background:#D97706;
-    border-color:#D97706;
-    color:#fff !important;
+.btn-payment:hover {
+    background: #D97706;
+    border-color: #D97706;
+    color: #fff !important;
 }
 
-.table thead th{
-
-    background:#f8fafc;
-    border-bottom:1px solid #e5e7eb;
-
+.table thead th {
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
 }
 
-
-
-.table-bordered{
-
-    border:1px solid #e5e7eb;
-
+.table-bordered {
+    border: 1px solid #e5e7eb;
 }
-
 
 .table-bordered td,
-.table-bordered th{
-
-    border-color:#e5e7eb;
-
+.table-bordered th {
+    border-color: #e5e7eb;
 }
 
 .status-dp,
-.status-booking{
-
-    background:#fef3c7;
-    color:#92400e;
-
+.status-booking {
+    background: #fef3c7;
+    color: #92400e;
 }
-
 
 .status-lunas,
-.status-selesai{
-
-    background:#dcfce7;
-    color:#166534;
-
+.status-selesai {
+    background: #dcfce7;
+    color: #166534;
 }
 
-
-.status-berlangsung{
-
-    background:#dbeafe;
-    color:#1d4ed8;
-
+.status-berlangsung {
+    background: #dbeafe;
+    color: #1d4ed8;
 }
 
-
-.status-batal{
-
-    background:#fee2e2;
-    color:#991b1b;
-
+.status-batal {
+    background: #fee2e2;
+    color: #991b1b;
 }
-
 
 .status-dp,
 .status-lunas,
 .status-booking,
 .status-berlangsung,
 .status-selesai,
-.status-batal{
-
-    padding:4px 10px;
-    border-radius:5px;
-    font-weight:600;
-    font-size:12px;
-    display:inline-block;
-
+.status-batal {
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: 12px;
+    display: inline-block;
 }
 
-.penyewaan-detail .btn{
-
-    border-radius:7px;
-    font-weight:600;
-
+/* Penyesuaian Badge Status Sinkronisasi Queue */
+.penyewaan-detail .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 10px;
+    font-weight: 600;
+    font-size: 12px;
+    border-radius: 6px;
 }
 
-
-.btn-block{
-
-    width:100%;
-
+.penyewaan-detail .badge i {
+    font-size: 13px;
 }
 
-
-.btn-secondary{
-
-    background:white;
-    color:#374151;
-    border:1px solid #d1d5db;
-
+.penyewaan-detail .btn {
+    border-radius: 7px;
+    font-weight: 600;
 }
 
-
-.btn-warning{
-
-    background:#f59e0b;
-    border:none;
-    color:white;
-
+.btn-block {
+    width: 100%;
 }
 
-.text-success{
-
-    color:#16a34a!important;
-    font-weight:600;
-
+.btn-secondary {
+    background: white;
+    color: #374151;
+    border: 1px solid #d1d5db;
 }
 
-
-.text-danger{
-
-    color:#dc2626!important;
-    font-weight:600;
-
+.btn-warning {
+    background: #f59e0b;
+    border: none;
+    color: white;
 }
 
-.btn-print{
-
-    background:#2E7D32;
-    border:1px solid #2E7D32;
-    color:#fff;
-
+.text-success {
+    color: #16a34a !important;
+    font-weight: 600;
 }
 
-.btn-print:hover{
-
-    background:#256329;
-    border-color:#256329;
-    color:#fff;
-
-}
-.sisa-label{
-
-    font-size:14px;
-    font-weight:600;
-
+.text-danger {
+    color: #dc2626 !important;
+    font-weight: 600;
 }
 
-
-.sisa-pelunasan{
-
-    color:#dc2626;
-    font-weight:600;
-
+.btn-print {
+    background: #2E7D32;
+    border: 1px solid #2E7D32;
+    color: #fff;
 }
 
-.detail-wrapper .table-responsive,
-.penyewaan-detail .table-responsive{
-    width:100%;
-    overflow-x:auto;
-    overflow-y:hidden;
-    -webkit-overflow-scrolling:touch;
+.btn-print:hover {
+    background: #256329;
+    border-color: #256329;
+    color: #fff;
 }
 
-.penyewaan-detail .table,
-.detail-wrapper .table{
-
-    width:100%;
-    border-collapse:collapse;
-    margin-bottom:0;
-
-}
-.penyewaan-detail .table th{
-
-    color:#64748b;
-    font-size:clamp(11px,1vw,13px);
-    font-weight:600;
-    white-space:nowrap;
-
+.penyewaan-detail .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 40px;
 }
 
-.penyewaan-detail .table td{
-
-    color:#374151;
-    font-size:clamp(11px,1vw,13px);
-    vertical-align:middle;
-
+.penyewaan-detail .info-item {
+    display: grid;
+    grid-template-columns: 175px 1fr; /* Diperlebar agar label status tidak terpotong */
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid #ececec;
+    align-items: center;
 }
 
-
-.table thead th{
-
-    background:#f8fafc;
-    border-bottom:1px solid #e5e7eb;
-
+/* Hapus border bottom untuk 2 baris terbawah pada desktop */
+@media (min-width: 1025px) {
+    .penyewaan-detail .info-item:nth-last-child(-n+2) {
+        border-bottom: none;
+    }
 }
 
-
-.table-bordered{
-
-    border:1px solid #e5e7eb;
-
+.penyewaan-detail .info-label {
+    color: #6b7280;
+    font-size: 13px;
+    font-weight: 600;
 }
 
-
-.table-bordered td,
-.table-bordered th{
-
-    border-color:#e5e7eb;
-
-}
-.penyewaan-detail .info-grid{
-
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:0 40px;
-
-}
-.penyewaan-detail .info-item{
-
-    display:grid;
-    grid-template-columns:150px 1fr;
-    gap:16px;
-    padding:14px 0;
-    border-bottom:1px solid #ececec;
-    align-items:start;
-
+.penyewaan-detail .info-value {
+    color: #111827;
+    font-size: 14px;
+    font-weight: 500;
+    word-break: break-word;
 }
 
-
-.penyewaan-detail .info-item:last-child{
-
-    border-bottom:none;
-
-}
-
-.penyewaan-detail .info-label{
-
-    color:#6b7280;
-    font-size:13px;
-    font-weight:600;
-
-}
-
-
-.penyewaan-detail .info-value{
-
-    color:#111827;
-    font-size:14px;
-    font-weight:500;
-    word-break:break-word;
-
-}
-
-@media (max-width:1024px){
-
-    .penyewaan-detail .card-body{
-        padding:16px;
+/* Responsif Mobile & Tablet */
+@media (max-width: 1024px) {
+    .penyewaan-detail .card-body {
+        padding: 16px;
     }
 
-    .penyewaan-detail .info-grid{
-
-        grid-template-columns:1fr;
-
+    .penyewaan-detail .info-grid {
+        grid-template-columns: 1fr;
     }
 
-    .penyewaan-detail .info-item{
-
-        flex-direction:column;
-        align-items:flex-start;
-        gap:4px;
-        padding:12px 0;
-
+    .penyewaan-detail .info-item {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 12px 0;
     }
 
-    .penyewaan-detail .info-label{
-
-        width:100%;
-        font-size:12px;
-
+    .penyewaan-detail .info-item:last-child {
+        border-bottom: none;
     }
 
-    .penyewaan-detail .info-value{
-
-        width:100%;
-        text-align:left;
-        font-size:13px;
-
+    .penyewaan-detail .info-label {
+        width: 100%;
+        font-size: 12px;
     }
 
-    .penyewaan-detail .info-lokasi{
+    .penyewaan-detail .info-value {
+        width: 100%;
+        text-align: left;
+        font-size: 13px;
+    }
+}
 
-        grid-column:auto;
-
+@media (max-width: 768px) {
+    .content-wrapper,
+    .content {
+        padding: 10px !important;
     }
 
-}
-/* 1. Mobile Layout */
-@media (max-width:768px){
+    .box,
+    .card {
+        width: 100% !important;
+    }
 
-.content-wrapper,
-.content{
-    padding:10px!important;
-}
+    .has-many-table-detailPaket,
+    .has-many-table-detailBarang {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
 
-.box,
-.card{
-    width:100%!important;
-}
+    .has-many-table-detailPaket table,
+    .has-many-table-detailBarang table {
+        min-width: 700px;
+        width: max-content;
+    }
 
-}
+    .has-many-table-detailPaket td,
+    .has-many-table-detailBarang td {
+        white-space: nowrap;
+    }
 
-/* 2. HasMany Scroll */
-@media (max-width:768px){
+    .has-many-table-detailPaket input,
+    .has-many-table-detailBarang input {
+        min-width: 70px;
+    }
 
-.has-many-table-detailPaket,
-.has-many-table-detailBarang{
-
-    display:block;
-    width:100%;
-    overflow-x:auto;
-    overflow-y:hidden;
-    -webkit-overflow-scrolling:touch;
-
-}
-
-.has-many-table-detailPaket table,
-.has-many-table-detailBarang table{
-
-    min-width:700px;
-    width:max-content;
-
+    .has-many-table-detailPaket select,
+    .has-many-table-detailBarang select {
+        min-width: 180px;
+    }
 }
 
+.select2-container {
+    width: 100% !important;
 }
 
-/* 3. Isi tabel */
-@media (max-width:768px){
-
-.has-many-table-detailPaket td,
-.has-many-table-detailBarang td{
-
-    white-space:nowrap;
-
+.select2-selection {
+    min-width: 180px;
 }
 
-.has-many-table-detailPaket input,
-.has-many-table-detailBarang input{
-
-    min-width:70px;
-
+.has-many-table .btn {
+    white-space: nowrap;
 }
-
-.has-many-table-detailPaket select,
-.has-many-table-detailBarang select{
-
-    min-width:180px;
-
+/* Menyamakan ukuran tombol custom di dropdown Dcat Admin */
+.dropdown-menu .btn-payment,
+.dropdown-menu .btn-danger {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+    margin-top: 5px !important;
 }
-
-}
-
-/* 4. Select2 */
-.select2-container{
-    width:100%!important;
-}
-
-.select2-selection{
-    min-width:180px;
-}
-
-/* 5. Tombol */
-.has-many-table .btn{
-    white-space:nowrap;
-}
-

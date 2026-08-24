@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('detail_paket', function (Blueprint $table) {
@@ -18,14 +15,14 @@ return new class extends Migration
             $table->integer('jumlah');
             $table->timestamps();
 
+            // Constraint Composite Unique
+            $table->unique(['paket_id', 'barang_id']);
+
             $table->foreign('paket_id')->references('id')->on('paket')->onDelete('cascade');
             $table->foreign('barang_id')->references('id')->on('barang')->onDelete('cascade');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('detail_paket');

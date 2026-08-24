@@ -19,6 +19,7 @@ class PemasukanController extends AdminController
             $grid->model()
                 ->with('penyewaan')
                 ->orderByDesc('tanggal_masuk');
+
             $totalPemasukan = PemasukanModel::sum('jumlah');
 
             $grid->header("
@@ -26,46 +27,47 @@ class PemasukanController extends AdminController
                     <span class='total-pemasukan-label'>
                         Total Pemasukan :
                     </span>
-
                     <span class='total-pemasukan-nominal'>
                         Rp " . number_format($totalPemasukan, 0, ',', '.') . "
                     </span>
                 </div>
             ");
-            $grid->column('id')->sortable();
 
+            $grid->column('id')->sortable();
             $grid->column('tanggal_masuk');
             $grid->column('penyewaan.nama_penyewa', 'Nama Penyewa');
             $grid->column('jenis_pembayaran', 'Jenis')
                 ->display(function ($status) {
-
                     if ($status == 'DP') {
                         return "<span class='status-dp'>DP</span>";
                     }
                     return "<span class='status-lunas'>Lunas</span>";
                 });
+
             $grid->column('jumlah')
                 ->display(function ($value) {
                     return 'Rp ' . number_format($value, 0, ',', '.');
-                });;
+                });
+
             $grid->column('keterangan');
+
             $grid->quickSearch(function ($model, $keyword) {
                 $model->whereHas('penyewaan', function ($q) use ($keyword) {
                     $q->where('nama_penyewa', 'like', "%{$keyword}%");
                 })
                     ->orWhere('keterangan', 'like', "%{$keyword}%");
             });
-            $grid->filter(function (Grid\Filter $filter) {
 
+            $grid->filter(function (Grid\Filter $filter) {
                 $filter->equal('jenis_pembayaran')
                     ->select([
                         'DP' => 'DP',
                         'Lunas' => 'Lunas',
                     ]);
 
-                $filter->between('tanggal_masuk')
-                    ->date();
+                $filter->between('tanggal_masuk')->date();
             });
+
             $grid->disableCreateButton();
             $grid->disableActions();
             $grid->disableBatchDelete();
@@ -77,14 +79,33 @@ class PemasukanController extends AdminController
     {
         return Show::make($id, new Pemasukan(), function (Show $show) {
             $show->field('id');
+            $show->field('tanggal_masuk');
+            $show->field('penyewaan.nama_penyewa', 'Penyewa');
+            $show->field('jenis_pembayaran');
+            $show->field('jumlah');
+            $show->field('keterangan');
         });
     }
-
 
     protected function form()
     {
         return Form::make(new Pemasukan(), function (Form $form) {
             $form->display('id');
         });
+    }
+
+    public function destroy($id)
+    {
+        abort(405, 'Buku besar pemasukan bersifat immutable dan tidak dapat dihapus.');
+    }
+
+    public function update($id)
+    {
+        abort(405, 'Buku besar pemasukan bersifat immutable dan tidak dapat diubah.');
+    }
+
+    public function store()
+    {
+        abort(405, 'Pemasukan hanya dapat dicatat melalui transaksi pembayaran penyewaan.');
     }
 }

@@ -25,7 +25,9 @@ class Penyewaan extends Model
         'total_harga',
         'uang_muka',
         'status_pembayaran',
-        'status_penyewaan'
+        'status_penyewaan',
+        'calendar_sync_status',
+        'notification_status',
     ];
 
     public function detailPaket()
@@ -80,5 +82,4 @@ class Penyewaan extends Model
     {
         return $this->hasOne(Penugasan::class);
     }
-
 }

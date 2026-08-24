@@ -6,20 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('detail_penugasan', function (Blueprint $table) {
-
             $table->id();
-
             $table->unsignedBigInteger('penugasan_id');
-
             $table->unsignedBigInteger('user_id');
-
             $table->timestamps();
+
+            // Constraint Composite Unique
+            $table->unique(['penugasan_id', 'user_id']);
 
             $table->foreign('penugasan_id')
                 ->references('id')
@@ -33,9 +29,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('detail_penugasan');
