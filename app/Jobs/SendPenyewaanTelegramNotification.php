@@ -80,12 +80,11 @@ class SendPenyewaanTelegramNotification implements ShouldQueue
             })->get();
 
             foreach ($admins as $admin) {
-                if ($admin->telegram_chat_id) {
+                if (!empty($admin->telegram_chat_id)) {
                     $telegram->sendMessage($admin->telegram_chat_id, $pesan);
                 }
             }
 
-            // Notifikasi Ralat ke Pegawai Penugasan
             if (! $this->isCreating && $penyewaan->penugasan) {
                 $penugasan = $penyewaan->penugasan;
                 $namaPegawai = $penugasan->pegawai->pluck('name')->implode(', ');
@@ -109,7 +108,7 @@ class SendPenyewaanTelegramNotification implements ShouldQueue
                     "👷 Pegawai Bertugas\n" . $namaPegawai;
 
                 foreach ($penugasan->pegawai as $pegawai) {
-                    if ($pegawai->telegram_chat_id) {
+                    if (!empty($pegawai->telegram_chat_id)) {
                         $telegram->sendMessage($pegawai->telegram_chat_id, $pesanRalat);
                     }
                 }

@@ -2,7 +2,6 @@
 
 namespace App\Admin\Controllers;
 
-use App\Services\GoogleCalendarService;
 use Dcat\Admin\Http\Controllers\AdminController;
 use Google\Client;
 use Illuminate\Http\Request;
@@ -22,9 +21,8 @@ class GoogleAuthController extends AdminController
             storage_path('app/google/client_secret.json')
         );
 
-        $client->setRedirectUri(
-            env('GOOGLE_REDIRECT_URI', url('/admin/google/callback'))
-        );
+        $redirectUri = config('services.google.redirect_uri') ?: url('/admin/google/callback');
+        $client->setRedirectUri($redirectUri);
 
         $client->setAccessType('offline');
         $client->setPrompt('consent');
@@ -67,9 +65,8 @@ class GoogleAuthController extends AdminController
             storage_path('app/google/client_secret.json')
         );
 
-        $client->setRedirectUri(
-            env('GOOGLE_REDIRECT_URI', url('/admin/google/callback'))
-        );
+        $redirectUri = config('services.google.redirect_uri') ?: url('/admin/google/callback');
+        $client->setRedirectUri($redirectUri);
 
         $client->setAccessType('offline');
 

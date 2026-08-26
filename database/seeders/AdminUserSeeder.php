@@ -11,8 +11,8 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminPassword = env('INITIAL_ADMIN_PASSWORD');
-        $ownerPassword = env('INITIAL_OWNER_PASSWORD');
+        $adminPassword = config('services.initial_credentials.admin_password');
+        $ownerPassword = config('services.initial_credentials.owner_password');
 
         if (empty($adminPassword) || strlen($adminPassword) < 12) {
             throw new RuntimeException(

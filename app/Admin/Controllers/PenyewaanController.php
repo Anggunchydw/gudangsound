@@ -299,9 +299,11 @@ class PenyewaanController extends AdminController
             });
 
             // 2. SAVED: Simpan DP Awal, Commit Transaksi, dan Dispatch Background Jobs
+            // 2. SAVED: Simpan DP Awal, Commit Transaksi, dan Dispatch Background Jobs
             $form->saved(function (Form $form) {
                 $isCreating = $form->isCreating();
 
+                // Tahap 1: Transaksi Utama Bisnis (Penyewaan + DP Awal)
                 try {
                     if ($isCreating) {
                         PenyewaanService::buatPembayaranAwal($form->getKey());
@@ -318,18 +320,31 @@ class PenyewaanController extends AdminController
                     return $form->response()->success('Penyewaan berhasil disimpan.')->redirect(admin_url('penyewaan'));
                 }
 
-                // Update status sinkronisasi ke pending
-                $penyewaan->update([
-                    'calendar_sync_status' => 'pending',
-                    'notification_status' => 'pending',
-                ]);
+                // Tahap 2: Integrasi Eksternal / Dispatch Queue Job (Fault-Tolerant)
+                $pesanSukses = 'Penyewaan berhasil disimpan.';
 
-                // Dispatch Background Jobs (Asynchronous & Fault-Tolerant)
-                SyncPenyewaanToGoogleCalendar::dispatch($penyewaan->id, $isCreating);
-                SendPenyewaanTelegramNotification::dispatch($penyewaan->id, $isCreating);
+                try {
+                    $penyewaan->update([
+                        'calendar_sync_status' => 'pending',
+                        'notification_status' => 'pending',
+                    ]);
+
+                    SyncPenyewaanToGoogleCalendar::dispatch($penyewaan->id, $isCreating);
+                    SendPenyewaanTelegramNotification::dispatch($penyewaan->id, $isCreating);
+                } catch (\Throwable $e) {
+                   
+                    \Illuminate\Support\Facades\Log::error('Queue Dispatch Failed (Penyewaan ID ' . $penyewaan->id . '): ' . $e->getMessage());
+
+                    $penyewaan->update([
+                        'calendar_sync_status' => 'failed',
+                        'notification_status' => 'failed',
+                    ]);
+
+                    $pesanSukses = 'Penyewaan berhasil disimpan. Antrean sinkronisasi kalender/notifikasi tertunda.';
+                }
 
                 return $form->response()
-                    ->success('Penyewaan berhasil disimpan.')
+                    ->success($pesanSukses)
                     ->redirect(admin_url('penyewaan/' . $form->getKey()));
             });
         });
