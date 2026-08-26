@@ -141,8 +141,7 @@ class PengeluaranController extends AdminController
                     }
 
                     // Serialization lock pada kas utama
-                    CashAccount::lockForUpdate()->find(1)
-                        ?? CashAccount::create(['id' => 1, 'name' => 'Kas Utama', 'balance' => 0]);
+                    CashAccount::whereKey(1)->lockForUpdate()->first();
 
                     // Validasi sisa dana penyewaan spesifik
                     if (!empty($penyewaanId)) {

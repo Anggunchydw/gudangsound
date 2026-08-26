@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -17,6 +18,14 @@ return new class extends Migration
             $table->decimal('balance', 15, 2)->default(0);
             $table->timestamps();
         });
+
+        DB::table('cash_accounts')->insert([
+            'id'         => 1,
+            'name'       => 'Kas Utama',
+            'balance'    => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     /**

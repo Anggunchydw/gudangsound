@@ -5,18 +5,33 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use App\Models\Administrator;
 use Dcat\Admin\Models\Role;
+use RuntimeException;
 
 class AdminUserSeeder extends Seeder
 {
-    public function run()
+    public function run(): void
     {
-        // Administrator
+        $adminPassword = env('INITIAL_ADMIN_PASSWORD');
+        $ownerPassword = env('INITIAL_OWNER_PASSWORD');
+
+        if (empty($adminPassword) || strlen($adminPassword) < 12) {
+            throw new RuntimeException(
+                'INITIAL_ADMIN_PASSWORD wajib diatur di file .env dan memiliki panjang minimal 12 karakter.'
+            );
+        }
+
+        if (empty($ownerPassword) || strlen($ownerPassword) < 12) {
+            throw new RuntimeException(
+                'INITIAL_OWNER_PASSWORD wajib diatur di file .env dan memiliki panjang minimal 12 karakter.'
+            );
+        }
+
         $admin = Administrator::firstOrCreate(
             ['username' => 'admin'],
             [
-                'name' => 'Administrator',
-                'email' => 'admin@gmail.com',
-                'password' => bcrypt('admin'),
+                'name'     => 'Administrator',
+                'email'    => 'a@gmail.com',
+                'password' => bcrypt($adminPassword),
             ]
         );
 
@@ -24,13 +39,12 @@ class AdminUserSeeder extends Seeder
             $admin->roles()->sync([$role->id]);
         }
 
-        // Pemilik
         $pemilik = Administrator::firstOrCreate(
             ['username' => 'pemilik'],
             [
-                'name' => 'Pemilik',
-                'email' => 'pemilik@gmail.com',
-                'password' => bcrypt('pemilik'),
+                'name'     => 'Pemilik',
+                'email'    => 'p@gmail.com',
+                'password' => bcrypt($ownerPassword),
             ]
         );
 

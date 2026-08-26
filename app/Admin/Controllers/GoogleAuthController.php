@@ -29,7 +29,6 @@ class GoogleAuthController extends AdminController
         $client->setAccessType('offline');
         $client->setPrompt('consent');
 
-        // 1. Buat token state acak & simpan di session untuk mencegah OAuth CSRF
         $state = Str::random(40);
         session(['google_oauth_state' => $state]);
 
@@ -42,7 +41,6 @@ class GoogleAuthController extends AdminController
 
     public function callback(Request $request)
     {
-        // 2. Validasi parameter state menggunakan perbandingan timing-safe
         $savedState = session('google_oauth_state');
 
         if (
@@ -53,7 +51,6 @@ class GoogleAuthController extends AdminController
             abort(403, 'Sesi OAuth tidak valid atau telah kedaluwarsa (Invalid State Parameter).');
         }
 
-        // Hapus token state dari session setelah tervalidasi
         session()->forget('google_oauth_state');
 
         if (!$request->has('code')) {
@@ -82,19 +79,23 @@ class GoogleAuthController extends AdminController
             return "Gagal mendapatkan token Google: " . ($token['error_description'] ?? $token['error']);
         }
 
-        // Pastikan direktori tujuan ada sebelum menyimpan token
-        if (!is_dir(storage_path('app/google'))) {
-            mkdir(storage_path('app/google'), 0755, true);
+        $googleDir = storage_path('app/google');
+        $tokenPath = $googleDir . '/token.json';
+
+        if (!is_dir($googleDir)) {
+            mkdir($googleDir, 0700, true);
         }
 
         file_put_contents(
-            storage_path('app/google/token.json'),
+            $tokenPath,
             json_encode($token, JSON_PRETTY_PRINT)
         );
 
+        chmod($tokenPath, 0600);
+
         return "Google Calendar berhasil terhubung.";
     }
-
+}
     // public function testCalendar()
     // {
     //     $google = new GoogleCalendarService();
@@ -109,4 +110,3 @@ class GoogleAuthController extends AdminController
 
     //     return $event->htmlLink;
     // }
-}

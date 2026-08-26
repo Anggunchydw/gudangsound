@@ -15,6 +15,7 @@ class PenyewaanService
     public static function validate(Form $form)
     {
         if (!DB::transactionLevel()) {
+            DB::statement('SET TRANSACTION ISOLATION LEVEL READ COMMITTED');
             DB::beginTransaction();
             self::$transactionStarted = true;
         }
