@@ -17,3 +17,6 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+/storage/app/google/*.json
+/storage/app/google/token.json
+/storage/app/google/client_secret.json

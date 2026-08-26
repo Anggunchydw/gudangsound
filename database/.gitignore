@@ -1,4 +1,2 @@
 *.sqlite*
-/storage/app/google/*.json
-/storage/app/google/token.json
-/storage/app/google/client_secret.json
+
